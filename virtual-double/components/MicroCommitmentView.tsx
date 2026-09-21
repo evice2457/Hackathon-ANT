@@ -14,7 +14,11 @@ const SUGGESTION_PILLS = [
   'Write test cases',
 ]
 
-export default function MicroCommitmentView() {
+interface MicroCommitmentViewProps {
+  onInitiateRitual?: (task: string, durationMinutes: number) => void
+}
+
+export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmentViewProps = {}) {
   const { startSession } = useFocusSession()
   const [input, setInput] = useState('')
   const [minutes, setMinutes] = useState<number>(DEFAULT_DURATION_MINUTES)
@@ -23,11 +27,14 @@ export default function MicroCommitmentView() {
   const trimmed = input.trim()
   const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
 
-  // Starts a session on the main screen. The floating companion is NOT opened
-  // automatically — the user opens it explicitly from the session view.
+  // Starts or stages a session.
   const startWith = (task: string, durationMinutes: number) => {
     if (!task.trim() || durationMinutes <= 0) return
-    startSession(task.trim(), Math.round(durationMinutes * 60))
+    if (onInitiateRitual) {
+      onInitiateRitual(task.trim(), durationMinutes)
+    } else {
+      startSession(task.trim(), Math.round(durationMinutes * 60))
+    }
   }
 
   const handleCustomMinutes = (value: string) => {

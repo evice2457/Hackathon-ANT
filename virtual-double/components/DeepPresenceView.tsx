@@ -47,7 +47,7 @@ export default function DeepPresenceView() {
         {isPaused ? (
           <Button
             onClick={resumeSession}
-            className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
+            className="h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
           >
             <Play data-icon="inline-start" /> Resume
           </Button>
@@ -55,14 +55,14 @@ export default function DeepPresenceView() {
           <Button
             onClick={pauseSession}
             variant="outline"
-            className="rounded-xl border-slate-200/90 bg-white/70 px-5 py-5 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
+            className="h-11 rounded-xl border-slate-200/90 bg-white/70 px-5 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
           >
             <Pause data-icon="inline-start" /> Take a pause
           </Button>
         )}
         <Button
           onClick={completeSession}
-          className="rounded-xl bg-emerald-500 px-5 py-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
+          className="h-11 rounded-xl bg-emerald-500 px-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
@@ -70,7 +70,7 @@ export default function DeepPresenceView() {
           <button
             ref={floatButtonRef}
             type="button"
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 py-5 text-sm font-semibold text-cyan-900 transition-colors hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 text-sm font-semibold text-cyan-900 transition-colors hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
           >
             <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
           </button>
@@ -78,7 +78,7 @@ export default function DeepPresenceView() {
         <Button
           onClick={stopSession}
           variant="outline"
-          className="rounded-xl border-rose-300/40 bg-rose-400/10 px-5 py-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
+          className="h-11 rounded-xl border-rose-300/40 bg-rose-400/10 px-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
         >
           <LogOut data-icon="inline-start" /> End now
         </Button>
