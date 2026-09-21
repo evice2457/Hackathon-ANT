@@ -5,7 +5,6 @@ import Header from '@/components/Header'
 import MicroCommitmentView from '@/components/MicroCommitmentView'
 import DeepPresenceView from '@/components/DeepPresenceView'
 import DistractionNudgeModal from '@/components/DistractionNudgeModal'
-import FloatingMiniWidget from '@/components/FloatingMiniWidget'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
@@ -23,16 +22,10 @@ export default function Page() {
 
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const { session, displayMode, stopSession, expandToFull, openPip: setPipMode, exitPip } = useFocusSession()
+  const { session, stopSession } = useFocusSession()
   const { nudgeVisible, dismissNudge } = useDistractionWatch()
 
-  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture({
-    // Native close button on the PiP window → return presentation to the
-    // in-page full view. The session itself is untouched.
-    onPipClose: () => {
-      expandToFull()
-    },
-  })
+  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture()
 
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
@@ -44,25 +37,16 @@ function AppShell() {
     isSupported: pipSupported,
     isOpen: Boolean(pipDocument),
     open: () => {
-      void openPipWindow().then((opened) => {
-        if (opened) setPipMode()
-      })
+      void openPipWindow()
     },
     close: () => {
       closePip()
-      exitPip()
     },
   }
 
   const handleExitPip = () => {
     closePip()
-    expandToFull()
   }
-
-  // If displayMode is 'pip' but pipDocument is null (e.g., after a reload with
-  // persisted 'pip' mode but no live PiP window), fall back to 'full' so the
-  // page never renders blank.
-  const effectiveDisplayMode = displayMode === 'pip' && !pipDocument ? 'full' : displayMode
 
   return (
     <FloatingCompanionProvider value={floating}>
@@ -72,9 +56,9 @@ function AppShell() {
         <main>
           {isIdle && <MicroCommitmentView />}
 
-          {!isIdle && !isCompleted && effectiveDisplayMode === 'full' && <DeepPresenceView />}
-
-          {!isIdle && !isCompleted && effectiveDisplayMode === 'widget' && <FloatingMiniWidget mode="inline" />}
+          {/* The main view stays on screen for the whole session — the PiP
+              window is an additional surface, not a replacement for it. */}
+          {!isIdle && !isCompleted && <DeepPresenceView />}
 
           {nudgeVisible && <DistractionNudgeModal />}
 
@@ -84,9 +68,7 @@ function AppShell() {
         <FocusStateDemoBar onDismissNudge={dismissNudge} />
 
         {/* Document PiP surface — same provider, portal into the PiP document. */}
-        {!isIdle && displayMode === 'pip' && pipDocument && (
-          <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />
-        )}
+        {pipDocument && <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />}
       </div>
     </FloatingCompanionProvider>
   )

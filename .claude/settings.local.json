@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(curl *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git *)",
+      "Bash(npm run *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx tsc *)"
     ]
   }
 }

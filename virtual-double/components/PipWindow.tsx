@@ -16,5 +16,5 @@ interface PipWindowProps {
  * and focus state are shared (there is exactly one source of truth).
  */
 export default function PipWindow({ pipDocument, onExitPip }: PipWindowProps) {
-  return createPortal(<FloatingMiniWidget mode="pip" onExitPip={onExitPip} />, pipDocument.body)
+  return createPortal(<FloatingMiniWidget onExitPip={onExitPip} />, pipDocument.body)
 }

@@ -1,14 +1,19 @@
 'use client'
 
-import { Check, LogOut, Minimize2, Pause, Play } from 'lucide-react'
+import { Check, LogOut, Pause, PictureInPicture2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
 import { formatTime, useFocusSession } from '@/lib/focus-session'
+import { useFloatingCompanion, useNativeClick } from '@/lib/floating-companion'
 
 export default function DeepPresenceView() {
-  const { session, pauseSession, resumeSession, completeSession, stopSession, minimizeToWidget, minutesRemaining } =
+  const { session, pauseSession, resumeSession, completeSession, stopSession, minutesRemaining } =
     useFocusSession()
+  const floating = useFloatingCompanion()
+  // Native click: requestWindow() needs the original user activation, which
+  // React's synthetic events don't reliably preserve.
+  const floatButtonRef = useNativeClick<HTMLButtonElement>(() => floating?.open())
 
   const isPaused = session.status === 'paused'
   const progress =
@@ -59,12 +64,15 @@ export default function DeepPresenceView() {
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
-        <Button
-          onClick={minimizeToWidget}
-          className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-5 font-semibold text-cyan-200 hover:bg-cyan-400/20"
-        >
-          <Minimize2 data-icon="inline-start" /> Minimize to widget
-        </Button>
+        {floating?.isSupported && (
+          <button
+            ref={floatButtonRef}
+            type="button"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-5 text-sm font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/20"
+          >
+            <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
+          </button>
+        )}
         <Button
           onClick={stopSession}
           variant="outline"

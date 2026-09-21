@@ -5,7 +5,6 @@ import { Mic } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DEFAULT_DURATION_MINUTES, DURATION_PRESETS, useFocusSession } from '@/lib/focus-session'
-import { useFloatingCompanion, useNativeClick } from '@/lib/floating-companion'
 
 const SUGGESTION_PILLS = [
   'Finish the introduction slide',
@@ -17,7 +16,6 @@ const SUGGESTION_PILLS = [
 
 export default function MicroCommitmentView() {
   const { startSession } = useFocusSession()
-  const floating = useFloatingCompanion()
   const [input, setInput] = useState('')
   const [minutes, setMinutes] = useState<number>(DEFAULT_DURATION_MINUTES)
   const [customMinutes, setCustomMinutes] = useState('')
@@ -25,17 +23,12 @@ export default function MicroCommitmentView() {
   const trimmed = input.trim()
   const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
 
-  // Starts a session AND opens the floating companion in the same native
-  // gesture. requestWindow() requires a fresh transient user activation, which
-  // React's onClick does not reliably preserve — so the Start control binds a
-  // native click listener via useNativeClick().
-  const startAndFloat = () => {
+  // Starts a session on the main screen. The floating companion is NOT opened
+  // automatically — the user opens it explicitly from the session view.
+  const start = () => {
     if (!canStart) return
     startSession(trimmed, Math.round(minutes * 60))
-    floating?.open()
   }
-
-  const startButtonRef = useNativeClick<HTMLButtonElement>(startAndFloat)
 
   const handleCustomMinutes = (value: string) => {
     setCustomMinutes(value)
@@ -66,17 +59,15 @@ export default function MicroCommitmentView() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                  // Enter is a user gesture too, so the floating companion can
-                  // open from here as well.
-                  startAndFloat()
+                  start()
                 }
               }}
               placeholder="Tell me what you’ll do..."
               className="flex-1 rounded-2xl border-slate-700/50 bg-slate-800/50 px-6 py-7 text-lg text-white placeholder-slate-500 backdrop-blur-sm focus:border-cyan-500/50 focus:ring-cyan-500/20"
             />
             <button
-              ref={startButtonRef}
               type="button"
+              onClick={start}
               disabled={!canStart}
               className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
@@ -144,21 +135,13 @@ export default function MicroCommitmentView() {
   )
 }
 
-/**
- * Suggestion pill that starts a session + opens the floating companion via a
- * native click listener (preserving transient user activation for requestWindow).
- */
+/** Suggestion pill that starts a session for the given task. */
 function StartPill({ task, durationMinutes }: { task: string; durationMinutes: number }) {
   const { startSession } = useFocusSession()
-  const floating = useFloatingCompanion()
-  const ref = useNativeClick<HTMLButtonElement>(() => {
-    startSession(task, Math.round(durationMinutes * 60))
-    floating?.open()
-  })
   return (
     <button
-      ref={ref}
       type="button"
+      onClick={() => startSession(task, Math.round(durationMinutes * 60))}
       className="rounded-xl border border-slate-700/50 bg-slate-800/40 px-4 py-3 text-sm text-slate-300 transition-all duration-200 hover:border-cyan-500/50 hover:bg-slate-700/60 hover:text-cyan-300"
     >
       {task}
