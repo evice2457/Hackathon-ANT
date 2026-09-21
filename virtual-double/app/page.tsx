@@ -8,6 +8,7 @@ import DistractionNudgeModal from '@/components/DistractionNudgeModal'
 import FloatingMiniWidget from '@/components/FloatingMiniWidget'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
+import VisionMonitor from '@/components/VisionMonitor'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
 import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
@@ -62,56 +63,19 @@ function AppShell() {
 
         {!isIdle && !isCompleted && displayMode === 'widget' && <FloatingMiniWidget mode="inline" />}
 
-        {nudgeVisible && <DistractionNudgeModal />}
+        {nudgeVisible && <DistractionNudgeModal onDismiss={dismissNudge} />}
 
         {isCompleted && (
           <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
         )}
       </main>
 
-      <FocusStateDemoBar onDismissNudge={dismissNudge} />
+      <VisionMonitor pipDocument={pipDocument} />
 
       {/* Document PiP surface — same provider, portal into the PiP document. */}
       {!isIdle && displayMode === 'pip' && pipDocument && (
         <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />
       )}
     </div>
-  )
-}
-
-/**
- * DEVELOPMENT / DEMO ONLY.
- * Simulates what the computer-vision teammate will drive via setFocusState().
- * Safe to keep during the hackathon; delete before shipping.
- */
-function FocusStateDemoBar({ onDismissNudge }: { onDismissNudge: () => void }) {
-  const { session, setFocusState } = useFocusSession()
-  const states = [
-    ['Focused', 'focused'],
-    ['Possibly distracted', 'possibly_distracted'],
-    ['Away', 'away'],
-  ] as const
-
-  return (
-    <nav
-      aria-label="Developer demo controls"
-      className="fixed bottom-5 left-1/2 z-40 flex max-w-[95vw] -translate-x-1/2 flex-wrap items-center justify-center gap-1 rounded-2xl border border-white/10 bg-[#101d38]/90 p-1.5 shadow-2xl backdrop-blur-xl"
-    >
-      <span className="px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Dev</span>
-      {states.map(([label, value]) => (
-        <button
-          key={value}
-          onClick={() => {
-            setFocusState(value)
-            if (value !== 'possibly_distracted') onDismissNudge()
-          }}
-          className={`rounded-xl px-3 py-2 text-[11px] font-medium transition-colors ${
-            session.focusState === value ? 'bg-cyan-400/15 text-cyan-200' : 'text-slate-500 hover:text-slate-200'
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-    </nav>
   )
 }

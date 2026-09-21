@@ -96,11 +96,11 @@ function reducer(state: State, action: Action): State {
 
     case 'pause':
       if (session.status !== 'running') return state
-      return { ...state, session: { ...session, status: 'paused' } }
+      return { ...state, session: { ...session, status: 'paused', focusState: 'focused' } }
 
     case 'resume':
       if (session.status !== 'paused') return state
-      return { ...state, session: { ...session, status: 'running' } }
+      return { ...state, session: { ...session, status: 'running', focusState: 'focused' } }
 
     case 'stop':
       return { session: idleSession, displayMode: 'full' }

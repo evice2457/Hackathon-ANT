@@ -10,14 +10,14 @@ import { requestTaskBreakdown } from '@/lib/task-breakdown'
  * Gentle, non-judgmental check-in shown after the user has been
  * "possibly_distracted" past the threshold (see useDistractionWatch).
  */
-export default function DistractionNudgeModal() {
-  const { session, pauseSession, setFocusState } = useFocusSession()
+export default function DistractionNudgeModal({ onDismiss }: { onDismiss: () => void }) {
+  const { session, pauseSession } = useFocusSession()
   const [isLoadingBreakdown, setIsLoadingBreakdown] = useState(false)
   const [subSteps, setSubSteps] = useState<string[] | null>(null)
 
   const handleKeepGoing = () => {
-    // Reset focus state so the nudge can re-arm on the next episode.
-    setFocusState('focused')
+    // Dismiss only this nudge episode; vision remains the source of truth.
+    onDismiss()
   }
 
   const handleBreakDown = async () => {
@@ -31,6 +31,7 @@ export default function DistractionNudgeModal() {
   }
 
   const handleTakeBreak = () => {
+    onDismiss()
     pauseSession()
   }
 

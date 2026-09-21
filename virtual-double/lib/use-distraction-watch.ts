@@ -20,32 +20,46 @@ export function useDistractionWatch() {
   const isDistracted = session.focusState === 'possibly_distracted'
   const shouldWatch = isRunning && isDistracted
 
-  // A stable id for "this particular distraction episode". Changing the focus
-  // state, or pausing/resuming, starts a new episode.
-  const episode = `${session.focusState}:${session.status}:${session.task}`
-
-  // Which episode the threshold has elapsed for (null = none pending).
-  const [reachedEpisode, setReachedEpisode] = useState<string | null>(null)
-  // Which episode the user dismissed the nudge for.
-  const [dismissedEpisode, setDismissedEpisode] = useState<string | null>(null)
-
-  // Guard so the timer never re-arms for an episode already handled.
-  const handled = useRef<string | null>(null)
+  const wasWatching = useRef(false)
+  const previousTask = useRef(session.task)
+  const nextEpisode = useRef(0)
+  const [activeEpisode, setActiveEpisode] = useState<number | null>(null)
+  const [reachedEpisode, setReachedEpisode] = useState<number | null>(null)
+  const [dismissedEpisode, setDismissedEpisode] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!shouldWatch || handled.current === episode) return
+    const taskChanged = previousTask.current !== session.task
+    previousTask.current = session.task
+
+    if (shouldWatch && (!wasWatching.current || taskChanged)) {
+      nextEpisode.current += 1
+      setActiveEpisode(nextEpisode.current)
+      setReachedEpisode(null)
+      setDismissedEpisode(null)
+    } else if (!shouldWatch) {
+      setActiveEpisode(null)
+      setReachedEpisode(null)
+      setDismissedEpisode(null)
+    }
+
+    wasWatching.current = shouldWatch
+  }, [shouldWatch, session.task])
+
+  useEffect(() => {
+    if (activeEpisode === null || !shouldWatch) return
     const timer = setTimeout(() => {
-      handled.current = episode
-      setReachedEpisode(episode)
+      setReachedEpisode(activeEpisode)
     }, DISTRACTION_THRESHOLD_MS)
     return () => clearTimeout(timer)
-  }, [shouldWatch, episode])
+  }, [activeEpisode, shouldWatch])
 
-  const thresholdReached = reachedEpisode === episode
-  const dismissedThisEpisode = dismissedEpisode === episode
+  const thresholdReached = activeEpisode !== null && reachedEpisode === activeEpisode
+  const dismissedThisEpisode = activeEpisode !== null && dismissedEpisode === activeEpisode
 
   return {
     nudgeVisible: shouldWatch && thresholdReached && !dismissedThisEpisode && displayMode === 'full',
-    dismissNudge: () => setDismissedEpisode(episode),
+    dismissNudge: () => {
+      if (activeEpisode !== null) setDismissedEpisode(activeEpisode)
+    },
   }
 }

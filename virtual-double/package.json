@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:vision": "node --experimental-strip-types --test lib/vision/*.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@mediapipe/tasks-vision": "1.0.1",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

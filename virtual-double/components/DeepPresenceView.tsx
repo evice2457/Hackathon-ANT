@@ -89,44 +89,11 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
         </Button>
       </div>
 
-      <FocusStateDebugControls />
-
       <div className="px-6 py-4 text-xs text-slate-500">
         <span className="text-cyan-400/80">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
         </span>
       </div>
-    </div>
-  )
-}
-
-/**
- * DEVELOPMENT / DEMO ONLY.
- * Lets us simulate what the computer-vision teammate will drive via
- * setFocusState(...). Remove or gate behind a flag before shipping.
- */
-function FocusStateDebugControls() {
-  const { setFocusState } = useFocusSession()
-  const states = [
-    ['Focused', 'focused'],
-    ['Possibly distracted', 'possibly_distracted'],
-    ['Away', 'away'],
-  ] as const
-
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/40 px-4 py-3">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-        Dev · focus state
-      </span>
-      {states.map(([label, value]) => (
-        <button
-          key={value}
-          onClick={() => setFocusState(value)}
-          className="rounded-lg bg-slate-800/60 px-3 py-1.5 text-[11px] text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-cyan-200"
-        >
-          {label}
-        </button>
-      ))}
     </div>
   )
 }
