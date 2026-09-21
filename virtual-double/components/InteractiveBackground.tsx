@@ -255,16 +255,16 @@ export default function InteractiveBackground({ isDarkMode }: InteractiveBackgro
 
       {/* Adaptive Atmospheric Tint Layer (Calibrated for visible mountains) */}
       {isDarkMode ? (
-        <div className="absolute inset-0 bg-gradient-to-b from-[#070f26]/50 via-[#0a1636]/40 to-[#070e24]/60 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B132B]/75 via-[#0B132B]/70 to-[#070f26]/80 backdrop-blur-[6px]" />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-sky-50/40 to-slate-200/55 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-sky-50/40 to-slate-200/55 backdrop-blur-[7px]" />
       )}
 
       {/* Soft Ambient Vignette */}
       <div
         className={`absolute inset-0 ${
           isDarkMode
-            ? 'bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(5,10,25,0.45)_100%)]'
+            ? 'bg-[radial-gradient(ellipse_at_center,_transparent_35%,_rgba(11,19,43,0.5)_100%)]'
             : 'bg-[radial-gradient(ellipse_at_center,_transparent_45%,_rgba(241,245,249,0.35)_100%)]'
         }`}
       />
