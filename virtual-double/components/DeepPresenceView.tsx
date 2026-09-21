@@ -30,14 +30,16 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
       </div>
 
       <div className="mb-10 max-w-2xl text-center">
-        <p className="mb-4 text-sm uppercase tracking-widest text-slate-400">Current Focus</p>
-        <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-800/60 to-slate-900/60 px-8 py-6 backdrop-blur-sm">
-          <p className="text-2xl font-light text-white">{session.task}</p>
+        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500 transition-colors dark:text-slate-400">
+          Current Focus
+        </p>
+        <div className="rounded-2xl border border-cyan-500/20 bg-white/75 px-8 py-6 shadow-xl shadow-cyan-950/5 backdrop-blur-md transition-all dark:bg-gradient-to-br dark:from-slate-800/60 dark:to-slate-900/60 dark:shadow-none">
+          <p className="text-2xl font-light text-slate-900 transition-colors dark:text-white">{session.task}</p>
         </div>
       </div>
 
-      <div className="mb-10 flex flex-col items-center gap-3">
-        <p className="text-base text-slate-400">
+      <div className="mb-10 flex flex-col items-center gap-3 text-center">
+        <p className="text-base text-slate-600 transition-colors dark:text-slate-400">
           {isPaused ? 'Taking a pause — resume when you’re ready.' : 'Your AI body double is quietly working alongside you.'}
         </p>
         <FocusStateIndicator state={session.focusState} size="md" />
@@ -55,27 +57,27 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
           <Button
             onClick={pauseSession}
             variant="outline"
-            className="rounded-xl border-white/10 bg-white/[0.03] px-5 py-5 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200"
+            className="rounded-xl border-slate-200/90 bg-white/70 px-5 py-5 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
           >
             <Pause data-icon="inline-start" /> Take a pause
           </Button>
         )}
         <Button
           onClick={completeSession}
-          className="rounded-xl bg-emerald-400 px-5 py-5 font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-300"
+          className="rounded-xl bg-emerald-500 px-5 py-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
         <Button
           onClick={minimizeToWidget}
-          className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-5 font-semibold text-cyan-200 hover:bg-cyan-400/20"
+          className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-5 py-5 font-semibold text-cyan-800 hover:bg-cyan-500/20 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/20"
         >
           <Minimize2 data-icon="inline-start" /> Minimize to widget
         </Button>
         {pipSupported && onFloatWidget && (
           <Button
             onClick={onFloatWidget}
-            className="rounded-xl border border-cyan-400/40 bg-cyan-400/15 px-5 py-5 font-semibold text-cyan-100 hover:bg-cyan-400/25"
+            className="rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 py-5 font-semibold text-cyan-900 hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
           >
             <PictureInPicture2 data-icon="inline-start" /> Float Widget
           </Button>
@@ -83,50 +85,17 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
         <Button
           onClick={stopSession}
           variant="outline"
-          className="rounded-xl border-rose-300/10 bg-rose-400/[0.04] px-5 py-5 text-rose-200 hover:bg-rose-400/10"
+          className="rounded-xl border-rose-300/40 bg-rose-400/10 px-5 py-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
         >
           <LogOut data-icon="inline-start" /> End now
         </Button>
       </div>
 
-      <FocusStateDebugControls />
-
-      <div className="px-6 py-4 text-xs text-slate-500">
-        <span className="text-cyan-400/80">
+      <div className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+        <span className="font-medium text-cyan-600 dark:text-cyan-400/80">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
         </span>
       </div>
-    </div>
-  )
-}
-
-/**
- * DEVELOPMENT / DEMO ONLY.
- * Lets us simulate what the computer-vision teammate will drive via
- * setFocusState(...). Remove or gate behind a flag before shipping.
- */
-function FocusStateDebugControls() {
-  const { setFocusState } = useFocusSession()
-  const states = [
-    ['Focused', 'focused'],
-    ['Possibly distracted', 'possibly_distracted'],
-    ['Away', 'away'],
-  ] as const
-
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/40 px-4 py-3">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-        Dev · focus state
-      </span>
-      {states.map(([label, value]) => (
-        <button
-          key={value}
-          onClick={() => setFocusState(value)}
-          className="rounded-lg bg-slate-800/60 px-3 py-1.5 text-[11px] text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-cyan-200"
-        >
-          {label}
-        </button>
-      ))}
     </div>
   )
 }

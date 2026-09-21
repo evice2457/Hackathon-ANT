@@ -58,8 +58,8 @@ export default function FloatingMiniWidget({ mode = 'inline', onExitPip }: Float
       aria-label="Active focus session widget"
       className={
         isPip
-          ? 'flex h-screen w-full select-none flex-col justify-center bg-[#0B132B] p-3'
-          : 'fixed right-6 top-24 z-50 w-[248px] select-none rounded-2xl border border-cyan-400/25 bg-[#101d38]/95 p-4 shadow-2xl shadow-cyan-950/50 backdrop-blur-xl'
+          ? 'flex h-screen w-full select-none flex-col justify-center bg-[#070f26] p-3 dark:bg-[#070f26]'
+          : 'fixed right-6 top-20 z-50 w-[256px] select-none rounded-2xl border border-slate-200/90 bg-white/90 p-4 shadow-2xl shadow-slate-400/25 backdrop-blur-xl transition-colors dark:border-cyan-400/25 dark:bg-[#101d38]/95 dark:shadow-cyan-950/50'
       }
       style={isPip ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
     >
@@ -70,7 +70,9 @@ export default function FloatingMiniWidget({ mode = 'inline', onExitPip }: Float
             onPointerDown={startDrag}
             onPointerMove={moveDrag}
             onPointerUp={endDrag}
-            className={`mt-0.5 cursor-grab text-slate-500 active:cursor-grabbing ${isDragging ? 'text-cyan-300' : ''}`}
+            className={`mt-0.5 cursor-grab text-slate-400 active:cursor-grabbing transition-colors ${
+              isDragging ? 'text-cyan-600 dark:text-cyan-300' : 'hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
           >
             <GripVertical className="size-4" />
           </div>
@@ -79,15 +81,19 @@ export default function FloatingMiniWidget({ mode = 'inline', onExitPip }: Float
         <div className="min-w-0 flex-1">
           <FocusStateIndicator state={session.focusState} />
 
-          <p className="mt-2 truncate text-sm font-medium text-white">
+          <p className="mt-2 truncate text-sm font-medium text-slate-900 transition-colors dark:text-white">
             {session.task || 'Your next small step'}
           </p>
 
           <div className="mt-3 flex items-baseline justify-between">
-            <span className={`font-mono font-light tracking-tight text-cyan-100 ${isPip ? 'text-4xl' : 'text-2xl'}`}>
+            <span
+              className={`font-mono font-light tracking-tight text-cyan-800 transition-colors dark:text-cyan-100 ${
+                isPip ? 'text-4xl' : 'text-2xl'
+              }`}
+            >
               {formatTime(session.remainingSeconds)}
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {isPaused ? 'Paused' : session.status === 'completed' ? 'Complete' : 'Body doubling'}
             </span>
           </div>
@@ -98,28 +104,28 @@ export default function FloatingMiniWidget({ mode = 'inline', onExitPip }: Float
         {isPaused ? (
           <button
             onClick={resumeSession}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-400/20"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-600/15 px-3 py-2 text-xs font-semibold text-cyan-800 transition-colors hover:bg-cyan-600/25 dark:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/20"
           >
             <Play className="size-3.5" /> Resume
           </button>
         ) : (
           <button
             onClick={pauseSession}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-white/10"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/10"
           >
             <Pause className="size-3.5" /> Pause
           </button>
         )}
         <button
           onClick={handleExpand}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-400/20"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-600/10 px-3 py-2 text-xs font-semibold text-cyan-800 transition-colors hover:bg-cyan-600/20 dark:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/20"
         >
           <Maximize2 className="size-3.5" /> {isPip ? 'Return' : 'Expand'}
         </button>
         <button
           onClick={stopSession}
           aria-label="End session"
-          className="flex items-center justify-center rounded-lg bg-rose-400/10 px-2.5 py-2 text-rose-200 transition-colors hover:bg-rose-400/20"
+          className="flex items-center justify-center rounded-lg bg-rose-500/10 px-2.5 py-2 text-rose-700 transition-colors hover:bg-rose-500/20 dark:bg-rose-400/10 dark:text-rose-200 dark:hover:bg-rose-400/20"
         >
           <X className="size-3.5" />
         </button>
