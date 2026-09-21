@@ -1,21 +1,19 @@
 'use client'
 
-import { Check, LogOut, Minimize2, Pause, PictureInPicture2, Play } from 'lucide-react'
+import { Check, LogOut, Pause, PictureInPicture2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
 import { formatTime, useFocusSession } from '@/lib/focus-session'
+import { useFloatingCompanion, useNativeClick } from '@/lib/floating-companion'
 
-interface DeepPresenceViewProps {
-  /** Whether Document PiP is supported in this browser. */
-  pipSupported?: boolean
-  /** Opens the Document PiP window; should start the PiP presentation. */
-  onFloatWidget?: () => void
-}
-
-export default function DeepPresenceView({ pipSupported = false, onFloatWidget }: DeepPresenceViewProps = {}) {
-  const { session, pauseSession, resumeSession, completeSession, stopSession, minimizeToWidget, minutesRemaining } =
+export default function DeepPresenceView() {
+  const { session, pauseSession, resumeSession, completeSession, stopSession, minutesRemaining } =
     useFocusSession()
+  const floating = useFloatingCompanion()
+  // Native click: requestWindow() needs the original user activation, which
+  // React's synthetic events don't reliably preserve.
+  const floatButtonRef = useNativeClick<HTMLButtonElement>(() => floating?.open())
 
   const isPaused = session.status === 'paused'
   const progress =
@@ -68,19 +66,14 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
-        <Button
-          onClick={minimizeToWidget}
-          className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-5 py-5 font-semibold text-cyan-800 hover:bg-cyan-500/20 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200 dark:hover:bg-cyan-400/20"
-        >
-          <Minimize2 data-icon="inline-start" /> Minimize to widget
-        </Button>
-        {pipSupported && onFloatWidget && (
-          <Button
-            onClick={onFloatWidget}
-            className="rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 py-5 font-semibold text-cyan-900 hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
+        {floating?.isSupported && (
+          <button
+            ref={floatButtonRef}
+            type="button"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 py-5 text-sm font-semibold text-cyan-900 transition-colors hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
           >
-            <PictureInPicture2 data-icon="inline-start" /> Float Widget
-          </Button>
+            <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
+          </button>
         )}
         <Button
           onClick={stopSession}

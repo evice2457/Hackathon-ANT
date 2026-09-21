@@ -23,6 +23,8 @@ export default function MicroCommitmentView() {
   const trimmed = input.trim()
   const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
 
+  // Starts a session on the main screen. The floating companion is NOT opened
+  // automatically — the user opens it explicitly from the session view.
   const startWith = (task: string, durationMinutes: number) => {
     if (!task.trim() || durationMinutes <= 0) return
     startSession(task.trim(), Math.round(durationMinutes * 60))
@@ -67,13 +69,14 @@ export default function MicroCommitmentView() {
               placeholder="Tell me what you’ll do..."
               className="flex-1 rounded-2xl border-slate-300/80 bg-white/75 px-6 py-7 text-lg text-slate-900 placeholder-slate-400 shadow-sm backdrop-blur-md transition-all focus:border-cyan-500/60 focus:ring-cyan-500/20 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-500 dark:shadow-none"
             />
-            <Button
+            <button
+              type="button"
               onClick={() => startWith(input, minutes)}
               disabled={!canStart}
-              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
+              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
               Start with Me
-            </Button>
+            </button>
             <Button
               size="icon"
               variant="outline"

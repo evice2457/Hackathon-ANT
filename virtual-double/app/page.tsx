@@ -6,12 +6,12 @@ import InteractiveBackground from '@/components/InteractiveBackground'
 import MicroCommitmentView from '@/components/MicroCommitmentView'
 import DeepPresenceView from '@/components/DeepPresenceView'
 import DistractionNudgeModal from '@/components/DistractionNudgeModal'
-import FloatingMiniWidget from '@/components/FloatingMiniWidget'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
 import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
+import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
 
 export default function Page() {
   return (
@@ -23,7 +23,7 @@ export default function Page() {
 
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const { session, displayMode, stopSession, expandToFull, openPip: setPipMode } = useFocusSession()
+  const { session, stopSession } = useFocusSession()
   const { nudgeVisible, dismissNudge } = useDistractionWatch()
 
   // Sync theme with HTML root class and localStorage
@@ -52,60 +52,61 @@ function AppShell() {
     })
   }
 
-  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture({
-    onPipClose: () => {
-      expandToFull()
-    },
-  })
+  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture()
 
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
 
-  const handleFloatWidget = () => {
-    void openPipWindow().then((opened) => {
-      if (opened) setPipMode()
-    })
+  // The floating companion is opened from the session view button's NATIVE
+  // click handler (see DeepPresenceView) so requestWindow() runs inside the
+  // real user gesture. This API is exposed via context for that purpose.
+  const floating: FloatingCompanionApi = {
+    isSupported: pipSupported,
+    isOpen: Boolean(pipDocument),
+    open: () => {
+      void openPipWindow()
+    },
+    close: () => {
+      closePip()
+    },
   }
 
   const handleExitPip = () => {
     closePip()
-    expandToFull()
   }
 
   return (
-    <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
-      {/* Mountain Landscape Background with Parallax and Particles */}
-      <InteractiveBackground isDarkMode={isDarkMode} />
+    <FloatingCompanionProvider value={floating}>
+      <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
+        {/* Mountain Landscape Background with Parallax and Particles */}
+        <InteractiveBackground isDarkMode={isDarkMode} />
 
-      {/* Main Content Layer */}
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Header
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={handleToggleDarkMode}
-          onDismissNudge={dismissNudge}
-        />
+        {/* Main Content Layer */}
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <Header
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={handleToggleDarkMode}
+            onDismissNudge={dismissNudge}
+          />
 
-        <main className="flex-1">
-          {isIdle && <MicroCommitmentView />}
+          <main className="flex-1">
+            {isIdle && <MicroCommitmentView />}
 
-          {!isIdle && !isCompleted && displayMode === 'full' && (
-            <DeepPresenceView pipSupported={pipSupported} onFloatWidget={handleFloatWidget} />
-          )}
+            {/* The main view stays on screen for the whole session — the PiP
+                window is an additional surface, not a replacement for it. */}
+            {!isIdle && !isCompleted && <DeepPresenceView />}
 
-          {!isIdle && !isCompleted && displayMode === 'widget' && <FloatingMiniWidget mode="inline" />}
+            {nudgeVisible && <DistractionNudgeModal />}
 
-          {nudgeVisible && <DistractionNudgeModal />}
+            {isCompleted && (
+              <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
+            )}
+          </main>
+        </div>
 
-          {isCompleted && (
-            <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
-          )}
-        </main>
+        {/* Document PiP surface — same provider, portal into the PiP document. */}
+        {pipDocument && <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />}
       </div>
-
-      {/* Document PiP surface — same provider, portal into the PiP document. */}
-      {!isIdle && displayMode === 'pip' && pipDocument && (
-        <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />
-      )}
-    </div>
+    </FloatingCompanionProvider>
   )
 }

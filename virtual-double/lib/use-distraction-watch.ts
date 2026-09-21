@@ -14,7 +14,7 @@ import { DISTRACTION_THRESHOLD_MS, useFocusSession } from '@/lib/focus-session'
  * reacts automatically.
  */
 export function useDistractionWatch() {
-  const { session, displayMode } = useFocusSession()
+  const { session } = useFocusSession()
 
   const isRunning = session.status === 'running'
   const isDistracted = session.focusState === 'possibly_distracted'
@@ -45,7 +45,7 @@ export function useDistractionWatch() {
   const dismissedThisEpisode = dismissedEpisode === episode
 
   return {
-    nudgeVisible: shouldWatch && thresholdReached && !dismissedThisEpisode && displayMode === 'full',
+    nudgeVisible: shouldWatch && thresholdReached && !dismissedThisEpisode,
     dismissNudge: () => setDismissedEpisode(episode),
   }
 }
