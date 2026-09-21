@@ -33,7 +33,6 @@ export function MascotNameProvider({ children }: { children: ReactNode }) {
     setMascotNameState(finalName)
     try {
       window.localStorage.setItem(MASCOT_NAME_STORAGE_KEY, finalName)
-      window.dispatchEvent(new CustomEvent('mascot-name-change', { detail: finalName }))
     } catch {
       // The in-memory name remains usable when local storage is unavailable.
     }

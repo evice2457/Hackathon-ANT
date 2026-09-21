@@ -82,23 +82,18 @@ export default function SmileRitualView({
     return () => clearTimeout(timer)
   }, [audioEnabled, hasSpokenInitial])
 
-  // Keyboard shortcut listener: Escape to go back to task, Enter to trigger smile/start
+  // Keyboard shortcut listener: Escape returns to task entry.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Escape') {
         e.preventDefault()
         onCancel()
-      } else if (e.code === 'Enter') {
-        if (!isFinishing) {
-          e.preventDefault()
-          finishRitual(false)
-        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [finishRitual, onCancel, isFinishing])
+  }, [onCancel])
 
   const toggleAudio = () => {
     setAudioEnabled((prev) => {

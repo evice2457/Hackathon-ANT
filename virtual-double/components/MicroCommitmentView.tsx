@@ -99,7 +99,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
       speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition
 
     if (!SpeechRecognition) {
-      setSpeechError('Trình duyệt chưa hỗ trợ Web Speech Recognition. Bạn vui lòng gõ task trực tiếp.')
+      setSpeechError("Speech recognition isn't supported in this browser. You can type your task instead.")
       return
     }
 
@@ -125,7 +125,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
       recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
         if (event.error !== 'no-speech') {
           console.warn('Speech recognition error:', event.error)
-          setSpeechError(`Microphone: ${event.error}`)
+          setSpeechError("Couldn't access speech recognition. Check your microphone permission or type your task instead.")
         }
         setIsListening(false)
       }
@@ -138,7 +138,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
       recognition.start()
     } catch (error: unknown) {
       console.warn('Failed to start speech recognition:', error)
-      setSpeechError('Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.')
+      setSpeechError("Couldn't access speech recognition. Check your microphone permission or type your task instead.")
       setIsListening(false)
     }
   }
@@ -223,7 +223,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
           {isListening && (
             <p className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-rose-500 dark:text-rose-400 animate-pulse">
               <span className="size-2 rounded-full bg-rose-500 animate-ping" />
-              Đang lắng nghe giọng nói... Hãy nói task của bạn (sẽ tự động điền vào ô trên).
+              Listening… Say your task and I&apos;ll fill it in above.
             </p>
           )}
           {speechError && (
