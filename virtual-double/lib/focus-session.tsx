@@ -31,7 +31,7 @@ export interface FocusSession {
 }
 
 /** Duration presets offered on the task-entry screen. */
-export const DURATION_PRESETS = [5, 10, 15, 25] as const
+export const DURATION_PRESETS = [5, 10, 15, 25, 50] as const
 export const DEFAULT_DURATION_MINUTES = 15
 
 /** Seconds added by the "+5 min" action. */

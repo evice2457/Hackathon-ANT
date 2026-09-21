@@ -38,6 +38,20 @@ export interface DocumentPipResult {
 const PIP_WIDTH = 320
 const PIP_HEIGHT = 240
 
+function syncPipTheme(pipDoc: Document) {
+  if (typeof document === 'undefined') return
+  const isDark = document.documentElement.classList.contains('dark')
+  if (isDark) {
+    pipDoc.documentElement.classList.add('dark')
+    pipDoc.body.style.backgroundColor = '#0B132B'
+    pipDoc.body.style.color = '#FFFFFF'
+  } else {
+    pipDoc.documentElement.classList.remove('dark')
+    pipDoc.body.style.backgroundColor = '#F8FAFC'
+    pipDoc.body.style.color = '#0F172A'
+  }
+}
+
 function copyStylesIntoPip(pipDocument: Document) {
   // Next.js/Tailwind emit several <style> nodes and <link> stylesheets. Inline
   // the readable ones by value; same-origin <link> nodes are cloned by reference.
@@ -62,9 +76,9 @@ function copyStylesIntoPip(pipDocument: Document) {
 
   pipDocument.body.style.margin = '0'
   pipDocument.body.style.overflow = 'hidden'
-  pipDocument.body.style.backgroundColor = '#0B132B'
   pipDocument.body.style.fontFamily =
     'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  syncPipTheme(pipDocument)
 }
 
 export function useDocumentPictureInPicture({
@@ -77,6 +91,7 @@ export function useDocumentPictureInPicture({
   const [pipDocument, setPipDocument] = useState<Document | null>(null)
 
   const pipWindowRef = useRef<DocumentPictureInPictureWindow | null>(null)
+  const isOpeningRef = useRef(false)
 
   // Keep the latest onPipClose in a ref so the callbacks below stay referentially
   // stable. Without this, a new onPipClose each render would change
@@ -89,11 +104,30 @@ export function useDocumentPictureInPicture({
   }, [onPipClose])
 
   const handleWindowClose = useCallback(() => {
+    isOpeningRef.current = false
     pipWindowRef.current = null
     setPipDocument(null)
     setIsPipOpen(false)
     onPipCloseRef.current?.()
   }, [])
+
+  // Keep PiP document theme in sync with main document root classes
+  useEffect(() => {
+    if (!pipDocument) return
+
+    syncPipTheme(pipDocument)
+
+    const observer = new MutationObserver(() => {
+      syncPipTheme(pipDocument)
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    return () => observer.disconnect()
+  }, [pipDocument])
 
   const closePip = useCallback(() => {
     const win = pipWindowRef.current
@@ -117,11 +151,15 @@ export function useDocumentPictureInPicture({
     const api = window.documentPictureInPicture
     if (!api) return Promise.resolve(false)
 
-    // Only one PiP window at a time — if one is already open, just focus it.
-    if (pipWindowRef.current) {
-      pipWindowRef.current.focus()
+    // Only one PiP window at a time — if one is already open or currently opening, guard it.
+    if (pipWindowRef.current || isOpeningRef.current) {
+      if (pipWindowRef.current) {
+        pipWindowRef.current.focus()
+      }
       return Promise.resolve(true)
     }
+
+    isOpeningRef.current = true
 
     // requestWindow MUST be invoked synchronously within the user gesture, so
     // we call it here (no await/log before it) and attach handling to the
@@ -134,8 +172,13 @@ export function useDocumentPictureInPicture({
 
     return requestPromise.then(
       (pipWindow) => {
+        isOpeningRef.current = false
         pipWindowRef.current = pipWindow
-        copyStylesIntoPip(pipWindow.document)
+        try {
+          copyStylesIntoPip(pipWindow.document)
+        } catch (styleError) {
+          console.warn('Could not copy all styles into PiP:', styleError)
+        }
 
         // The browser closes the PiP window when the user hits its native close
         // button, or when the opener tab is closed/hidden from PiP.
@@ -145,8 +188,10 @@ export function useDocumentPictureInPicture({
         setIsPipOpen(true)
         return true
       },
-      () => {
+      (err) => {
+        isOpeningRef.current = false
         // Gesture withheld or request rejected — fail gracefully.
+        console.warn('PiP window request rejected:', err)
         return false
       },
     )

@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import Image from 'next/image'
 import { Coffee, Play, Send } from 'lucide-react'
 import { CHECK_IN_RESPONSE, type CheckInState } from '@/lib/check-in'
 import { useMascotName } from '@/lib/mascot-name'
+import { playAntChime } from '@/lib/ant-voice'
 
 interface AntCheckInProps {
   checkIn: CheckInState
@@ -23,6 +25,10 @@ export default function AntCheckIn({
   onStayPaused,
 }: AntCheckInProps) {
   const { mascotName } = useMascotName()
+
+  useEffect(() => {
+    playAntChime('nudge')
+  }, [])
 
   return (
     <section

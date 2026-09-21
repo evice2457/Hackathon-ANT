@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFocusSession } from '@/lib/focus-session'
 import { useVisionMonitor } from '@/lib/vision/use-vision-monitor'
 
@@ -18,6 +18,37 @@ export default function VisionMonitor({ pipDocument }: { pipDocument?: Document 
   const videoRef = useRef<HTMLVideoElement>(null)
   const { session, setFocusState } = useFocusSession()
   const enabled = session.status === 'running' && session.visionEnabled
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    video.setAttribute('autopictureinpicture', 'true')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(video as any).autoPictureInPicture = true
+
+    // When vision is disabled (e.g. Start without camera), provide a fallback canvas stream
+    // so Chrome recognizes the element as an active playing video stream for Automatic PiP
+    if (!enabled && typeof document !== 'undefined') {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = 16
+        canvas.height = 16
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = '#0B132B'
+          ctx.fillRect(0, 0, 16, 16)
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const stream = (canvas as any).captureStream?.(5)
+        if (stream && !video.srcObject) {
+          video.srcObject = stream
+          video.play().catch(() => {})
+        }
+      } catch {}
+    }
+  }, [enabled])
+
   const diagnostics = useVisionMonitor({
     enabled,
     videoRef,
@@ -32,7 +63,13 @@ export default function VisionMonitor({ pipDocument }: { pipDocument?: Document 
 
   return (
     <>
-      <video ref={videoRef} muted playsInline aria-hidden className="hidden" />
+      <video
+        ref={videoRef}
+        muted
+        playsInline
+        aria-hidden
+        className="fixed bottom-0 right-0 size-2 opacity-[0.01] pointer-events-none -z-50"
+      />
 
       {hasError && (
         <aside

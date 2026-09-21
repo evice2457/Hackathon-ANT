@@ -8,7 +8,36 @@ import {
 
 let landmarkerPromise: Promise<FaceLandmarker> | null = null
 
+function suppressBenignWasmStderr() {
+  if (typeof window === 'undefined') return
+  const originalError = console.error
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((originalError as any).__wasmFiltered) return
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredError = (...args: any[]) => {
+    const firstArg = args[0]
+    if (
+      typeof firstArg === 'string' &&
+      (firstArg.includes('INFO: Created TensorFlow Lite') ||
+        firstArg.includes('face_landmarker_graph.cc') ||
+        firstArg.includes('gl_context.cc') ||
+        firstArg.includes('vision_wasm_internal') ||
+        firstArg.includes('Sets FaceBlendshapesGraph') ||
+        firstArg.includes('OpenGL error checking'))
+    ) {
+      console.info(...args)
+      return
+    }
+    originalError.apply(console, args)
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(filteredError as any).__wasmFiltered = true
+  console.error = filteredError
+}
+
 async function createFaceLandmarker(config: VisionConfig): Promise<FaceLandmarker> {
+  suppressBenignWasmStderr()
   const { FaceLandmarker: FaceLandmarkerApi, FilesetResolver } = await import('@mediapipe/tasks-vision')
   const fileset = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH)
   const sharedOptions = {

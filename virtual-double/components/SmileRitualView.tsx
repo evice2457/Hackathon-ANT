@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Sparkles, Volume2, VolumeX, ArrowLeft, Camera } from 'lucide-react'
 import { useSmileRitual } from '@/lib/vision/use-smile-ritual'
-import { speakAntDialogue, playAntChime } from '@/lib/ant-voice'
+import { speakAntDialogue, playAntChime, primeAudioOnGesture, startAudioKeepAlive } from '@/lib/ant-voice'
 import { useMascotName } from '@/lib/mascot-name'
 
 interface SmileRitualViewProps {
@@ -35,15 +35,19 @@ export default function SmileRitualView({
     completionStartedRef.current = true
     setIsFinishing(true)
 
+    // Synchronously prime and start audio keep-alive within the user interaction/gesture
+    primeAudioOnGesture()
+    startAudioKeepAlive()
+
     if (audioEnabled) {
       playAntChime('celebrate')
       speakAntDialogue(CELEBRATION_DIALOGUE)
     }
 
-    // Give the user a brief 1.4s beat to see and hear the mascot's celebration
+    // Give the user a full 3.4s beat (~2s longer) to hear the complete celebration dialogue before transition
     completionTimerRef.current = setTimeout(() => {
       onComplete(cameraOptIn)
-    }, 1400)
+    }, 3400)
   }, [audioEnabled, onComplete])
 
   const onSmileConfirmed = useCallback(() => finishRitual(true), [finishRitual])
@@ -151,7 +155,7 @@ export default function SmileRitualView({
                 </span>
               ) : (
                 <span>
-                  &ldquo;{INITIAL_DIALOGUE}&rdquo;
+                  {INITIAL_DIALOGUE}
                 </span>
               )}
             </p>

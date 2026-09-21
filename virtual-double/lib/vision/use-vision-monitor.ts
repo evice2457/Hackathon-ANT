@@ -208,10 +208,16 @@ export function useVisionMonitor({
             // behavior dwell threshold.
             classifier.reset(classifier.currentState)
           }
+          if (now <= lastInferenceAt) return
           lastProcessedAt = now
           lastInferenceAt = now
           const inferenceStartedAt = performance.now()
-          const result = landmarker.detectForVideo(video, now)
+          let result
+          try {
+            result = landmarker.detectForVideo(video, now)
+          } catch {
+            return
+          }
           const inferenceMs = performance.now() - inferenceStartedAt
           const observation = extractor.extract(result, now)
           const classificationObservation = classifyLookingAway

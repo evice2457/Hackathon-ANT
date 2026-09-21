@@ -1,6 +1,6 @@
 import type { FocusState, SessionStatus } from '@/lib/focus-session'
 
-export const CHECK_IN_THRESHOLD_MS = 30_000
+export const CHECK_IN_THRESHOLD_MS = 10_000
 
 export interface CheckInEpisodeInput {
   now: number

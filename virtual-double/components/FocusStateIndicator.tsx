@@ -4,9 +4,9 @@ import type { FocusState } from '@/lib/focus-session'
 import { cn } from '@/lib/utils'
 
 const FOCUS_STATE_META: Record<FocusState, { label: string; dot: string; text: string }> = {
-  focused: { label: 'Focused', dot: 'bg-emerald-400', text: 'text-emerald-200' },
-  possibly_distracted: { label: 'Checking in…', dot: 'bg-amber-400', text: 'text-amber-200' },
-  away: { label: 'Away', dot: 'bg-slate-400', text: 'text-slate-300' },
+  focused: { label: 'Focused', dot: 'bg-emerald-500 dark:bg-emerald-400', text: 'text-emerald-700 dark:text-emerald-200' },
+  possibly_distracted: { label: 'Checking in…', dot: 'bg-amber-500 dark:bg-amber-400', text: 'text-amber-700 dark:text-amber-200' },
+  away: { label: 'Away', dot: 'bg-slate-500 dark:bg-slate-400', text: 'text-slate-600 dark:text-slate-300' },
 }
 
 interface FocusStateIndicatorProps {

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, ClockPlus, MoveRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFocusSession, ADD_TIME_SECONDS } from '@/lib/focus-session'
 import { requestTaskBreakdown } from '@/lib/task-breakdown'
+import { playAntChime } from '@/lib/ant-voice'
 
 interface SessionCompletionModalProps {
   /** "Done" / "Next task" both return the user to task entry. */
@@ -17,6 +18,10 @@ export default function SessionCompletionModal({ onDone, onNextTask }: SessionCo
   const { session, addTime } = useFocusSession()
   const [isLoadingBreakdown, setIsLoadingBreakdown] = useState(false)
   const [subSteps, setSubSteps] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    playAntChime('complete')
+  }, [])
 
   const handleAddTime = () => {
     addTime(ADD_TIME_SECONDS)
