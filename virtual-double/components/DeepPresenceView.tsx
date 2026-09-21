@@ -1,99 +1,132 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Check, LogOut, Minimize2, Pause } from 'lucide-react'
+import { Check, LogOut, Minimize2, Pause, PictureInPicture2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
+import FocusStateIndicator from '@/components/FocusStateIndicator'
+import { formatTime, useFocusSession } from '@/lib/focus-session'
 
 interface DeepPresenceViewProps {
-  task: string
-  onTakePause: () => void
-  onCompleted: () => void
-  onDistraction: () => void
-  onMinimize?: () => void
-  onEnd?: () => void
+  /** Whether Document PiP is supported in this browser. */
+  pipSupported?: boolean
+  /** Opens the Document PiP window; should start the PiP presentation. */
+  onFloatWidget?: () => void
 }
 
-export default function DeepPresenceView({ 
-  task, 
-  onTakePause, 
-  onCompleted,
-  onDistraction,
-  onMinimize,
-  onEnd,
-}: DeepPresenceViewProps) {
-  const [focusIndex, setFocusIndex] = useState(98)
-  const [isMediaPipeActive, setIsMediaPipeActive] = useState(true)
+export default function DeepPresenceView({ pipSupported = false, onFloatWidget }: DeepPresenceViewProps = {}) {
+  const { session, pauseSession, resumeSession, completeSession, stopSession, minimizeToWidget, minutesRemaining } =
+    useFocusSession()
 
-  // Simulate focus index fluctuation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFocusIndex((prev) => {
-        const change = Math.random() * 6 - 2
-        return Math.max(70, Math.min(100, prev + change))
-      })
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
+  const isPaused = session.status === 'paused'
+  const progress =
+    session.durationSeconds > 0
+      ? 1 - session.remainingSeconds / session.durationSeconds
+      : 0
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6 py-12">
-      {/* Breathing Aura */}
-      <div className="mb-16">
-        <BreathingAura />
+    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 py-12">
+      <div className="mb-14">
+        <BreathingAura label={formatTime(session.remainingSeconds)} progress={progress} />
       </div>
 
-      {/* Current Task */}
-      <div className="text-center mb-12 max-w-2xl">
-        <p className="text-slate-400 text-sm uppercase tracking-widest mb-4">Current Focus</p>
-        <div className="px-8 py-6 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-cyan-500/20 backdrop-blur-sm">
-          <p className="text-2xl font-light text-white">{task}</p>
+      <div className="mb-10 max-w-2xl text-center">
+        <p className="mb-4 text-sm uppercase tracking-widest text-slate-400">Current Focus</p>
+        <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-800/60 to-slate-900/60 px-8 py-6 backdrop-blur-sm">
+          <p className="text-2xl font-light text-white">{session.task}</p>
         </div>
       </div>
 
-      {/* Status Indicator */}
-      <div className="mb-12 text-center">
-        <p className="text-slate-400 text-base mb-4">AI Body Double is quietly working alongside you</p>
-        <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span>Presence Active</span>
-        </div>
+      <div className="mb-10 flex flex-col items-center gap-3">
+        <p className="text-base text-slate-400">
+          {isPaused ? 'Taking a pause — resume when you’re ready.' : 'Your AI body double is quietly working alongside you.'}
+        </p>
+        <FocusStateIndicator state={session.focusState} size="md" />
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-        <Button onClick={onTakePause} variant="outline" className="rounded-xl border-white/10 bg-white/[0.03] px-5 py-5 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200">
-          <Pause data-icon="inline-start" /> Take a pause
+      <div className="mb-10 flex flex-wrap items-center justify-center gap-3">
+        {isPaused ? (
+          <Button
+            onClick={resumeSession}
+            className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
+          >
+            <Play data-icon="inline-start" /> Resume
+          </Button>
+        ) : (
+          <Button
+            onClick={pauseSession}
+            variant="outline"
+            className="rounded-xl border-white/10 bg-white/[0.03] px-5 py-5 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200"
+          >
+            <Pause data-icon="inline-start" /> Take a pause
+          </Button>
+        )}
+        <Button
+          onClick={completeSession}
+          className="rounded-xl bg-emerald-400 px-5 py-5 font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-300"
+        >
+          <Check data-icon="inline-start" /> Completed early
         </Button>
-        <Button onClick={onCompleted} className="rounded-xl bg-emerald-400 px-5 py-5 font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-300">
-          <Check data-icon="inline-start" /> Completed early!
+        <Button
+          onClick={minimizeToWidget}
+          className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-5 font-semibold text-cyan-200 hover:bg-cyan-400/20"
+        >
+          <Minimize2 data-icon="inline-start" /> Minimize to widget
         </Button>
-        <Button onClick={onEnd ?? onCompleted} variant="outline" className="rounded-xl border-rose-300/10 bg-rose-400/[0.04] px-5 py-5 text-rose-200 hover:bg-rose-400/10">
+        {pipSupported && onFloatWidget && (
+          <Button
+            onClick={onFloatWidget}
+            className="rounded-xl border border-cyan-400/40 bg-cyan-400/15 px-5 py-5 font-semibold text-cyan-100 hover:bg-cyan-400/25"
+          >
+            <PictureInPicture2 data-icon="inline-start" /> Float Widget
+          </Button>
+        )}
+        <Button
+          onClick={stopSession}
+          variant="outline"
+          className="rounded-xl border-rose-300/10 bg-rose-400/[0.04] px-5 py-5 text-rose-200 hover:bg-rose-400/10"
+        >
           <LogOut data-icon="inline-start" /> End now
         </Button>
-        <Button onClick={onMinimize} variant="ghost" className="rounded-xl px-5 py-5 text-slate-400 hover:text-cyan-200">
-          <Minimize2 data-icon="inline-start" /> Minimize to Widget
-        </Button>
       </div>
 
-      {/* Demo Control */}
-      <button
-        onClick={onDistraction}
-        className="text-xs text-slate-500 hover:text-slate-400 underline"
-      >
-        [Simulate Distraction] for demo
-      </button>
+      <FocusStateDebugControls />
 
-      {/* Footer Status */}
-      <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-xs text-slate-500 px-6 py-4 rounded-xl bg-slate-800/30 border border-slate-700/30 backdrop-blur-sm max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span>MediaPipe Vision: Local Gaze Detection Active</span>
-        </div>
-        <div>
-          <span className="text-cyan-400 font-medium">Focus Index: {Math.round(focusIndex)}%</span>
-        </div>
+      <div className="px-6 py-4 text-xs text-slate-500">
+        <span className="text-cyan-400/80">
+          {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
+        </span>
       </div>
+    </div>
+  )
+}
+
+/**
+ * DEVELOPMENT / DEMO ONLY.
+ * Lets us simulate what the computer-vision teammate will drive via
+ * setFocusState(...). Remove or gate behind a flag before shipping.
+ */
+function FocusStateDebugControls() {
+  const { setFocusState } = useFocusSession()
+  const states = [
+    ['Focused', 'focused'],
+    ['Possibly distracted', 'possibly_distracted'],
+    ['Away', 'away'],
+  ] as const
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/40 px-4 py-3">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+        Dev · focus state
+      </span>
+      {states.map(([label, value]) => (
+        <button
+          key={value}
+          onClick={() => setFocusState(value)}
+          className="rounded-lg bg-slate-800/60 px-3 py-1.5 text-[11px] text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-cyan-200"
+        >
+          {label}
+        </button>
+      ))}
     </div>
   )
 }

@@ -1,63 +1,106 @@
 'use client'
 
-import { Lightbulb, X } from 'lucide-react'
+import { useState } from 'react'
+import { Coffee, Sparkles, Waves } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useFocusSession } from '@/lib/focus-session'
+import { requestTaskBreakdown } from '@/lib/task-breakdown'
 
-interface DistractionNudgeModalProps {
-  onBreakDown: () => void
-  onKeepGoing: () => void
-  onClose: () => void
-}
+/**
+ * Gentle, non-judgmental check-in shown after the user has been
+ * "possibly_distracted" past the threshold (see useDistractionWatch).
+ */
+export default function DistractionNudgeModal() {
+  const { session, pauseSession, setFocusState } = useFocusSession()
+  const [isLoadingBreakdown, setIsLoadingBreakdown] = useState(false)
+  const [subSteps, setSubSteps] = useState<string[] | null>(null)
 
-export default function DistractionNudgeModal({ 
-  onBreakDown, 
-  onKeepGoing,
-  onClose,
-}: DistractionNudgeModalProps) {
+  const handleKeepGoing = () => {
+    // Reset focus state so the nudge can re-arm on the next episode.
+    setFocusState('focused')
+  }
+
+  const handleBreakDown = async () => {
+    setIsLoadingBreakdown(true)
+    try {
+      const steps = await requestTaskBreakdown(session.task)
+      setSubSteps(steps)
+    } finally {
+      setIsLoadingBreakdown(false)
+    }
+  }
+
+  const handleTakeBreak = () => {
+    pauseSession()
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center px-6 py-12 z-50">
-      <div className="w-full max-w-xl rounded-3xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-amber-500/30 backdrop-blur-md shadow-2xl shadow-amber-500/20 overflow-hidden">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-slate-300 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Content */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6 py-12 backdrop-blur-sm">
+      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-amber-500/25 bg-gradient-to-br from-slate-800/95 to-slate-900/95 shadow-2xl shadow-amber-950/20 backdrop-blur-md">
         <div className="p-10">
-          {/* Icon */}
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500/30 to-orange-500/20 border border-amber-500/50 flex items-center justify-center mb-6">
-            <Lightbulb className="w-7 h-7 text-amber-400" />
+          <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-amber-500/40 bg-gradient-to-br from-amber-500/25 to-orange-500/15">
+            <Waves className="size-7 text-amber-300" />
           </div>
 
-          {/* Headline */}
-          <h3 className="text-3xl font-light text-white mb-4">
-            Notice you paused <span className="font-serif italic font-normal text-amber-200">for a moment</span>
+          <h3 className="mb-3 text-3xl font-light text-white">
+            Still with me?{' '}
+            <span className="font-serif italic font-normal text-amber-200">No rush.</span>
           </h3>
 
-          {/* Description */}
-          <p className="text-slate-300 text-base leading-relaxed mb-8">
-            Totally okay! Brains get overloaded sometimes. Would you like me to break this step down even smaller for you?
+          <p className="mb-8 text-base leading-relaxed text-slate-300">
+            Looks like you paused for a moment. That&apos;s completely okay — want to keep going, make the
+            step smaller, or take a quick break?
           </p>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <Button
-              onClick={onBreakDown}
-              className="flex-1 px-6 py-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl font-semibold shadow-lg shadow-amber-500/30"
-            >
-              Break it down smaller (AI)
-            </Button>
-            <Button
-              onClick={onKeepGoing}
-              variant="outline"
-              className="flex-1 px-6 py-6 border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700/50 hover:border-slate-500 rounded-xl font-semibold"
-            >
-              Keep going
-            </Button>
-          </div>
+          {subSteps ? (
+            <div>
+              <p className="mb-3 text-xs uppercase tracking-wide text-slate-400">Here&apos;s a smaller step</p>
+              <ul className="mb-6 space-y-2">
+                {subSteps.map((step) => (
+                  <li
+                    key={step}
+                    className="flex items-start gap-2.5 rounded-xl border border-slate-700/40 bg-slate-800/40 px-4 py-3 text-sm text-slate-200"
+                  >
+                    <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-300" />
+                    {step}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                onClick={handleKeepGoing}
+                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 font-semibold text-white shadow-lg shadow-amber-500/25 hover:from-amber-400 hover:to-orange-400"
+              >
+                Keep going
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleKeepGoing}
+                className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-6 font-semibold text-white shadow-lg shadow-amber-500/25 hover:from-amber-400 hover:to-orange-400"
+              >
+                Keep going
+              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleBreakDown}
+                  disabled={isLoadingBreakdown}
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-600 px-6 py-5 font-semibold text-slate-200 hover:border-amber-400/40 hover:bg-slate-700/50 hover:text-white"
+                >
+                  <Sparkles data-icon="inline-start" />
+                  {isLoadingBreakdown ? 'Breaking it down…' : 'Break it down'}
+                </Button>
+                <Button
+                  onClick={handleTakeBreak}
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-600 px-6 py-5 font-semibold text-slate-200 hover:border-cyan-400/40 hover:bg-slate-700/50 hover:text-white"
+                >
+                  <Coffee data-icon="inline-start" /> Take a short break
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
