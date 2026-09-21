@@ -7,6 +7,7 @@ import BreathingAura from '@/components/BreathingAura'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
 import { formatTime, useFocusSession } from '@/lib/focus-session'
 import { useFloatingCompanion, useNativeClick } from '@/lib/floating-companion'
+import { primeAudioOnGesture } from '@/lib/ant-voice'
 
 export default function DeepPresenceView() {
   const { session, pauseSession, resumeSession, completeSession, stopSession, minutesRemaining } =
@@ -23,6 +24,19 @@ export default function DeepPresenceView() {
     session.durationSeconds > 0
       ? 1 - session.remainingSeconds / session.durationSeconds
       : 0
+
+  // Keep audio keep-alive primed on any user interaction within the countdown view
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      primeAudioOnGesture()
+    }
+    window.addEventListener('pointerdown', handleUserInteraction, { passive: true })
+    window.addEventListener('keydown', handleUserInteraction, { passive: true })
+    return () => {
+      window.removeEventListener('pointerdown', handleUserInteraction)
+      window.removeEventListener('keydown', handleUserInteraction)
+    }
+  }, [])
 
   // Keyboard shortcut listener: Space to toggle Pause/Resume, Escape to dismiss End confirmation
   useEffect(() => {

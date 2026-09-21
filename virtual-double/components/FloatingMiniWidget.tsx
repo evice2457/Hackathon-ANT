@@ -34,21 +34,21 @@ export default function FloatingMiniWidget({ onExitPip }: FloatingMiniWidgetProp
   return (
     <div
       aria-label="Floating focus companion"
-      className="flex h-screen w-full select-none flex-col justify-center bg-[#0B132B] p-3"
+      className="flex h-screen w-full select-none flex-col justify-center bg-slate-50 dark:bg-[#0B132B] p-3 text-slate-900 dark:text-white transition-colors"
     >
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <FocusStateIndicator state={session.focusState} />
 
-          <p className="mt-2 truncate text-sm font-medium text-white">
+          <p className="mt-2 truncate text-sm font-semibold text-slate-800 dark:text-white">
             {session.task || 'Your next small step'}
           </p>
 
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="font-mono text-4xl font-light tracking-tight text-cyan-100">
+            <span className="font-mono text-4xl font-light tracking-tight text-cyan-700 dark:text-cyan-100">
               {formatTime(session.remainingSeconds)}
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
               {isPaused ? 'Paused' : session.status === 'completed' ? 'Complete' : 'Body doubling'}
             </span>
           </div>
@@ -59,21 +59,21 @@ export default function FloatingMiniWidget({ onExitPip }: FloatingMiniWidgetProp
         {isPaused ? (
           <button
             onClick={resumeSession}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-400/20"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-200 transition-colors hover:bg-cyan-500/20"
           >
             <Play className="size-3.5" /> Resume
           </button>
         ) : (
           <button
             onClick={pauseSession}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-white/10"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-200/80 dark:bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-300/80 dark:hover:bg-white/10"
           >
             <Pause className="size-3.5" /> Pause
           </button>
         )}
         <button
           onClick={handleReturn}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-400/20"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-200 transition-colors hover:bg-cyan-500/20"
         >
           <Maximize2 className="size-3.5" /> Return
         </button>

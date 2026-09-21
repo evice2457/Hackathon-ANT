@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from '@/components/Header'
 import InteractiveBackground from '@/components/InteractiveBackground'
 import AntWelcomeView from '@/components/AntWelcomeView'
@@ -17,6 +17,7 @@ import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
 import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
 import { createCheckIn, type CheckInState } from '@/lib/check-in'
 import { MascotNameProvider } from '@/lib/mascot-name'
+import { startAudioKeepAlive, stopAudioKeepAlive } from '@/lib/ant-voice'
 
 export default function Page() {
   return (
@@ -78,6 +79,140 @@ function AppShell() {
 
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
+  const isSessionActive = session.status === 'running' || session.status === 'paused'
+
+  const isSessionActiveRef = useRef(isSessionActive)
+  isSessionActiveRef.current = isSessionActive
+
+  const isPipOpenRef = useRef(Boolean(pipDocument))
+  isPipOpenRef.current = Boolean(pipDocument)
+
+  const wasAwayRef = useRef(false)
+  const lastPipOpenTimeRef = useRef(0)
+
+  const handleOpenPip = useCallback(() => {
+    lastPipOpenTimeRef.current = Date.now()
+    void openPipWindow()
+  }, [openPipWindow])
+
+  // Automatic PiP pop-out on minimize/blur and auto-close when returning to the countdown web screen
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        wasAwayRef.current = true
+        if (isSessionActiveRef.current && pipSupported && !isPipOpenRef.current) {
+          lastPipOpenTimeRef.current = Date.now()
+          void openPipWindow().catch(() => {})
+        }
+      } else if (document.visibilityState === 'visible') {
+        if (wasAwayRef.current) {
+          wasAwayRef.current = false
+          if (isPipOpenRef.current && Date.now() - lastPipOpenTimeRef.current > 1200) {
+            closePip()
+          }
+        }
+      }
+    }
+
+    const handleWindowBlur = () => {
+      wasAwayRef.current = true
+      // On Windows, clicking the minimize button fires blur immediately during the title bar mouse click.
+      // Calling openPipWindow here preserves the transient user gesture from the minimize click!
+      if (isSessionActiveRef.current && pipSupported && !isPipOpenRef.current) {
+        lastPipOpenTimeRef.current = Date.now()
+        void openPipWindow().catch(() => {})
+      }
+    }
+
+    const handleWindowFocus = () => {
+      // ONLY close the PiP window if the main web document is currently VISIBLE
+      // This prevents the OS minimize focus flutter from killing the newly opened PiP window
+      if (document.visibilityState !== 'visible') return
+
+      if (wasAwayRef.current) {
+        wasAwayRef.current = false
+        if (isPipOpenRef.current && Date.now() - lastPipOpenTimeRef.current > 1200) {
+          closePip()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('blur', handleWindowBlur)
+    window.addEventListener('focus', handleWindowFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('blur', handleWindowBlur)
+      window.removeEventListener('focus', handleWindowFocus)
+    }
+  }, [pipSupported, openPipWindow, closePip])
+
+  // Manage inaudible audio keep-alive for Chrome Auto-PiP qualification
+  useEffect(() => {
+    if (isSessionActive) {
+      startAudioKeepAlive()
+    } else {
+      stopAudioKeepAlive()
+    }
+    return () => {
+      stopAudioKeepAlive()
+    }
+  }, [isSessionActive])
+
+  // Register Chrome native Automatic Picture-in-Picture via Media Session API
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return
+    if (!pipSupported) return
+
+    if (isSessionActive) {
+      try {
+        navigator.mediaSession.playbackState = 'playing'
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: session.task || 'Focus Session',
+          artist: 'VirtualDouble — ANT Companion',
+          artwork: [{ src: '/ant-mascot.png', sizes: '512x512', type: 'image/png' }],
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('enterpictureinpicture', () => {
+          if (!isPipOpenRef.current) {
+            lastPipOpenTimeRef.current = Date.now()
+            void openPipWindow().catch(() => {})
+          }
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('play', () => {
+          resumeSession()
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('pause', () => {
+          pauseSession()
+        })
+      } catch {}
+    } else {
+      try {
+        navigator.mediaSession.playbackState = 'none'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('enterpictureinpicture', null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('play', null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('pause', null)
+      } catch {}
+    }
+
+    return () => {
+      try {
+        navigator.mediaSession.playbackState = 'none'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('enterpictureinpicture', null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('play', null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(navigator.mediaSession.setActionHandler as any)('pause', null)
+      } catch {}
+    }
+  }, [isSessionActive, pipSupported, session.task, openPipWindow, pauseSession, resumeSession])
 
   // The floating companion is opened from the session view button's NATIVE
   // click handler (see DeepPresenceView) so requestWindow() runs inside the
@@ -85,9 +220,7 @@ function AppShell() {
   const floating: FloatingCompanionApi = {
     isSupported: pipSupported,
     isOpen: Boolean(pipDocument),
-    open: () => {
-      void openPipWindow()
-    },
+    open: handleOpenPip,
     close: () => {
       closePip()
     },

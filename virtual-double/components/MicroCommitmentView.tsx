@@ -5,6 +5,7 @@ import { Mic, MicOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DEFAULT_DURATION_MINUTES, DURATION_PRESETS, useFocusSession } from '@/lib/focus-session'
+import { primeAudioOnGesture } from '@/lib/ant-voice'
 
 const SUGGESTION_PILLS = [
   'Review 3 priority emails',
@@ -149,6 +150,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
   // Starts or stages a session.
   const startWith = (task: string, durationMinutes: number) => {
     if (!task.trim() || durationMinutes <= 0) return
+    primeAudioOnGesture()
     if (onInitiateRitual) {
       onInitiateRitual(task.trim(), durationMinutes)
     } else {

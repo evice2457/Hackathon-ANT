@@ -3,6 +3,7 @@
 import { Sparkles, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import { useMascotName } from '@/lib/mascot-name'
+import { primeAudioOnGesture } from '@/lib/ant-voice'
 
 interface AntWelcomeViewProps {
   onStart: () => void
@@ -10,6 +11,11 @@ interface AntWelcomeViewProps {
 
 export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
   const { mascotName } = useMascotName()
+
+  const handleStart = () => {
+    primeAudioOnGesture()
+    onStart()
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 py-8 text-center animate-in fade-in duration-500">
@@ -39,10 +45,10 @@ export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
 
           {/* Floating Mascot Container */}
           <div
-            onClick={onStart}
+            onClick={handleStart}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && onStart()}
+            onKeyDown={(e) => e.key === 'Enter' && handleStart()}
             aria-label={`${mascotName} mascot - Click to Get Started`}
             className="animate-mascot-float group relative cursor-pointer select-none transition-transform hover:scale-105 flex flex-col items-center"
           >
@@ -72,7 +78,7 @@ export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
         {/* Prominent GET STARTED Button */}
         <div className="flex flex-col items-center gap-3">
           <button
-            onClick={onStart}
+            onClick={handleStart}
             type="button"
             className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 px-9 py-4 text-lg font-bold tracking-wide text-white shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:scale-[1.03] hover:from-cyan-400 hover:to-blue-500 hover:shadow-cyan-500/45 active:scale-[0.98]"
           >
