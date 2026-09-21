@@ -16,12 +16,15 @@ import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
 import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
 import { createCheckIn, type CheckInState } from '@/lib/check-in'
+import { MascotNameProvider } from '@/lib/mascot-name'
 
 export default function Page() {
   return (
-    <FocusSessionProvider>
-      <AppShell />
-    </FocusSessionProvider>
+    <MascotNameProvider>
+      <FocusSessionProvider>
+        <AppShell />
+      </FocusSessionProvider>
+    </MascotNameProvider>
   )
 }
 

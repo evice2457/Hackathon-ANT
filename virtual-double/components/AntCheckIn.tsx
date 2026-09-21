@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Coffee, Play, Send } from 'lucide-react'
 import { CHECK_IN_RESPONSE, type CheckInState } from '@/lib/check-in'
+import { useMascotName } from '@/lib/mascot-name'
 
 interface AntCheckInProps {
   checkIn: CheckInState
@@ -21,9 +22,11 @@ export default function AntCheckIn({
   onResume,
   onStayPaused,
 }: AntCheckInProps) {
+  const { mascotName } = useMascotName()
+
   return (
     <section
-      aria-label="ANT check-in"
+      aria-label={`${mascotName} check-in`}
       className={
         compact
           ? 'flex h-screen w-full flex-col overflow-auto bg-[#0B132B] p-3 text-white'
@@ -39,10 +42,10 @@ export default function AntCheckIn({
       >
         <div className="flex items-center gap-3">
           <div className={`relative shrink-0 overflow-hidden rounded-full bg-cyan-400/10 ${compact ? 'size-12' : 'size-16'}`}>
-            <Image src="/ant-mascot-removebg.png" alt="ANT mascot" fill sizes={compact ? '48px' : '64px'} className="object-contain" />
+            <Image src="/ant-mascot-removebg.png" alt={`${mascotName} mascot`} fill sizes={compact ? '48px' : '64px'} className="object-contain" />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">ANT check-in</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">{mascotName} check-in</p>
             <h2 className={compact ? 'text-base font-semibold' : 'text-2xl font-semibold'}>{checkIn.prompt}</h2>
           </div>
         </div>
@@ -71,7 +74,7 @@ export default function AntCheckIn({
               type="submit"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-400"
             >
-              <Send className="size-4" /> Tell ANT
+              <Send className="size-4" /> Tell {mascotName}
             </button>
           </form>
         ) : (

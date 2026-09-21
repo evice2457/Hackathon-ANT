@@ -2,12 +2,15 @@
 
 import { Sparkles, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
+import { useMascotName } from '@/lib/mascot-name'
 
 interface AntWelcomeViewProps {
   onStart: () => void
 }
 
 export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
+  const { mascotName } = useMascotName()
+
   return (
     <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 py-8 text-center animate-in fade-in duration-500">
       <div className="w-full max-w-2xl flex flex-col items-center">
@@ -21,7 +24,7 @@ export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
         <h1 className="mb-2 text-4xl font-light tracking-tight text-slate-900 transition-colors dark:text-white md:text-5xl lg:text-6xl">
           Hello, this is{' '}
           <span className="font-serif italic font-semibold text-cyan-600 dark:text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]">
-            ANT
+            {mascotName}
           </span>
           .
         </h1>
@@ -40,14 +43,14 @@ export default function AntWelcomeView({ onStart }: AntWelcomeViewProps) {
             role="button"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && onStart()}
-            aria-label="ANT Mascot - Click to Get Started"
+            aria-label={`${mascotName} mascot - Click to Get Started`}
             className="animate-mascot-float group relative cursor-pointer select-none transition-transform hover:scale-105 flex flex-col items-center"
           >
             {/* Directly Rendered Animated Transparent Ant Mascot */}
             <div className="relative h-72 w-64 md:h-88 md:w-76 flex items-center justify-center drop-shadow-[0_15px_35px_rgba(6,182,212,0.35)]">
               <Image
                 src="/ant-waving.webp"
-                alt="ANT - AI Cognitive Body Doubler Animated Mascot"
+                alt={`${mascotName} - AI Cognitive Body Doubler Animated Mascot`}
                 width={440}
                 height={520}
                 priority
