@@ -8,3 +8,11 @@ build/
 *.tsbuildinfo
 virtual-double_state.md
 *state.md
+
+# Impeccable & AI agent skillsets (local only)
+.agent/
+.agents/
+.claude/agents/
+.claude/skills/
+.codex/
+.gemini/

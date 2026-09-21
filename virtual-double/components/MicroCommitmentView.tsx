@@ -1,17 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Mic } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Mic, MicOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DEFAULT_DURATION_MINUTES, DURATION_PRESETS, useFocusSession } from '@/lib/focus-session'
 
 const SUGGESTION_PILLS = [
-  'Finish the introduction slide',
   'Review 3 priority emails',
-  'Outline 3 main bullet points',
-  'Plan next sprint backlog',
-  'Write test cases',
+  'Outline key bullet points',
+  'Finish draft introduction',
 ]
 
 interface MicroCommitmentViewProps {
@@ -23,6 +21,88 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
   const [input, setInput] = useState('')
   const [minutes, setMinutes] = useState<number>(DEFAULT_DURATION_MINUTES)
   const [customMinutes, setCustomMinutes] = useState('')
+
+  // Speech-to-Text State
+  const [isListening, setIsListening] = useState(false)
+  const [speechError, setSpeechError] = useState<string | null>(null)
+  const recognitionRef = useRef<any>(null)
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort()
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, [])
+
+  const toggleSpeechRecognition = () => {
+    setSpeechError(null)
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop()
+        } catch {
+          // ignore
+        }
+      }
+      setIsListening(false)
+      return
+    }
+
+    if (typeof window === 'undefined') return
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+
+    if (!SpeechRecognition) {
+      setSpeechError('Trình duyệt chưa hỗ trợ Web Speech Recognition. Bạn vui lòng gõ task trực tiếp.')
+      return
+    }
+
+    try {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false
+      recognition.interimResults = true
+      recognition.lang = navigator.language || 'en-US'
+
+      recognition.onstart = () => {
+        setIsListening(true)
+      }
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((res: any) => res[0]?.transcript || '')
+          .join('')
+        if (transcript.trim()) {
+          setInput(transcript.trim())
+        }
+      }
+
+      recognition.onerror = (event: any) => {
+        if (event.error !== 'no-speech') {
+          console.warn('Speech recognition error:', event.error)
+          setSpeechError(`Microphone: ${event.error}`)
+        }
+        setIsListening(false)
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      recognitionRef.current = recognition
+      recognition.start()
+    } catch (err: any) {
+      console.warn('Failed to start speech recognition:', err)
+      setSpeechError('Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.')
+      setIsListening(false)
+    }
+  }
 
   const trimmed = input.trim()
   const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
@@ -64,7 +144,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
 
         {/* Input Area */}
         <div className="mb-8">
-          <div className="relative flex gap-3">
+          <div className="relative flex items-stretch gap-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -80,21 +160,38 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
               type="button"
               onClick={() => startWith(input, minutes)}
               disabled={!canStart}
-              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
+              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-7 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
               Start with Me
             </button>
             <Button
               size="icon"
-              variant="outline"
-              aria-label="Voice input (coming soon)"
-              disabled
-              title="Voice input — coming soon"
-              className="border-slate-200/90 bg-white/60 text-slate-400 dark:border-slate-700/50 dark:bg-slate-800/30 dark:text-slate-400"
+              type="button"
+              onClick={toggleSpeechRecognition}
+              aria-label={isListening ? 'Stop listening' : 'Voice input (Click to speak task)'}
+              title={isListening ? 'Listening... click to stop' : 'Click to speak your task'}
+              className={`h-auto self-stretch w-14 shrink-0 rounded-2xl transition-all ${
+                isListening
+                  ? 'border-rose-500 bg-rose-500 text-white animate-pulse shadow-lg shadow-rose-500/40 hover:bg-rose-600'
+                  : 'border-slate-200/90 bg-white/70 text-slate-700 hover:border-cyan-500/50 hover:bg-white hover:text-cyan-600 dark:border-slate-700/50 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-300'
+              }`}
             >
-              <Mic className="size-5" />
+              {isListening ? <MicOff className="size-5" /> : <Mic className="size-5" />}
             </Button>
           </div>
+
+          {/* Speech Feedback message */}
+          {isListening && (
+            <p className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-rose-500 dark:text-rose-400 animate-pulse">
+              <span className="size-2 rounded-full bg-rose-500 animate-ping" />
+              Đang lắng nghe giọng nói... Hãy nói task của bạn (sẽ tự động điền vào ô trên).
+            </p>
+          )}
+          {speechError && (
+            <p className="mt-2.5 text-xs text-amber-600 dark:text-amber-400">
+              {speechError}
+            </p>
+          )}
         </div>
 
         {/* Duration picker */}
@@ -134,21 +231,41 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
           </div>
         </div>
 
-        {/* Quick Suggestion Pills */}
+        {/* Quick Suggestion Pills (Compact single row, fills input on click) */}
         <div>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
-            Quick suggestions
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {SUGGESTION_PILLS.map((pill) => (
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
+              Quick suggestions (Click to fill)
+            </p>
+            {input && (
               <button
-                key={pill}
-                onClick={() => startWith(pill, minutes)}
-                className="rounded-xl border border-slate-200/90 bg-white/60 px-4 py-3 text-sm text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:bg-slate-700/60 dark:hover:text-cyan-300"
+                type="button"
+                onClick={() => setInput('')}
+                className="text-[11px] text-slate-400 hover:text-rose-500 transition-colors"
               >
-                {pill}
+                Clear input
               </button>
-            ))}
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {SUGGESTION_PILLS.map((pill) => {
+              const isSelected = input === pill
+              return (
+                <button
+                  key={pill}
+                  type="button"
+                  onClick={() => setInput(pill)}
+                  className={`rounded-xl border px-3.5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center truncate ${
+                    isSelected
+                      ? 'border-cyan-500 bg-cyan-500/15 text-cyan-800 shadow-sm dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-cyan-200 ring-1 ring-cyan-400/40'
+                      : 'border-slate-200/90 bg-white/60 text-slate-700 shadow-sm hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:bg-slate-700/60 dark:hover:text-cyan-300'
+                  }`}
+                  title={pill}
+                >
+                  {pill}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>

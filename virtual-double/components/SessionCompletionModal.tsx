@@ -69,7 +69,7 @@ export default function SessionCompletionModal({ onDone, onNextTask }: SessionCo
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 onClick={onDone}
-                className="rounded-xl bg-emerald-400 px-6 py-6 font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 hover:bg-emerald-300"
+                className="rounded-xl bg-emerald-500 px-6 py-6 font-semibold text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300"
               >
                 <Check data-icon="inline-start" /> Done
               </Button>
