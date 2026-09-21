@@ -54,7 +54,10 @@ export function useFloatingCompanion(): FloatingCompanionApi | null {
 export function useNativeClick<T extends HTMLElement>(handler: () => void) {
   const ref = useRef<T>(null)
   const handlerRef = useRef(handler)
-  handlerRef.current = handler
+
+  useEffect(() => {
+    handlerRef.current = handler
+  }, [handler])
 
   useEffect(() => {
     const el = ref.current

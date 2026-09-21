@@ -1,25 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Header from '@/components/Header'
 import InteractiveBackground from '@/components/InteractiveBackground'
 import AntWelcomeView from '@/components/AntWelcomeView'
 import SmileRitualView from '@/components/SmileRitualView'
 import MicroCommitmentView from '@/components/MicroCommitmentView'
 import DeepPresenceView from '@/components/DeepPresenceView'
-import DistractionNudgeModal from '@/components/DistractionNudgeModal'
+import AntCheckIn from '@/components/AntCheckIn'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
+import VisionMonitor from '@/components/VisionMonitor'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
 import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
 import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
+import { createCheckIn, type CheckInState } from '@/lib/check-in'
+import { MascotNameProvider } from '@/lib/mascot-name'
 
 export default function Page() {
   return (
-    <FocusSessionProvider>
-      <AppShell />
-    </FocusSessionProvider>
+    <MascotNameProvider>
+      <FocusSessionProvider>
+        <AppShell />
+      </FocusSessionProvider>
+    </MascotNameProvider>
   )
 }
 
@@ -27,19 +32,34 @@ function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [hasStarted, setHasStarted] = useState(false)
   const [stagedSession, setStagedSession] = useState<{ task: string; durationMinutes: number } | null>(null)
-  const { session, startSession, stopSession } = useFocusSession()
-  const { nudgeVisible, dismissNudge } = useDistractionWatch()
+  const [checkIn, setCheckIn] = useState<CheckInState | null>(null)
+  const { session, startSession, stopSession, pauseSession, resumeSession } = useFocusSession()
+  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture()
+
+  const handleCheckInTriggered = useCallback(
+    ({ episodeId }: { episodeId: number }) => {
+      setCheckIn((current) => current ?? createCheckIn(episodeId))
+      pauseSession()
+    },
+    [pauseSession],
+  )
+
+  useDistractionWatch({
+    onCheckInTriggered: handleCheckInTriggered,
+    schedulingWindow: pipDocument?.defaultView ?? null,
+  })
 
   // Sync theme with HTML root class and localStorage
   useEffect(() => {
     const saved = localStorage.getItem('virtualdouble.theme')
+    const prefersDark = saved !== 'light'
     if (saved === 'light') {
-      setIsDarkMode(false)
       document.documentElement.classList.remove('dark')
     } else {
-      setIsDarkMode(true)
       document.documentElement.classList.add('dark')
     }
+    const frame = requestAnimationFrame(() => setIsDarkMode(prefersDark))
+    return () => cancelAnimationFrame(frame)
   }, [])
 
   const handleToggleDarkMode = () => {
@@ -55,8 +75,6 @@ function AppShell() {
       return next
     })
   }
-
-  const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture()
 
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
@@ -96,7 +114,6 @@ function AppShell() {
           <Header
             isDarkMode={isDarkMode}
             onToggleDarkMode={handleToggleDarkMode}
-            onDismissNudge={dismissNudge}
           />
 
           <main className="flex-1">
@@ -110,10 +127,10 @@ function AppShell() {
               <SmileRitualView
                 task={stagedSession.task}
                 durationMinutes={stagedSession.durationMinutes}
-                onComplete={() => {
+                onComplete={(cameraOptIn) => {
                   const { task, durationMinutes } = stagedSession
                   setStagedSession(null)
-                  startSession(task, Math.round(durationMinutes * 60))
+                  startSession(task, Math.round(durationMinutes * 60), cameraOptIn)
                 }}
                 onCancel={() => setStagedSession(null)}
               />
@@ -132,16 +149,46 @@ function AppShell() {
                 window is an additional surface, not a replacement for it. */}
             {!isIdle && !isCompleted && <DeepPresenceView />}
 
-            {nudgeVisible && <DistractionNudgeModal />}
-
             {isCompleted && (
               <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
             )}
           </main>
         </div>
 
+        <VisionMonitor pipDocument={pipDocument} />
+
+        {checkIn && !pipDocument && (
+          <AntCheckIn
+            checkIn={checkIn}
+            onAnswerChange={(answer) => setCheckIn((current) => (current ? { ...current, answer } : current))}
+            onSubmit={() => setCheckIn((current) => (current ? { ...current, responseShown: true } : current))}
+            onResume={() => {
+              setCheckIn(null)
+              resumeSession()
+            }}
+            onStayPaused={() => setCheckIn(null)}
+          />
+        )}
+
         {/* Document PiP surface — same provider, portal into the PiP document. */}
-        {pipDocument && <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />}
+        {pipDocument && (
+          <PipWindow
+            pipDocument={pipDocument}
+            onExitPip={handleExitPip}
+            checkIn={checkIn}
+            onCheckInAnswerChange={(answer) =>
+              setCheckIn((current) => (current ? { ...current, answer } : current))
+            }
+            onCheckInSubmit={() =>
+              setCheckIn((current) => (current ? { ...current, responseShown: true } : current))
+            }
+            onCheckInResume={() => {
+              setCheckIn(null)
+              resumeSession()
+            }}
+            onCheckInStayPaused={() => setCheckIn(null)}
+          />
+        )}
       </div>
     </FloatingCompanionProvider>
   )

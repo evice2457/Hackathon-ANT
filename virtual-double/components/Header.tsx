@@ -1,34 +1,21 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Moon, Sun, Pencil, Check } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { useMascotName } from '@/lib/mascot-name'
 
 interface HeaderProps {
   isDarkMode: boolean
   onToggleDarkMode: () => void
-  onDismissNudge?: () => void
 }
 
 export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
-  const [mascotName, setMascotName] = useState('VirtualDouble')
+  const { mascotName, setMascotName } = useMascotName()
   const [isEditingName, setIsEditingName] = useState(false)
-  const [tempName, setTempName] = useState('VirtualDouble')
+  const [tempName, setTempName] = useState(mascotName)
   const nameInputRef = useRef<HTMLInputElement>(null)
-
-  // Load custom mascot name from localStorage on client mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('ant_mascot_name')
-      if (saved && saved.trim()) {
-        setMascotName(saved.trim())
-        setTempName(saved.trim())
-      }
-    } catch {
-      // Ignore localStorage access issues
-    }
-  }, [])
 
   // Auto-focus and select text when entering editing mode
   useEffect(() => {
@@ -43,14 +30,7 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
     setMascotName(finalName)
     setTempName(finalName)
     setIsEditingName(false)
-    try {
-      localStorage.setItem('ant_mascot_name', finalName)
-      window.dispatchEvent(new CustomEvent('mascot-name-change', { detail: finalName }))
-    } catch {
-      // Ignore localStorage access issues
-    }
   }
-
   return (
     <header
       className={`sticky top-0 z-30 transition-colors duration-300 backdrop-blur-md ${
@@ -65,7 +45,7 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
           <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-cyan-400/50 bg-[#0B132B] shadow-lg shadow-cyan-500/25 ring-2 ring-cyan-400/20">
             <Image
               src="/ant-mascot.png"
-              alt="ANT Mascot"
+              alt={`${mascotName} mascot`}
               fill
               className="object-cover object-center"
               sizes="40px"

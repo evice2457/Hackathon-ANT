@@ -1,17 +1,21 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Sparkles, Volume2, VolumeX, ArrowLeft, Camera } from 'lucide-react'
-import { useSmileDetector } from '@/lib/use-smile-detector'
+import { useSmileRitual } from '@/lib/vision/use-smile-ritual'
 import { speakAntDialogue, playAntChime } from '@/lib/ant-voice'
+import { useMascotName } from '@/lib/mascot-name'
 
 interface SmileRitualViewProps {
   task: string
   durationMinutes: number
-  onComplete: () => void
+  onComplete: (cameraOptIn: boolean) => void
   onCancel: () => void
 }
+
+const INITIAL_DIALOGUE = "Hey, are you ready? Let's smile whenever you're about to start the task!"
+const CELEBRATION_DIALOGUE = "Nice — we're ready. Let's start now!"
 
 export default function SmileRitualView({
   task,
@@ -19,26 +23,30 @@ export default function SmileRitualView({
   onComplete,
   onCancel,
 }: SmileRitualViewProps) {
+  const { mascotName } = useMascotName()
   const [audioEnabled, setAudioEnabled] = useState(true)
   const [hasSpokenInitial, setHasSpokenInitial] = useState(false)
   const [isFinishing, setIsFinishing] = useState(false)
+  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const completionStartedRef = useRef(false)
 
-  const initialDialogue = "Hey, are you ready? Let's smile whenever you're about to start the task!"
-  const celebrationDialogue = "You look so energetic! Let's start now!!!"
-
-  const onSmileConfirmed = () => {
+  const finishRitual = useCallback((cameraOptIn: boolean) => {
+    if (completionStartedRef.current) return
+    completionStartedRef.current = true
     setIsFinishing(true)
 
     if (audioEnabled) {
       playAntChime('celebrate')
-      speakAntDialogue(celebrationDialogue)
+      speakAntDialogue(CELEBRATION_DIALOGUE)
     }
 
     // Give the user a brief 1.4s beat to see and hear the mascot's celebration
-    setTimeout(() => {
-      onComplete()
+    completionTimerRef.current = setTimeout(() => {
+      onComplete(cameraOptIn)
     }, 1400)
-  }
+  }, [audioEnabled, onComplete])
+
+  const onSmileConfirmed = useCallback(() => finishRitual(true), [finishRitual])
 
   const {
     isCameraActive,
@@ -46,12 +54,16 @@ export default function SmileRitualView({
     smileProgress,
     isSmiling,
     videoRef,
-    canvasRef,
-    triggerSimulatedSmile,
-  } = useSmileDetector({
+  } = useSmileRitual({
     onSmileDetected: onSmileConfirmed,
-    enabled: true,
+    enabled: !isFinishing,
   })
+
+  useEffect(() => {
+    return () => {
+      if (completionTimerRef.current) clearTimeout(completionTimerRef.current)
+    }
+  }, [])
 
   // Play initial chime and speech on mount
   const hasMountedRef = useRef(false)
@@ -62,7 +74,7 @@ export default function SmileRitualView({
     const timer = setTimeout(() => {
       if (audioEnabled && !hasSpokenInitial) {
         playAntChime('ready')
-        speakAntDialogue(initialDialogue)
+        speakAntDialogue(INITIAL_DIALOGUE)
         setHasSpokenInitial(true)
       }
     }, 450)
@@ -70,23 +82,18 @@ export default function SmileRitualView({
     return () => clearTimeout(timer)
   }, [audioEnabled, hasSpokenInitial])
 
-  // Keyboard shortcut listener: Escape to go back to task, Enter to trigger smile/start
+  // Keyboard shortcut listener: Escape returns to task entry.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Escape') {
         e.preventDefault()
         onCancel()
-      } else if (e.code === 'Enter') {
-        if (!isFinishing) {
-          e.preventDefault()
-          triggerSimulatedSmile()
-        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onCancel, isFinishing, triggerSimulatedSmile])
+  }, [onCancel])
 
   const toggleAudio = () => {
     setAudioEnabled((prev) => {
@@ -119,7 +126,7 @@ export default function SmileRitualView({
           <button
             onClick={toggleAudio}
             type="button"
-            title={audioEnabled ? 'Mute ANT voice' : 'Enable ANT voice'}
+            title={audioEnabled ? `Mute ${mascotName} voice` : `Enable ${mascotName} voice`}
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-md transition-all hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-white/10"
           >
             {audioEnabled ? (
@@ -138,13 +145,13 @@ export default function SmileRitualView({
         <div className="relative mb-6 max-w-xl px-4 z-20">
           <div className="relative rounded-[2.25rem] border-[3.5px] border-slate-900 bg-white px-8 py-6 shadow-2xl transition-all duration-300 dark:border-cyan-400/90 dark:bg-[#0c1630]">
             <p className="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white md:text-2xl leading-relaxed">
-              {isSmiling ? (
+              {isFinishing ? (
                 <span className="text-cyan-600 dark:text-cyan-300 animate-pulse">
-                  🎉 {celebrationDialogue}
+                  🎉 {CELEBRATION_DIALOGUE}
                 </span>
               ) : (
                 <span>
-                  &ldquo;{initialDialogue}&rdquo;
+                  &ldquo;{INITIAL_DIALOGUE}&rdquo;
                 </span>
               )}
             </p>
@@ -179,13 +186,13 @@ export default function SmileRitualView({
           <div className="flex flex-col items-center">
             <div
               className={`relative transition-all duration-500 select-none ${
-                isSmiling ? 'scale-110 -translate-y-4' : 'animate-mascot-float'
+                isFinishing ? 'scale-110 -translate-y-4' : 'animate-mascot-float'
               }`}
             >
               <div className="relative h-64 w-56 md:h-76 md:w-64 drop-shadow-[0_20px_40px_rgba(6,182,212,0.35)]">
                 <Image
                   src="/ant-mascot-removebg.png"
-                  alt="ANT Mascot - Ready to begin"
+                  alt={`${mascotName} mascot - Ready to begin`}
                   width={440}
                   height={520}
                   priority
@@ -209,16 +216,16 @@ export default function SmileRitualView({
                 muted
                 className="size-full object-cover scale-x-[-1]"
               />
-              <canvas ref={canvasRef} className="hidden" />
-
               {/* Target Face Focus Overlay */}
               <div className="absolute inset-3 rounded-xl border border-dashed border-cyan-400/50 pointer-events-none" />
 
               {/* Status pill */}
               <div className="absolute top-2 left-2 flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-cyan-200 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span
+                  className={`size-1.5 rounded-full ${isCameraActive ? 'bg-emerald-400 animate-ping' : 'bg-amber-300'}`}
+                />
                 <Camera className="size-3" />
-                <span>Face & Smile CV</span>
+                <span>{isCameraActive ? 'MediaPipe ready' : 'Starting camera'}</span>
               </div>
 
               {isSmiling && (
@@ -249,14 +256,14 @@ export default function SmileRitualView({
               </p>
             </div>
 
-            {/* Fallback & Simulation Button */}
+            {/* Accessible fallback: camera/model failure never blocks starting. */}
             <button
-              onClick={triggerSimulatedSmile}
+              onClick={() => finishRitual(false)}
               disabled={isFinishing}
               type="button"
               className="mt-1 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-blue-400 disabled:opacity-60"
             >
-              {isSmiling ? "Starting..." : "I'm smiling! (Start now)"}
+              {isFinishing ? 'Starting…' : 'Start without camera'}
             </button>
           </div>
         </div>

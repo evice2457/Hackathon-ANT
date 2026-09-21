@@ -12,6 +12,44 @@ const SUGGESTION_PILLS = [
   'Finish draft introduction',
 ]
 
+interface SpeechRecognitionAlternativeLike {
+  transcript: string
+}
+
+interface SpeechRecognitionResultLike {
+  [index: number]: SpeechRecognitionAlternativeLike | undefined
+}
+
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<SpeechRecognitionResultLike>
+}
+
+interface SpeechRecognitionErrorEventLike {
+  error: string
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onstart: (() => void) | null
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null
+  onend: (() => void) | null
+  start: () => void
+  stop: () => void
+  abort: () => void
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionLike
+}
+
+type SpeechRecognitionWindow = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor
+  webkitSpeechRecognition?: SpeechRecognitionConstructor
+}
+
 interface MicroCommitmentViewProps {
   onInitiateRitual?: (task: string, durationMinutes: number) => void
 }
@@ -25,7 +63,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
   // Speech-to-Text State
   const [isListening, setIsListening] = useState(false)
   const [speechError, setSpeechError] = useState<string | null>(null)
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
 
   useEffect(() => {
     return () => {
@@ -56,11 +94,12 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
 
     if (typeof window === 'undefined') return
 
+    const speechWindow = window as SpeechRecognitionWindow
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition
 
     if (!SpeechRecognition) {
-      setSpeechError('Trình duyệt chưa hỗ trợ Web Speech Recognition. Bạn vui lòng gõ task trực tiếp.')
+      setSpeechError("Speech recognition isn't supported in this browser. You can type your task instead.")
       return
     }
 
@@ -74,19 +113,19 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
         setIsListening(true)
       }
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEventLike) => {
         const transcript = Array.from(event.results)
-          .map((res: any) => res[0]?.transcript || '')
+          .map((result) => result[0]?.transcript || '')
           .join('')
         if (transcript.trim()) {
           setInput(transcript.trim())
         }
       }
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
         if (event.error !== 'no-speech') {
           console.warn('Speech recognition error:', event.error)
-          setSpeechError(`Microphone: ${event.error}`)
+          setSpeechError("Couldn't access speech recognition. Check your microphone permission or type your task instead.")
         }
         setIsListening(false)
       }
@@ -97,9 +136,9 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
 
       recognitionRef.current = recognition
       recognition.start()
-    } catch (err: any) {
-      console.warn('Failed to start speech recognition:', err)
-      setSpeechError('Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.')
+    } catch (error: unknown) {
+      console.warn('Failed to start speech recognition:', error)
+      setSpeechError("Couldn't access speech recognition. Check your microphone permission or type your task instead.")
       setIsListening(false)
     }
   }
@@ -184,7 +223,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
           {isListening && (
             <p className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-rose-500 dark:text-rose-400 animate-pulse">
               <span className="size-2 rounded-full bg-rose-500 animate-ping" />
-              Đang lắng nghe giọng nói... Hãy nói task của bạn (sẽ tự động điền vào ô trên).
+              Listening… Say your task and I&apos;ll fill it in above.
             </p>
           )}
           {speechError && (
