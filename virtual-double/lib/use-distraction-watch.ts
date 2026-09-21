@@ -1,65 +1,53 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { DISTRACTION_THRESHOLD_MS, useFocusSession } from '@/lib/focus-session'
+import { useFocusSession } from '@/lib/focus-session'
+import { CHECK_IN_THRESHOLD_MS, CheckInEpisodeTracker } from '@/lib/check-in-episode'
 
-/**
- * Watches the shared focus state and surfaces a gentle nudge only after the
- * user has been "possibly_distracted" continuously for DISTRACTION_THRESHOLD_MS.
- *
- * Returns whether the nudge should currently be shown, plus a `dismissNudge`
- * callback to suppress it until the next distraction episode.
- *
- * The computer-vision teammate only needs to drive `setFocusState`; this hook
- * reacts automatically.
- */
-export function useDistractionWatch() {
+interface CheckInTrigger {
+  episodeId: number
+}
+
+interface UseDistractionWatchOptions {
+  onCheckInTriggered: (trigger: CheckInTrigger) => void
+  schedulingWindow?: Window | null
+}
+
+/** Watches continuous `possibly_distracted` or `away` time and emits once per episode. */
+export function useDistractionWatch({
+  onCheckInTriggered,
+  schedulingWindow,
+}: UseDistractionWatchOptions) {
   const { session } = useFocusSession()
-
-  const isRunning = session.status === 'running'
-  const isDistracted = session.focusState === 'possibly_distracted'
-  const shouldWatch = isRunning && isDistracted
-
-  const wasWatching = useRef(false)
-  const previousTask = useRef(session.task)
-  const nextEpisode = useRef(0)
-  const [activeEpisode, setActiveEpisode] = useState<number | null>(null)
-  const [reachedEpisode, setReachedEpisode] = useState<number | null>(null)
-  const [dismissedEpisode, setDismissedEpisode] = useState<number | null>(null)
+  const [tracker] = useState(() => new CheckInEpisodeTracker(CHECK_IN_THRESHOLD_MS))
+  const onTriggeredRef = useRef(onCheckInTriggered)
+  const episodeIdRef = useRef(0)
+  const shouldWatch =
+    session.status === 'running' &&
+    (session.focusState === 'possibly_distracted' || session.focusState === 'away')
 
   useEffect(() => {
-    const taskChanged = previousTask.current !== session.task
-    previousTask.current = session.task
+    onTriggeredRef.current = onCheckInTriggered
+  }, [onCheckInTriggered])
 
-    if (shouldWatch && (!wasWatching.current || taskChanged)) {
-      nextEpisode.current += 1
-      setActiveEpisode(nextEpisode.current)
-      setReachedEpisode(null)
-      setDismissedEpisode(null)
-    } else if (!shouldWatch) {
-      setActiveEpisode(null)
-      setReachedEpisode(null)
-      setDismissedEpisode(null)
+  useEffect(() => {
+    const evaluate = () => {
+      const triggered = tracker.update({
+        now: performance.now(),
+        status: session.status,
+        focusState: session.focusState,
+        task: session.task,
+      })
+      if (!triggered) return
+      episodeIdRef.current += 1
+      onTriggeredRef.current({ episodeId: episodeIdRef.current })
     }
 
-    wasWatching.current = shouldWatch
-  }, [shouldWatch, session.task])
+    evaluate()
+    if (!shouldWatch) return
 
-  useEffect(() => {
-    if (activeEpisode === null || !shouldWatch) return
-    const timer = setTimeout(() => {
-      setReachedEpisode(activeEpisode)
-    }, DISTRACTION_THRESHOLD_MS)
-    return () => clearTimeout(timer)
-  }, [activeEpisode, shouldWatch])
-
-  const thresholdReached = activeEpisode !== null && reachedEpisode === activeEpisode
-  const dismissedThisEpisode = activeEpisode !== null && dismissedEpisode === activeEpisode
-
-  return {
-    nudgeVisible: shouldWatch && thresholdReached && !dismissedThisEpisode,
-    dismissNudge: () => {
-      if (activeEpisode !== null) setDismissedEpisode(activeEpisode)
-    },
-  }
+    const timerWindow = schedulingWindow ?? window
+    const interval = timerWindow.setInterval(evaluate, 250)
+    return () => timerWindow.clearInterval(interval)
+  }, [session.status, session.focusState, session.task, shouldWatch, schedulingWindow, tracker])
 }

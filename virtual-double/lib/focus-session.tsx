@@ -8,8 +8,10 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
   type ReactNode,
 } from 'react'
+import { reconcileElapsedSeconds } from '@/lib/session-clock'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -25,14 +27,12 @@ export interface FocusSession {
   remainingSeconds: number
   status: SessionStatus
   focusState: FocusState
+  visionEnabled: boolean
 }
 
 /** Duration presets offered on the task-entry screen. */
 export const DURATION_PRESETS = [5, 10, 15, 25] as const
 export const DEFAULT_DURATION_MINUTES = 15
-
-/** How long a "possibly_distracted" state must persist before we nudge. */
-export const DISTRACTION_THRESHOLD_MS = 10_000
 
 /** Seconds added by the "+5 min" action. */
 export const ADD_TIME_SECONDS = 5 * 60
@@ -50,7 +50,7 @@ interface PersistedSnapshot {
 // ---------------------------------------------------------------------------
 
 type Action =
-  | { type: 'start'; task: string; durationSeconds: number }
+  | { type: 'start'; task: string; durationSeconds: number; visionEnabled: boolean }
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'stop' }
@@ -70,6 +70,7 @@ const idleSession: FocusSession = {
   remainingSeconds: DEFAULT_DURATION_MINUTES * 60,
   status: 'idle',
   focusState: 'focused',
+  visionEnabled: true,
 }
 
 const initialState: State = { session: idleSession }
@@ -85,6 +86,7 @@ function reducer(state: State, action: Action): State {
         remainingSeconds: action.durationSeconds,
         status: 'running',
         focusState: 'focused',
+        visionEnabled: action.visionEnabled,
       }
       return { session: next }
     }
@@ -102,7 +104,10 @@ function reducer(state: State, action: Action): State {
 
     case 'complete':
       if (session.status === 'idle') return state
-      return { ...state, session: { ...session, status: 'completed', remainingSeconds: 0 } }
+      return {
+        ...state,
+        session: { ...session, status: 'completed', remainingSeconds: 0, focusState: 'focused' },
+      }
 
     case 'addTime': {
       // Adding time from a completed session resumes it.
@@ -114,6 +119,7 @@ function reducer(state: State, action: Action): State {
           remainingSeconds: session.remainingSeconds + action.seconds,
           durationSeconds: session.durationSeconds + action.seconds,
           status: wasCompleted ? 'running' : session.status,
+          focusState: wasCompleted ? 'focused' : session.focusState,
         },
       }
     }
@@ -122,12 +128,16 @@ function reducer(state: State, action: Action): State {
       if (session.status !== 'running') return state
       const remaining = Math.max(0, session.remainingSeconds - action.seconds)
       if (remaining === 0) {
-        return { ...state, session: { ...session, remainingSeconds: 0, status: 'completed' } }
+        return {
+          ...state,
+          session: { ...session, remainingSeconds: 0, status: 'completed', focusState: 'focused' },
+        }
       }
       return { ...state, session: { ...session, remainingSeconds: remaining } }
     }
 
     case 'setFocusState':
+      if (session.status !== 'running') return state
       if (session.focusState === action.state) return state
       return { ...state, session: { ...session, focusState: action.state } }
 
@@ -146,10 +156,17 @@ function reducer(state: State, action: Action): State {
             ...restored,
             remainingSeconds: remaining,
             status: remaining === 0 ? 'completed' : 'running',
+            focusState: 'focused',
+            visionEnabled: restored.visionEnabled !== false,
           },
         }
       }
-      return { session: restored }
+      return {
+        session:
+          restored.status === 'paused' || restored.status === 'completed'
+            ? { ...restored, focusState: 'focused', visionEnabled: restored.visionEnabled !== false }
+            : { ...restored, visionEnabled: restored.visionEnabled !== false },
+      }
     }
 
     default:
@@ -165,7 +182,7 @@ export interface FocusSessionContextValue {
   session: FocusSession
   /** Whole minutes remaining, rounded up so the last minute shows "1" not "0". */
   minutesRemaining: number
-  startSession: (task: string, durationSeconds: number) => void
+  startSession: (task: string, durationSeconds: number, visionEnabled?: boolean) => void
   pauseSession: () => void
   resumeSession: () => void
   stopSession: () => void
@@ -181,9 +198,8 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { session } = state
 
-  // Skip the very first persist so we don't overwrite saved state with the
-  // initial idle session before hydration has run.
-  const hydratedRef = useRef(false)
+  // Do not persist the initial idle state before saved state has been restored.
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   // ---- Hydrate from localStorage once on mount --------------------------
   useEffect(() => {
@@ -197,35 +213,54 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore corrupt storage — fall back to a clean idle session.
     } finally {
-      hydratedRef.current = true
+      setHasHydrated(true)
     }
   }, [])
 
   // ---- Persist on any change --------------------------------------------
   useEffect(() => {
-    if (!hydratedRef.current) return
+    if (!hasHydrated) return
     try {
       const payload: PersistedSnapshot = { session, savedAt: Date.now() }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     } catch {
       // Storage may be unavailable (private mode); the session still works in-memory.
     }
-  }, [session])
+  }, [hasHydrated, session])
 
   // ---- The single ticking clock -----------------------------------------
   // One interval owned by the provider. Every consumer just reads `session`.
+  const lastClockTimestampRef = useRef<number | null>(null)
+  const reconcileRunningClock = useCallback(() => {
+    const currentTimestamp = Date.now()
+    const previousTimestamp = lastClockTimestampRef.current ?? currentTimestamp
+    const reconciliation = reconcileElapsedSeconds(previousTimestamp, currentTimestamp)
+    lastClockTimestampRef.current = reconciliation.reconciledAt
+    if (reconciliation.elapsedSeconds > 0) {
+      dispatch({ type: 'tick', seconds: reconciliation.elapsedSeconds })
+    }
+  }, [])
+
   useEffect(() => {
-    if (session.status !== 'running') return
+    if (session.status !== 'running') {
+      lastClockTimestampRef.current = null
+      return
+    }
+
+    lastClockTimestampRef.current = Date.now()
     const interval = setInterval(() => {
-      dispatch({ type: 'tick', seconds: 1 })
+      reconcileRunningClock()
     }, 1000)
     return () => clearInterval(interval)
-  }, [session.status])
+  }, [reconcileRunningClock, session.status])
 
-  const startSession = useCallback((task: string, durationSeconds: number) => {
-    dispatch({ type: 'start', task, durationSeconds })
+  const startSession = useCallback((task: string, durationSeconds: number, visionEnabled = true) => {
+    dispatch({ type: 'start', task, durationSeconds, visionEnabled })
   }, [])
-  const pauseSession = useCallback(() => dispatch({ type: 'pause' }), [])
+  const pauseSession = useCallback(() => {
+    reconcileRunningClock()
+    dispatch({ type: 'pause' })
+  }, [reconcileRunningClock])
   const resumeSession = useCallback(() => dispatch({ type: 'resume' }), [])
   const stopSession = useCallback(() => dispatch({ type: 'stop' }), [])
   const completeSession = useCallback(() => dispatch({ type: 'complete' }), [])

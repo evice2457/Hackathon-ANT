@@ -3,30 +3,13 @@
 import { Moon, Sun } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { useFocusSession, type FocusState } from '@/lib/focus-session'
 
 interface HeaderProps {
   isDarkMode: boolean
   onToggleDarkMode: () => void
-  onDismissNudge?: () => void
 }
 
-export default function Header({ isDarkMode, onToggleDarkMode, onDismissNudge }: HeaderProps) {
-  const { session, setFocusState } = useFocusSession()
-
-  const focusStates: { label: string; value: FocusState }[] = [
-    { label: 'Focused', value: 'focused' },
-    { label: 'Possibly distracted', value: 'possibly_distracted' },
-    { label: 'Away', value: 'away' },
-  ]
-
-  const handleStateClick = (state: FocusState) => {
-    setFocusState(state)
-    if (state !== 'possibly_distracted' && onDismissNudge) {
-      onDismissNudge()
-    }
-  }
-
+export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
   return (
     <header
       className={`sticky top-0 z-30 transition-colors duration-300 backdrop-blur-md ${
@@ -69,51 +52,6 @@ export default function Header({ isDarkMode, onToggleDarkMode, onDismissNudge }:
             </p>
           </div>
         </div>
-
-        {/* Focus State Controller (Focused | Possibly distracted | Away) */}
-        <nav
-          aria-label="Focus state controls"
-          className={`flex items-center gap-1 rounded-2xl p-1 transition-all backdrop-blur-xl ${
-            isDarkMode
-              ? 'border border-white/10 bg-[#101d38]/80 shadow-inner'
-              : 'border border-slate-200/90 bg-white/80 shadow-inner'
-          }`}
-        >
-          {focusStates.map(({ label, value }) => {
-            const isActive = session.focusState === value
-
-            let activeClass = ''
-            if (isActive) {
-              if (value === 'focused') {
-                activeClass = isDarkMode
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm shadow-emerald-950/40'
-                  : 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 shadow-sm font-semibold'
-              } else if (value === 'possibly_distracted') {
-                activeClass = isDarkMode
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-950/40'
-                  : 'bg-amber-500/15 text-amber-800 border border-amber-500/30 shadow-sm font-semibold'
-              } else {
-                activeClass = isDarkMode
-                  ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 shadow-sm shadow-cyan-950/40'
-                  : 'bg-cyan-600/15 text-cyan-900 border border-cyan-500/30 shadow-sm font-semibold'
-              }
-            } else {
-              activeClass = isDarkMode
-                ? 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/70 border border-transparent'
-            }
-
-            return (
-              <button
-                key={value}
-                onClick={() => handleStateClick(value)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${activeClass}`}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </nav>
 
         {/* Theme Toggle Button (Light/Dark mode) */}
         <div className="flex items-center gap-2">

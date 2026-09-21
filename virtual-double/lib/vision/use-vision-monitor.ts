@@ -17,6 +17,8 @@ interface UseVisionMonitorOptions {
   captureDiagnostics?: boolean
   /** Visible window whose animation clock should drive inference (for Document PiP). */
   schedulingWindow?: Window | null
+  /** Keep yaw observable while optionally excluding it from focus-state classification. */
+  classifyLookingAway?: boolean
 }
 
 interface SchedulerController {
@@ -54,6 +56,7 @@ export function useVisionMonitor({
   onObservation,
   captureDiagnostics = false,
   schedulingWindow,
+  classifyLookingAway = true,
 }: UseVisionMonitorOptions): VisionDiagnostics {
   const [diagnostics, setDiagnostics] = useState<VisionDiagnostics>(INITIAL_DIAGNOSTICS)
   const onStateChangeRef = useRef(onStateChange)
@@ -78,6 +81,7 @@ export function useVisionMonitor({
     let stream: MediaStream | null = null
     let animationFrame = 0
     let animationFrameWindow: Window | null = null
+    let visibilityDocument: Document | null = null
     let lastInferenceAt = 0
     let framesThisWindow = 0
     let fpsWindowStartedAt = performance.now()
@@ -97,7 +101,31 @@ export function useVisionMonitor({
     }
 
     let processFrame: () => void = () => {}
-    const scheduleFrame = () => {
+    let scheduleFrame = () => {}
+
+    const handleVisibilityChange = () => {
+      const activeDocument = schedulingWindowRef.current?.document ?? document
+      if (activeDocument.visibilityState !== 'visible') {
+        cancelScheduledFrame()
+        classifier.reset('focused')
+        extractor.reset()
+        lastProcessedAt = 0
+        lastInferenceAt = 0
+        lastEmittedState = 'focused'
+        onStateChangeRef.current('focused')
+        return
+      }
+
+      scheduleFrame()
+    }
+
+    const bindVisibilityDocument = () => {
+      visibilityDocument?.removeEventListener('visibilitychange', handleVisibilityChange)
+      visibilityDocument = schedulingWindowRef.current?.document ?? document
+      visibilityDocument.addEventListener('visibilitychange', handleVisibilityChange)
+    }
+
+    scheduleFrame = () => {
       if (cancelled || animationFrame) return
       const targetWindow = schedulingWindowRef.current ?? window
       animationFrameWindow = targetWindow
@@ -111,7 +139,8 @@ export function useVisionMonitor({
     schedulerControllerRef.current = {
       reschedule: () => {
         cancelScheduledFrame()
-        scheduleFrame()
+        bindVisibilityDocument()
+        handleVisibilityChange()
       },
     }
 
@@ -119,6 +148,8 @@ export function useVisionMonitor({
       cancelled = true
       if (schedulerControllerRef.current) schedulerControllerRef.current = null
       cancelScheduledFrame()
+      visibilityDocument?.removeEventListener('visibilitychange', handleVisibilityChange)
+      visibilityDocument = null
       stream?.getTracks().forEach((track) => track.stop())
       const video = videoRef.current
       if (video) {
@@ -183,7 +214,10 @@ export function useVisionMonitor({
           const result = landmarker.detectForVideo(video, now)
           const inferenceMs = performance.now() - inferenceStartedAt
           const observation = extractor.extract(result, now)
-          const derivedState = classifier.update(observation)
+          const classificationObservation = classifyLookingAway
+            ? observation
+            : { ...observation, lookingAway: false }
+          const derivedState = classifier.update(classificationObservation)
           onObservationRef.current?.(observation)
           if (derivedState !== lastEmittedState) {
             lastEmittedState = derivedState
@@ -203,7 +237,8 @@ export function useVisionMonitor({
           }
         }
 
-        scheduleFrame()
+        bindVisibilityDocument()
+        handleVisibilityChange()
       } catch (error) {
         if (cancelled) return
         const detail = cameraError(error)
@@ -214,7 +249,7 @@ export function useVisionMonitor({
 
     void start()
     return stop
-  }, [enabled, videoRef, config, captureDiagnostics])
+  }, [enabled, videoRef, config, captureDiagnostics, classifyLookingAway])
 
   return enabled ? diagnostics : INITIAL_DIAGNOSTICS
 }

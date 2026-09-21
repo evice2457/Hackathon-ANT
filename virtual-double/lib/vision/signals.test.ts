@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { FaceLandmarkerResult, Matrix } from '@mediapipe/tasks-vision'
 import { DEFAULT_VISION_CONFIG, type VisionConfig } from './config.ts'
 import { VisionSignalExtractor } from './signals.ts'
+import { SMILE_RITUAL_VISION_CONFIG } from './smile-ritual.ts'
 
 const radians = (degrees: number) => (degrees * Math.PI) / 180
 
@@ -135,4 +136,18 @@ test('emits one held smile gesture and rearms only after relaxation', () => {
   extractor.extract(face(0, 0, 0.1), 450)
   extractor.extract(face(0, 0, 0.7), 500)
   assert.equal(extractor.extract(face(0, 0, 0.7), 600).smileGesture, true)
+})
+
+test('ritual config accepts an already-present smile after acquisition and fires once', () => {
+  const extractor = new VisionSignalExtractor({
+    ...SMILE_RITUAL_VISION_CONFIG,
+    poseSmoothingAlpha: 1,
+  })
+
+  for (const timestamp of [0, 100, 200, 300, 400, 500]) {
+    extractor.extract(face(0, 0, 0.7), timestamp)
+  }
+  assert.equal(extractor.extract(face(0, 0, 0.7), 1_399).smileGesture, false)
+  assert.equal(extractor.extract(face(0, 0, 0.7), 1_400).smileGesture, true)
+  assert.equal(extractor.extract(face(0, 0, 0.7), 2_000).smileGesture, false)
 })

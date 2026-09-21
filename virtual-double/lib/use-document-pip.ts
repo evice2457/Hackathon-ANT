@@ -83,7 +83,10 @@ export function useDocumentPictureInPicture({
   // handleWindowClose, retrigger the unmount effect's dependency, and close the
   // freshly-opened PiP window on the next render.
   const onPipCloseRef = useRef(onPipClose)
-  onPipCloseRef.current = onPipClose
+
+  useEffect(() => {
+    onPipCloseRef.current = onPipClose
+  }, [onPipClose])
 
   const handleWindowClose = useCallback(() => {
     pipWindowRef.current = null

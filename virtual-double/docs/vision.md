@@ -13,7 +13,20 @@ getUserMedia camera frame
   -> relative pose + exponential smoothing
   -> angular enter/exit hysteresis + dwell-time state machine
   -> FocusSessionContext.setFocusState(...)
-  -> existing useDistractionWatch() 10-second supportive-nudge timer
+  -> 30-second continuous non-focus episode tracker
+  -> pause countdown + shared ANT check-in (main page and Document PiP)
+```
+
+The positive-start ritual uses the same Face Landmarker and signal extractor:
+
+```text
+SmileRitualView
+  -> useSmileRitual() / useVisionMonitor()
+  -> 0.5 s acquisition baseline
+  -> absolute smile coefficient held for 0.9 s
+  -> one-shot smileGesture
+  -> 1.4 s ANT celebration
+  -> startSession()
 ```
 
 This is the simplest deployment for Vercel, has no Python service to operate,
@@ -68,12 +81,16 @@ and effective FPS; use those values on the demo laptop before changing the rate.
 - `lib/vision/signals.ts`: blendshape extraction and exponential smoothing.
 - `lib/vision/temporal-filter.ts`: deterministic behavior state machine.
 - `lib/vision/use-vision-monitor.ts`: camera lifecycle, scheduling, teardown.
+- `lib/vision/smile-ritual.ts`: ritual-specific acquisition and smile heuristics.
+- `lib/vision/use-smile-ritual.ts`: MediaPipe adapter for `SmileRitualView`.
 - `components/VisionMonitor.tsx`: context bridge and development diagnostics.
+- `lib/check-in-episode.ts`: deterministic 30-second episode tracker.
+- `components/AntCheckIn.tsx`: shared main-page and PiP intervention UI.
 
 Another teammate can consume frame-level data by adding an `onObservation`
 callback to `useVisionMonitor`; application focus state should continue to flow
 only through `setFocusState`. `VisionObservation.smileGesture` and `smileScore`
-are ready for a future readiness screen. The gesture fires once after a
+drive the current `SmileRitualView` readiness step. The gesture fires once after a
 calibrated score rise is held, then rearms only after relaxation. They mean
 only “smile-like mouth geometry was observed,” never “happy.”
 
@@ -100,9 +117,12 @@ scientific or medical thresholds.
 | posture dwell | 2.0 s | Continuous head-down/turned pose before `possibly_distracted` |
 | recovery dwell | 1.5 s | Stable face/pose before returning to `focused` |
 
-After CV emits `possibly_distracted`, the existing application waits another
-10 seconds before showing a check-in. Brief misses and glances therefore do not
-cause an intervention.
+For the running-session MVP, yaw remains observable in diagnostics but is
+excluded from focus-state classification. Only sustained relative head-down
+posture and sustained face absence can drive an intervention. After CV emits
+`possibly_distracted` or `away`, the application requires another 30 seconds of
+continuous non-focused state before pausing and opening the ANT check-in.
+Returning to `focused` before then cancels the pending episode.
 
 ## Setup and operation
 
@@ -112,8 +132,10 @@ npm run dev
 ```
 
 Use `http://localhost:3000` or HTTPS; browsers do not permit camera access on an
-ordinary insecure remote origin. Starting a focus session requests camera
-permission. Pausing, completing, or ending it stops every camera track. The
+ordinary insecure remote origin. The smile path enables camera monitoring for
+the session; choosing **Start without camera** persists an opt-out for that
+session and the running monitor does not request the camera again. A later new
+session can opt in normally. Pausing, completing, or ending it stops every camera track. The
 model stays cached in memory for fast resume and is not recreated on React
 renders. Pause and resume both reset the shared focus state to `focused`; a new
 monitor run emits its first derived state even when that state is also
@@ -131,10 +153,19 @@ the EMA history. After 0.75 seconds of absence, pose/smile/eye EMA and gesture
 latches reset so reacquisition is not biased; a completed session baseline is
 preserved. Deliberate pause/resume starts a fresh monitor and calibration.
 
-The check-in timer represents a continuous `possibly_distracted` episode.
-“Keep going” dismisses only that episode and does not overwrite the CV-derived
-state. Recovery, absence, pause/stop/completion, or a task change ends the
-episode; a later transition starts a fresh 10-second timer.
+The check-in timer treats `possibly_distracted` and `away` as one continuous
+non-focused condition, so switching between them does not reset the timer. It
+fires exactly once after 30 seconds, records a fixed prompt for that episode,
+opens check-in state, and pauses the session. Pause resets focus state and stops
+CV, but the separately owned check-in remains open. Its free-text answer exists
+only in React memory and is never persisted or logged. Resume closes the
+check-in and starts a fresh monitoring/calibration run; staying paused closes
+the interaction without resuming.
+
+If PiP is open, it renders the same check-in state in place of the mini widget.
+There is no second timer, provider, camera stream, or answer store. The ritual
+also disables its CV monitor as soon as smile success or the manual fallback
+fires, before the running-session monitor can start.
 
 Assets are committed for repeatable/offline inference after the app itself has
 loaded:
@@ -189,7 +220,7 @@ environment used for this change, so these physical values remain unverified.
 | 6. Turn right | `|yaw delta|` increases with the opposite sign |
 | 7. Tilt sideways | Roll responds primarily; pitch/yaw remain secondary |
 | 8. Brief glance (<2 s) | State remains `focused` |
-| 9. Sustained strong turn | `possibly_distracted`; check-in waits its additional 10 s |
+| 9. Sustained strong turn | Yaw changes in diagnostics only; running-session focus state stays unchanged |
 | 10. Leave chair | Brief misses are ignored; `away` after 3 continuous seconds |
 | 11. Return | Fresh EMA values; stable neutral face recovers after 1.5 s |
 | 12. Pause while distracted | Camera tracks stop and shared state resets to `focused` |
@@ -199,15 +230,17 @@ environment used for this change, so these physical values remain unverified.
 | 16. Verify CV continues in PiP | Head posture and absence transitions still update at roughly 10 FPS |
 | 17. Close PiP | PiP scheduler is cancelled without stopping/restarting the stream |
 | 18. Verify scheduler returns | Main-window scheduling resumes; still one inference loop and stream |
-| 19. Keep going | Nudge closes but `session.focusState` remains CV-derived and unchanged |
-| 20. Recover to focused | Stable neutral posture recovers after dwell and ends the episode |
-| 21. Become distracted again | A new continuous distraction episode begins |
-| 22. Second nudge | A fresh nudge appears after 10 s; no repeat during the same dismissed episode |
-| 23. Permission denied | Actionable camera message; session remains manually usable |
-| 24. Camera busy/unavailable | Actionable message; no retry loop or leaked stream |
-| 25. Dim lighting | Note acquisition reliability; no rapid state changes |
-| 26. Glasses | Presence/pose remain usable; secondary eye geometry may degrade with glare |
-| 27. Intentional smile | A held rise emits one gesture, sustained smile does not repeat, relaxation rearms it |
+| 19. Hide opener without PiP during non-focus | Public state resets to `focused`; stale pre-hide evidence cannot complete the 30-second episode; returning visible requires fresh CV evidence |
+| 20. Hide opener with visible PiP during non-focus | CV and the same 30-second episode continue normally without resetting |
+| 21. Recover before 30 s | Pending check-in cancels and countdown continues |
+| 22. Stay head-down/away for 30 s | Countdown pauses once; exactly one ANT check-in renders: full-page without PiP, compact inside active PiP |
+| 23. Answer and resume | Hard-coded support appears, then resume closes check-in and starts fresh CV calibration |
+| 24. Later non-focus episode | A new check-in can trigger after another continuous 30 s |
+| 25. Permission denied | Actionable camera message; session remains manually usable |
+| 26. Camera busy/unavailable | Actionable message; no retry loop or leaked stream |
+| 27. Dim lighting | Note acquisition reliability; no rapid state changes |
+| 28. Glasses | Presence/pose remain usable; secondary eye geometry may degrade with glare |
+| 29. Smile ritual | MediaPipe acquires briefly, a smile held ~0.9 s fires once, camera stops during celebration, then session starts; fallback also works |
 
 Also verify that hiding the main tab with **no PiP** may intentionally suspend
 inference, while hiding it with an active visible **Document PiP must continue**.

@@ -17,13 +17,14 @@ function score(value: number | undefined): string {
 export default function VisionMonitor({ pipDocument }: { pipDocument?: Document | null }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const { session, setFocusState } = useFocusSession()
-  const enabled = session.status === 'running'
+  const enabled = session.status === 'running' && session.visionEnabled
   const diagnostics = useVisionMonitor({
     enabled,
     videoRef,
     onStateChange: setFocusState,
     captureDiagnostics: SHOW_DEBUG,
     schedulingWindow: pipDocument?.defaultView ?? null,
+    classifyLookingAway: false,
   })
 
   const observation = diagnostics.observation
