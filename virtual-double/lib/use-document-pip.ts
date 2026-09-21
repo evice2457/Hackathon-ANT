@@ -8,10 +8,17 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * The PiP window is only ever ANOTHER presentation surface for the existing
  * session — no timer or state lives here. This hook handles purely the browser
  * window mechanics: opening, closing, copying styles, and cleanup.
+ *
+ * Browser constraints discovered in testing (Chrome 153, macOS):
+ *  - requestWindow() requires a *transient user activation* — it must be called
+ *    synchronously from a real gesture. Calling it from a React effect or from
+ *    Base UI's onClick loses the activation and the request is rejected.
+ *  - moveTo() and resizeTo() on the PiP window are blocked without a fresh
+ *    gesture, so the window cannot be positioned or hidden after opening.
  */
 
 interface UseDocumentPipOptions {
-  /** Called when the PiP window closes (manual native close, or exitPiP). */
+  /** Called when the PiP window closes (manual native close, or exitPip). */
   onPipClose?: () => void
 }
 
@@ -22,19 +29,18 @@ export interface DocumentPipResult {
   isPipOpen: boolean
   /** The PiP window's document, for use as a React portal target. */
   pipDocument: Document | null
-  /** Opens the PiP window. Only valid from a direct user gesture. */
-  openPip: (event?: MouseEvent) => Promise<boolean>
+  /** Opens the PiP window. Only valid from a direct native user gesture. */
+  openPip: () => Promise<boolean>
   /** Closes the PiP window (no-op if not open). */
   closePip: () => void
 }
 
 const PIP_WIDTH = 320
-const PIP_HEIGHT = 220
+const PIP_HEIGHT = 240
 
 function copyStylesIntoPip(pipDocument: Document) {
-  // Clone every stylesheet the main document loaded (Next.js/Tailwind emits
-  // several <link> and <style> nodes). Cloning by reference keeps them in sync
-  // with the parent document.
+  // Next.js/Tailwind emit several <style> nodes and <link> stylesheets. Inline
+  // the readable ones by value; same-origin <link> nodes are cloned by reference.
   for (const sheet of Array.from(document.styleSheets)) {
     try {
       const rules = sheet.cssRules
@@ -50,12 +56,10 @@ function copyStylesIntoPip(pipDocument: Document) {
     }
   }
 
-  // Copy stylesheet <link> nodes by reference (works for same-origin dev build).
   for (const link of Array.from(document.querySelectorAll('link[rel="stylesheet"]'))) {
     pipDocument.head.appendChild(link.cloneNode())
   }
 
-  // PiP window body must not scroll; the widget sizes itself.
   pipDocument.body.style.margin = '0'
   pipDocument.body.style.overflow = 'hidden'
   pipDocument.body.style.backgroundColor = '#0B132B'
@@ -74,44 +78,59 @@ export function useDocumentPictureInPicture({
 
   const pipWindowRef = useRef<DocumentPictureInPictureWindow | null>(null)
 
+  // Keep the latest onPipClose in a ref so the callbacks below stay referentially
+  // stable. Without this, a new onPipClose each render would change
+  // handleWindowClose, retrigger the unmount effect's dependency, and close the
+  // freshly-opened PiP window on the next render.
+  const onPipCloseRef = useRef(onPipClose)
+  onPipCloseRef.current = onPipClose
+
   const handleWindowClose = useCallback(() => {
     pipWindowRef.current = null
     setPipDocument(null)
     setIsPipOpen(false)
-    onPipClose?.()
-  }, [onPipClose])
+    onPipCloseRef.current?.()
+  }, [])
 
   const closePip = useCallback(() => {
     const win = pipWindowRef.current
+    if (typeof window !== 'undefined') {
+      try {
+        window.focus?.()
+      } catch {}
+    }
     if (!win) return
     // Remove our pagehide listener first so closing programmatically doesn't
     // double-fire onPipClose (which would toggle the UI back).
     win.removeEventListener('pagehide', handleWindowClose)
-    win.close()
+    try {
+      win.close()
+    } catch {}
     handleWindowClose()
   }, [handleWindowClose])
 
-  const openPip = useCallback(
-    async (event?: MouseEvent): Promise<boolean> => {
-      if (!isSupported) return false
-      const api = window.documentPictureInPicture
-      if (!api) return false
+  const openPip = useCallback((): Promise<boolean> => {
+    if (!isSupported) return Promise.resolve(false)
+    const api = window.documentPictureInPicture
+    if (!api) return Promise.resolve(false)
 
-      // Only one PiP window at a time — if one is already open, just focus it.
-      if (pipWindowRef.current) {
-        pipWindowRef.current.focus()
-        return true
-      }
+    // Only one PiP window at a time — if one is already open, just focus it.
+    if (pipWindowRef.current) {
+      pipWindowRef.current.focus()
+      return Promise.resolve(true)
+    }
 
-      event?.preventDefault()
+    // requestWindow MUST be invoked synchronously within the user gesture, so
+    // we call it here (no await/log before it) and attach handling to the
+    // returned promise. Awaiting first would consume the transient activation.
+    const requestPromise = api.requestWindow({
+      width: PIP_WIDTH,
+      height: PIP_HEIGHT,
+      preferInitialWindowPlacement: true,
+    })
 
-      try {
-        const pipWindow = await api.requestWindow({
-          width: PIP_WIDTH,
-          height: PIP_HEIGHT,
-          preferInitialWindowPlacement: true,
-        })
-
+    return requestPromise.then(
+      (pipWindow) => {
         pipWindowRef.current = pipWindow
         copyStylesIntoPip(pipWindow.document)
 
@@ -122,13 +141,13 @@ export function useDocumentPictureInPicture({
         setPipDocument(pipWindow.document)
         setIsPipOpen(true)
         return true
-      } catch {
-        // User gesture withheld or request rejected — fail gracefully.
+      },
+      () => {
+        // Gesture withheld or request rejected — fail gracefully.
         return false
-      }
-    },
-    [isSupported, handleWindowClose],
-  )
+      },
+    )
+  }, [isSupported, handleWindowClose])
 
   // If the user closes the opener tab, the PiP window disappears; nothing else
   // to do here since the whole app tears down anyway.

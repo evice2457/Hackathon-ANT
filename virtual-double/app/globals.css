@@ -158,6 +158,34 @@
   50% { transform: translateY(-12px); }
 }
 
+@keyframes mascot-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0.8deg);
+  }
+}
+
+@keyframes mascot-shadow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(0.82);
+    opacity: 0.22;
+  }
+}
+
+.animate-mascot-float {
+  animation: mascot-float 3.6s ease-in-out infinite;
+}
+
+.animate-mascot-shadow {
+  animation: mascot-shadow 3.6s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

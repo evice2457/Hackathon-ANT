@@ -19,8 +19,6 @@ export type FocusState = 'focused' | 'possibly_distracted' | 'away'
 
 export type SessionStatus = 'idle' | 'running' | 'paused' | 'completed'
 
-export type DisplayMode = 'full' | 'widget' | 'pip'
-
 export interface FocusSession {
   task: string
   durationSeconds: number
@@ -43,7 +41,6 @@ const STORAGE_KEY = 'virtualdouble.session.v1'
 
 interface PersistedSnapshot {
   session: FocusSession
-  displayMode: DisplayMode
   /** Epoch ms when the running timer was last reconciled; used to catch up after refresh. */
   savedAt: number
 }
@@ -62,11 +59,9 @@ type Action =
   | { type: 'tick'; seconds: number }
   | { type: 'setFocusState'; state: FocusState }
   | { type: 'setCurrentTask'; task: string }
-  | { type: 'setDisplayMode'; mode: DisplayMode }
   | { type: 'restore'; snapshot: PersistedSnapshot }
 interface State {
   session: FocusSession
-  displayMode: DisplayMode
 }
 
 const idleSession: FocusSession = {
@@ -77,7 +72,7 @@ const idleSession: FocusSession = {
   focusState: 'focused',
 }
 
-const initialState: State = { session: idleSession, displayMode: 'full' }
+const initialState: State = { session: idleSession }
 
 function reducer(state: State, action: Action): State {
   const { session } = state
@@ -91,7 +86,7 @@ function reducer(state: State, action: Action): State {
         status: 'running',
         focusState: 'focused',
       }
-      return { session: next, displayMode: 'full' }
+      return { session: next }
     }
 
     case 'pause':
@@ -103,7 +98,7 @@ function reducer(state: State, action: Action): State {
       return { ...state, session: { ...session, status: 'running', focusState: 'focused' } }
 
     case 'stop':
-      return { session: idleSession, displayMode: 'full' }
+      return { session: idleSession }
 
     case 'complete':
       if (session.status === 'idle') return state
@@ -139,11 +134,8 @@ function reducer(state: State, action: Action): State {
     case 'setCurrentTask':
       return { ...state, session: { ...session, task: action.task } }
 
-    case 'setDisplayMode':
-      return { ...state, displayMode: action.mode }
-
     case 'restore': {
-      const { session: restored, displayMode } = action.snapshot
+      const restored = action.snapshot.session
       // Catch the timer up for time elapsed while the page was closed, but only
       // while it was actually running.
       if (restored.status === 'running') {
@@ -155,10 +147,9 @@ function reducer(state: State, action: Action): State {
             remainingSeconds: remaining,
             status: remaining === 0 ? 'completed' : 'running',
           },
-          displayMode,
         }
       }
-      return { session: restored, displayMode }
+      return { session: restored }
     }
 
     default:
@@ -172,7 +163,6 @@ function reducer(state: State, action: Action): State {
 
 export interface FocusSessionContextValue {
   session: FocusSession
-  displayMode: DisplayMode
   /** Whole minutes remaining, rounded up so the last minute shows "1" not "0". */
   minutesRemaining: number
   startSession: (task: string, durationSeconds: number) => void
@@ -183,19 +173,13 @@ export interface FocusSessionContextValue {
   addTime: (seconds: number) => void
   setFocusState: (state: FocusState) => void
   setCurrentTask: (task: string) => void
-  minimizeToWidget: () => void
-  expandToFull: () => void
-  /** Switch presentation to the Document PiP surface. */
-  openPip: () => void
-  /** Return presentation to the normal full view (closing PiP if open). */
-  exitPip: () => void
 }
 
 const FocusSessionContext = createContext<FocusSessionContextValue | null>(null)
 
 export function FocusSessionProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const { session, displayMode } = state
+  const { session } = state
 
   // Skip the very first persist so we don't overwrite saved state with the
   // initial idle session before hydration has run.
@@ -221,12 +205,12 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydratedRef.current) return
     try {
-      const payload: PersistedSnapshot = { session, displayMode, savedAt: Date.now() }
+      const payload: PersistedSnapshot = { session, savedAt: Date.now() }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     } catch {
       // Storage may be unavailable (private mode); the session still works in-memory.
     }
-  }, [session, displayMode])
+  }, [session])
 
   // ---- The single ticking clock -----------------------------------------
   // One interval owned by the provider. Every consumer just reads `session`.
@@ -248,17 +232,12 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
   const addTime = useCallback((seconds: number) => dispatch({ type: 'addTime', seconds }), [])
   const setFocusState = useCallback((next: FocusState) => dispatch({ type: 'setFocusState', state: next }), [])
   const setCurrentTask = useCallback((task: string) => dispatch({ type: 'setCurrentTask', task }), [])
-  const minimizeToWidget = useCallback(() => dispatch({ type: 'setDisplayMode', mode: 'widget' }), [])
-  const expandToFull = useCallback(() => dispatch({ type: 'setDisplayMode', mode: 'full' }), [])
-  const openPip = useCallback(() => dispatch({ type: 'setDisplayMode', mode: 'pip' }), [])
-  const exitPip = useCallback(() => dispatch({ type: 'setDisplayMode', mode: 'full' }), [])
 
   const minutesRemaining = Math.ceil(session.remainingSeconds / 60)
 
   const value = useMemo<FocusSessionContextValue>(
     () => ({
       session,
-      displayMode,
       minutesRemaining,
       startSession,
       pauseSession,
@@ -268,14 +247,9 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
       addTime,
       setFocusState,
       setCurrentTask,
-      minimizeToWidget,
-      expandToFull,
-      openPip,
-      exitPip,
     }),
     [
       session,
-      displayMode,
       minutesRemaining,
       startSession,
       pauseSession,
@@ -285,10 +259,6 @@ export function FocusSessionProvider({ children }: { children: ReactNode }) {
       addTime,
       setFocusState,
       setCurrentTask,
-      minimizeToWidget,
-      expandToFull,
-      openPip,
-      exitPip,
     ],
   )
 

@@ -14,7 +14,11 @@ const SUGGESTION_PILLS = [
   'Write test cases',
 ]
 
-export default function MicroCommitmentView() {
+interface MicroCommitmentViewProps {
+  onInitiateRitual?: (task: string, durationMinutes: number) => void
+}
+
+export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmentViewProps = {}) {
   const { startSession } = useFocusSession()
   const [input, setInput] = useState('')
   const [minutes, setMinutes] = useState<number>(DEFAULT_DURATION_MINUTES)
@@ -23,9 +27,14 @@ export default function MicroCommitmentView() {
   const trimmed = input.trim()
   const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
 
+  // Starts or stages a session.
   const startWith = (task: string, durationMinutes: number) => {
     if (!task.trim() || durationMinutes <= 0) return
-    startSession(task.trim(), Math.round(durationMinutes * 60))
+    if (onInitiateRitual) {
+      onInitiateRitual(task.trim(), durationMinutes)
+    } else {
+      startSession(task.trim(), Math.round(durationMinutes * 60))
+    }
   }
 
   const handleCustomMinutes = (value: string) => {
@@ -41,12 +50,16 @@ export default function MicroCommitmentView() {
       <div className="w-full max-w-2xl">
         {/* Headline */}
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-light text-white md:text-5xl">
+          <h2 className="mb-4 text-4xl font-light tracking-tight text-slate-900 transition-colors dark:text-white md:text-5xl">
             What small step{' '}
-            <span className="font-serif italic font-normal text-cyan-300">will you conquer</span> in the next{' '}
-            {minutes || 15} minutes?
+            <span className="font-serif italic font-normal text-cyan-600 dark:text-cyan-300">
+              will you conquer
+            </span>{' '}
+            in the next {minutes || 15} minutes?
           </h2>
-          <p className="text-base text-slate-400">Break it down. Keep it simple. Just one thing.</p>
+          <p className="text-base text-slate-600 transition-colors dark:text-slate-400">
+            Break it down. Keep it simple. Just one thing.
+          </p>
         </div>
 
         {/* Input Area */}
@@ -61,22 +74,23 @@ export default function MicroCommitmentView() {
                 }
               }}
               placeholder="Tell me what you’ll do..."
-              className="flex-1 rounded-2xl border-slate-700/50 bg-slate-800/50 px-6 py-7 text-lg text-white placeholder-slate-500 backdrop-blur-sm focus:border-cyan-500/50 focus:ring-cyan-500/20"
+              className="flex-1 rounded-2xl border-slate-300/80 bg-white/75 px-6 py-7 text-lg text-slate-900 placeholder-slate-400 shadow-sm backdrop-blur-md transition-all focus:border-cyan-500/60 focus:ring-cyan-500/20 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-500 dark:shadow-none"
             />
-            <Button
+            <button
+              type="button"
               onClick={() => startWith(input, minutes)}
               disabled={!canStart}
-              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
+              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
               Start with Me
-            </Button>
+            </button>
             <Button
               size="icon"
               variant="outline"
               aria-label="Voice input (coming soon)"
               disabled
               title="Voice input — coming soon"
-              className="border-slate-700/50 bg-slate-800/30 text-slate-400"
+              className="border-slate-200/90 bg-white/60 text-slate-400 dark:border-slate-700/50 dark:bg-slate-800/30 dark:text-slate-400"
             >
               <Mic className="size-5" />
             </Button>
@@ -85,7 +99,9 @@ export default function MicroCommitmentView() {
 
         {/* Duration picker */}
         <div className="mb-10">
-          <p className="mb-4 text-xs uppercase tracking-wide text-slate-500">Session length</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
+            Session length
+          </p>
           <div className="flex flex-wrap items-center gap-3">
             {DURATION_PRESETS.map((preset) => (
               <button
@@ -94,16 +110,16 @@ export default function MicroCommitmentView() {
                   setMinutes(preset)
                   setCustomMinutes('')
                 }}
-                className={`rounded-xl border px-5 py-3 text-sm transition-all duration-200 ${
+                className={`rounded-xl border px-5 py-3 text-sm font-medium transition-all duration-200 backdrop-blur-md ${
                   minutes === preset && !customMinutes
-                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-200'
-                    : 'border-slate-700/50 bg-slate-800/40 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
+                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-800 shadow-sm dark:border-cyan-400/60 dark:bg-cyan-400/15 dark:text-cyan-200'
+                    : 'border-slate-200/90 bg-white/60 text-slate-700 hover:border-cyan-500/50 hover:bg-white/80 hover:text-cyan-700 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:text-cyan-300'
                 }`}
               >
                 {preset} min
               </button>
             ))}
-            <div className="flex items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-800/40 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white/60 px-3 py-2 backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/40">
               <Input
                 type="number"
                 min={1}
@@ -111,22 +127,24 @@ export default function MicroCommitmentView() {
                 value={customMinutes}
                 onChange={(e) => handleCustomMinutes(e.target.value)}
                 placeholder="Custom"
-                className="h-8 w-20 border-0 bg-transparent p-0 text-center text-sm text-white placeholder-slate-500 focus-visible:ring-0"
+                className="h-8 w-20 border-0 bg-transparent p-0 text-center text-sm text-slate-900 placeholder-slate-400 focus-visible:ring-0 dark:text-white dark:placeholder-slate-500"
               />
-              <span className="text-sm text-slate-400">min</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">min</span>
             </div>
           </div>
         </div>
 
         {/* Quick Suggestion Pills */}
         <div>
-          <p className="mb-4 text-xs uppercase tracking-wide text-slate-500">Quick suggestions</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
+            Quick suggestions
+          </p>
           <div className="flex flex-wrap gap-3">
             {SUGGESTION_PILLS.map((pill) => (
               <button
                 key={pill}
                 onClick={() => startWith(pill, minutes)}
-                className="rounded-xl border border-slate-700/50 bg-slate-800/40 px-4 py-3 text-sm text-slate-300 transition-all duration-200 hover:border-cyan-500/50 hover:bg-slate-700/60 hover:text-cyan-300"
+                className="rounded-xl border border-slate-200/90 bg-white/60 px-4 py-3 text-sm text-slate-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:bg-slate-700/60 dark:hover:text-cyan-300"
               >
                 {pill}
               </button>
