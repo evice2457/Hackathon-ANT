@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Check, LogOut, Pause, PictureInPicture2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
@@ -11,6 +12,8 @@ export default function DeepPresenceView() {
   const { session, pauseSession, resumeSession, completeSession, stopSession, minutesRemaining } =
     useFocusSession()
   const floating = useFloatingCompanion()
+  const [isConfirmingEnd, setIsConfirmingEnd] = useState(false)
+
   // Native click: requestWindow() needs the original user activation, which
   // React's synthetic events don't reliably preserve.
   const floatButtonRef = useNativeClick<HTMLButtonElement>(() => floating?.open())
@@ -20,6 +23,33 @@ export default function DeepPresenceView() {
     session.durationSeconds > 0
       ? 1 - session.remainingSeconds / session.durationSeconds
       : 0
+
+  // Keyboard shortcut listener: Space to toggle Pause/Resume, Escape to dismiss End confirmation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input or textarea
+      const activeTag = document.activeElement?.tagName.toLowerCase()
+      if (activeTag === 'input' || activeTag === 'textarea' || (document.activeElement as HTMLElement)?.isContentEditable) {
+        return
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (isPaused) {
+          resumeSession()
+        } else {
+          pauseSession()
+        }
+      } else if (e.code === 'Escape') {
+        if (isConfirmingEnd) {
+          setIsConfirmingEnd(false)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isPaused, isConfirmingEnd, resumeSession, pauseSession])
 
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 py-12">
@@ -62,7 +92,7 @@ export default function DeepPresenceView() {
         )}
         <Button
           onClick={completeSession}
-          className="h-11 rounded-xl bg-emerald-500 px-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
+          className="h-11 rounded-xl bg-emerald-500 px-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300"
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
@@ -75,18 +105,44 @@ export default function DeepPresenceView() {
             <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
           </button>
         )}
-        <Button
-          onClick={stopSession}
-          variant="outline"
-          className="h-11 rounded-xl border-rose-300/40 bg-rose-400/10 px-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
-        >
-          <LogOut data-icon="inline-start" /> End now
-        </Button>
+        {isConfirmingEnd ? (
+          <div className="inline-flex h-11 items-center gap-2 rounded-xl border border-rose-300/60 bg-rose-500/10 px-3 backdrop-blur-md dark:border-rose-400/30 dark:bg-rose-950/40 animate-in fade-in zoom-in-95 duration-200">
+            <span className="text-xs font-medium text-rose-700 dark:text-rose-200">
+              End session?
+            </span>
+            <button
+              onClick={stopSession}
+              type="button"
+              className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-500"
+            >
+              Yes, end
+            </button>
+            <button
+              onClick={() => setIsConfirmingEnd(false)}
+              type="button"
+              className="rounded-lg px-2 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-white/50 dark:text-slate-300 dark:hover:bg-white/10"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setIsConfirmingEnd(true)}
+            variant="outline"
+            className="h-11 rounded-xl border-rose-300/40 bg-rose-400/10 px-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
+          >
+            <LogOut data-icon="inline-start" /> End now
+          </Button>
+        )}
       </div>
 
-      <div className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-2 px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
         <span className="font-medium text-cyan-600 dark:text-cyan-400/80">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
+        </span>
+        <span className="hidden sm:inline text-slate-400 dark:text-slate-600">·</span>
+        <span className="hidden sm:inline text-[11px] text-slate-400 dark:text-slate-500">
+          Press <kbd className="rounded border border-slate-300/80 bg-slate-100/80 px-1.5 py-0.5 font-mono text-[10px] text-slate-700 dark:border-slate-700/80 dark:bg-slate-800/80 dark:text-slate-300">Space</kbd> to {isPaused ? 'resume' : 'pause'}
         </span>
       </div>
     </div>

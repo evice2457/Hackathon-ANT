@@ -70,6 +70,24 @@ export default function SmileRitualView({
     return () => clearTimeout(timer)
   }, [audioEnabled, hasSpokenInitial])
 
+  // Keyboard shortcut listener: Escape to go back to task, Enter to trigger smile/start
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        e.preventDefault()
+        onCancel()
+      } else if (e.code === 'Enter') {
+        if (!isFinishing) {
+          e.preventDefault()
+          triggerSimulatedSmile()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onCancel, isFinishing, triggerSimulatedSmile])
+
   const toggleAudio = () => {
     setAudioEnabled((prev) => {
       const next = !prev
@@ -90,7 +108,7 @@ export default function SmileRitualView({
             type="button"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-md transition-all hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-white/10"
           >
-            <ArrowLeft className="size-3.5" /> Back to task
+            <ArrowLeft className="size-3.5" /> Back to task <span className="hidden sm:inline text-[10px] text-slate-400">(Esc)</span>
           </button>
 
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-700 backdrop-blur-md dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-300">
@@ -118,7 +136,7 @@ export default function SmileRitualView({
 
         {/* Comic Speech Bubble (Authentic Comic Style with dark border and tail) */}
         <div className="relative mb-6 max-w-xl px-4 z-20">
-          <div className="relative rounded-[2.25rem] border-[3.5px] border-[#261810] bg-white px-8 py-6 shadow-2xl transition-all duration-300 dark:border-cyan-400/90 dark:bg-[#0c1630]">
+          <div className="relative rounded-[2.25rem] border-[3.5px] border-slate-900 bg-white px-8 py-6 shadow-2xl transition-all duration-300 dark:border-cyan-400/90 dark:bg-[#0c1630]">
             <p className="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-white md:text-2xl leading-relaxed">
               {isSmiling ? (
                 <span className="text-cyan-600 dark:text-cyan-300 animate-pulse">
@@ -142,7 +160,7 @@ export default function SmileRitualView({
               </svg>
               {/* Tail border stroke */}
               <svg
-                className="absolute inset-0 h-6 w-9 text-[#261810] dark:text-cyan-400/90 pointer-events-none"
+                className="absolute inset-0 h-6 w-9 text-slate-900 dark:text-cyan-400/90 pointer-events-none"
                 viewBox="0 0 36 24"
                 fill="none"
                 stroke="currentColor"
