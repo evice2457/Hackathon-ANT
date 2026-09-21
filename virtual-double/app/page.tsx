@@ -11,6 +11,7 @@ import PipWindow from '@/components/PipWindow'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
 import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
+import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
 
 export default function Page() {
   return (
@@ -22,12 +23,12 @@ export default function Page() {
 
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const { session, displayMode, stopSession, expandToFull, openPip: setPipMode } = useFocusSession()
+  const { session, displayMode, stopSession, expandToFull, openPip: setPipMode, exitPip } = useFocusSession()
   const { nudgeVisible, dismissNudge } = useDistractionWatch()
 
   const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture({
-    // If the user closes the PiP window manually (native close button), fall
-    // back to the in-page full view. The session itself is untouched.
+    // Native close button on the PiP window → return presentation to the
+    // in-page full view. The session itself is untouched.
     onPipClose: () => {
       expandToFull()
     },
@@ -36,12 +37,21 @@ function AppShell() {
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
 
-  const handleFloatWidget = () => {
-    // openPip must run from the user gesture. Only switch presentation mode
-    // once the window has actually been created, so the portal has a target.
-    void openPipWindow().then((opened) => {
-      if (opened) setPipMode()
-    })
+  // The floating companion is opened from the Start button's NATIVE click
+  // handler (see MicroCommitmentView) so requestWindow() runs inside the real
+  // user gesture. This callback is exposed via context for that purpose.
+  const floating: FloatingCompanionApi = {
+    isSupported: pipSupported,
+    isOpen: Boolean(pipDocument),
+    open: () => {
+      void openPipWindow().then((opened) => {
+        if (opened) setPipMode()
+      })
+    },
+    close: () => {
+      closePip()
+      exitPip()
+    },
   }
 
   const handleExitPip = () => {
@@ -49,33 +59,36 @@ function AppShell() {
     expandToFull()
   }
 
+  // If displayMode is 'pip' but pipDocument is null (e.g., after a reload with
+  // persisted 'pip' mode but no live PiP window), fall back to 'full' so the
+  // page never renders blank.
+  const effectiveDisplayMode = displayMode === 'pip' && !pipDocument ? 'full' : displayMode
+
   return (
-    <div className={`min-h-screen bg-[#0B132B] text-foreground ${isDarkMode ? 'dark' : ''}`}>
-      <Header isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
+    <FloatingCompanionProvider value={floating}>
+      <div className={`min-h-screen bg-[#0B132B] text-foreground ${isDarkMode ? 'dark' : ''}`}>
+        <Header isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
 
-      <main>
-        {isIdle && <MicroCommitmentView />}
+        <main>
+          {isIdle && <MicroCommitmentView />}
 
-        {!isIdle && !isCompleted && displayMode === 'full' && (
-          <DeepPresenceView pipSupported={pipSupported} onFloatWidget={handleFloatWidget} />
+          {!isIdle && !isCompleted && effectiveDisplayMode === 'full' && <DeepPresenceView />}
+
+          {!isIdle && !isCompleted && effectiveDisplayMode === 'widget' && <FloatingMiniWidget mode="inline" />}
+
+          {nudgeVisible && <DistractionNudgeModal />}
+
+          {isCompleted && <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />}
+        </main>
+
+        <FocusStateDemoBar onDismissNudge={dismissNudge} />
+
+        {/* Document PiP surface — same provider, portal into the PiP document. */}
+        {!isIdle && displayMode === 'pip' && pipDocument && (
+          <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />
         )}
-
-        {!isIdle && !isCompleted && displayMode === 'widget' && <FloatingMiniWidget mode="inline" />}
-
-        {nudgeVisible && <DistractionNudgeModal />}
-
-        {isCompleted && (
-          <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
-        )}
-      </main>
-
-      <FocusStateDemoBar onDismissNudge={dismissNudge} />
-
-      {/* Document PiP surface — same provider, portal into the PiP document. */}
-      {!isIdle && displayMode === 'pip' && pipDocument && (
-        <PipWindow pipDocument={pipDocument} onExitPip={handleExitPip} />
-      )}
-    </div>
+      </div>
+    </FloatingCompanionProvider>
   )
 }
 

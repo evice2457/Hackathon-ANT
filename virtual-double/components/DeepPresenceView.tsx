@@ -1,19 +1,12 @@
 'use client'
 
-import { Check, LogOut, Minimize2, Pause, PictureInPicture2, Play } from 'lucide-react'
+import { Check, LogOut, Minimize2, Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
 import { formatTime, useFocusSession } from '@/lib/focus-session'
 
-interface DeepPresenceViewProps {
-  /** Whether Document PiP is supported in this browser. */
-  pipSupported?: boolean
-  /** Opens the Document PiP window; should start the PiP presentation. */
-  onFloatWidget?: () => void
-}
-
-export default function DeepPresenceView({ pipSupported = false, onFloatWidget }: DeepPresenceViewProps = {}) {
+export default function DeepPresenceView() {
   const { session, pauseSession, resumeSession, completeSession, stopSession, minimizeToWidget, minutesRemaining } =
     useFocusSession()
 
@@ -72,14 +65,6 @@ export default function DeepPresenceView({ pipSupported = false, onFloatWidget }
         >
           <Minimize2 data-icon="inline-start" /> Minimize to widget
         </Button>
-        {pipSupported && onFloatWidget && (
-          <Button
-            onClick={onFloatWidget}
-            className="rounded-xl border border-cyan-400/40 bg-cyan-400/15 px-5 py-5 font-semibold text-cyan-100 hover:bg-cyan-400/25"
-          >
-            <PictureInPicture2 data-icon="inline-start" /> Float Widget
-          </Button>
-        )}
         <Button
           onClick={stopSession}
           variant="outline"
