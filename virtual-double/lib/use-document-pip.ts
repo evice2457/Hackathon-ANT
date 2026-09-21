@@ -94,11 +94,18 @@ export function useDocumentPictureInPicture({
 
   const closePip = useCallback(() => {
     const win = pipWindowRef.current
+    if (typeof window !== 'undefined') {
+      try {
+        window.focus?.()
+      } catch {}
+    }
     if (!win) return
     // Remove our pagehide listener first so closing programmatically doesn't
     // double-fire onPipClose (which would toggle the UI back).
     win.removeEventListener('pagehide', handleWindowClose)
-    win.close()
+    try {
+      win.close()
+    } catch {}
     handleWindowClose()
   }, [handleWindowClose])
 

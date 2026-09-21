@@ -6,3 +6,5 @@ build/
 .DS_Store
 *.log
 *.tsbuildinfo
+virtual-double_state.md
+*state.md

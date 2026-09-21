@@ -1,6 +1,7 @@
 'use client'
 
 import { Moon, Sun } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useFocusSession, type FocusState } from '@/lib/focus-session'
 
@@ -37,17 +38,28 @@ export default function Header({ isDarkMode, onToggleDarkMode, onDismissNudge }:
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         {/* Logo and Title */}
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/30">
-            <span className="text-lg font-bold text-white">V</span>
+          <div className="relative size-10 overflow-hidden rounded-full border border-cyan-400/50 bg-[#0B132B] shadow-lg shadow-cyan-500/25 ring-2 ring-cyan-400/20">
+            <Image
+              src="/ant-mascot.png"
+              alt="ANT Mascot"
+              fill
+              className="object-cover object-center"
+              sizes="40px"
+            />
           </div>
           <div className="flex flex-col">
-            <h1
-              className={`text-xl font-semibold tracking-tight transition-colors ${
-                isDarkMode ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              VirtualDouble
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1
+                className={`text-xl font-semibold tracking-tight transition-colors ${
+                  isDarkMode ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                VirtualDouble
+              </h1>
+              <span className="rounded-md bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">
+                ANT
+              </span>
+            </div>
             <p
               className={`text-xs transition-colors ${
                 isDarkMode ? 'text-slate-400' : 'text-slate-500 font-medium'

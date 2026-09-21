@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import InteractiveBackground from '@/components/InteractiveBackground'
+import AntWelcomeView from '@/components/AntWelcomeView'
+import SmileRitualView from '@/components/SmileRitualView'
 import MicroCommitmentView from '@/components/MicroCommitmentView'
 import DeepPresenceView from '@/components/DeepPresenceView'
 import DistractionNudgeModal from '@/components/DistractionNudgeModal'
@@ -23,7 +25,9 @@ export default function Page() {
 
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const { session, stopSession } = useFocusSession()
+  const [hasStarted, setHasStarted] = useState(false)
+  const [stagedSession, setStagedSession] = useState<{ task: string; durationMinutes: number } | null>(null)
+  const { session, startSession, stopSession } = useFocusSession()
   const { nudgeVisible, dismissNudge } = useDistractionWatch()
 
   // Sync theme with HTML root class and localStorage
@@ -73,12 +77,18 @@ function AppShell() {
 
   const handleExitPip = () => {
     closePip()
+    if (typeof window !== 'undefined') {
+      try {
+        window.focus()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } catch {}
+    }
   }
 
   return (
     <FloatingCompanionProvider value={floating}>
       <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
-        {/* Mountain Landscape Background with Parallax and Particles */}
+        {/* Ambient Gradient Background with Peaceful Particles */}
         <InteractiveBackground isDarkMode={isDarkMode} />
 
         {/* Main Content Layer */}
@@ -90,7 +100,33 @@ function AppShell() {
           />
 
           <main className="flex-1">
-            {isIdle && <MicroCommitmentView />}
+            {/* First time / Initial landing: ANT Mascot Welcome Screen */}
+            {isIdle && !hasStarted && (
+              <AntWelcomeView onStart={() => setHasStarted(true)} />
+            )}
+
+            {/* Intermediate Positive Start Ritual: Smile Check-in with Mascot ANT */}
+            {isIdle && hasStarted && stagedSession && (
+              <SmileRitualView
+                task={stagedSession.task}
+                durationMinutes={stagedSession.durationMinutes}
+                onComplete={() => {
+                  const { task, durationMinutes } = stagedSession
+                  setStagedSession(null)
+                  startSession(task, Math.round(durationMinutes * 60))
+                }}
+                onCancel={() => setStagedSession(null)}
+              />
+            )}
+
+            {/* Main micro-commitment entry (after clicking GET STARTED) */}
+            {isIdle && hasStarted && !stagedSession && (
+              <MicroCommitmentView
+                onInitiateRitual={(task, durationMinutes) =>
+                  setStagedSession({ task, durationMinutes })
+                }
+              />
+            )}
 
             {/* The main view stays on screen for the whole session — the PiP
                 window is an additional surface, not a replacement for it. */}
