@@ -484,7 +484,7 @@ export default function MicroCommitmentView({
                   key={pill}
                   type="button"
                   onClick={() => updateTask(pill)}
-                  className={`rounded-xl border px-3.5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center truncate ${
+                  className={`rounded-xl border px-4 py-3 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center break-words ${
                     isSelected
                       ? 'border-cyan-500 bg-cyan-500/15 text-cyan-800 shadow-sm dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-cyan-200 ring-1 ring-cyan-400/40'
                       : 'border-slate-200/90 bg-white/60 text-slate-700 shadow-sm hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:bg-slate-700/60 dark:hover:text-cyan-300'
