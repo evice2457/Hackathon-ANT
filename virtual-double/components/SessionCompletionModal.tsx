@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Check, ClockPlus, MoveRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFocusSession, ADD_TIME_SECONDS } from '@/lib/focus-session'
-import { requestTaskBreakdown } from '@/lib/task-breakdown'
+import { createTaskPlan } from '@/lib/task-breakdown'
 import { playAntChime } from '@/lib/ant-voice'
 
 interface SessionCompletionModalProps {
@@ -12,11 +12,15 @@ interface SessionCompletionModalProps {
   onDone: () => void
   /** "Next task" clears the session and goes back to entry. */
   onNextTask: () => void
+  planCompleteTask?: string
 }
 
-export default function SessionCompletionModal({ onDone, onNextTask }: SessionCompletionModalProps) {
+export default function SessionCompletionModal({
+  onDone,
+  onNextTask,
+  planCompleteTask,
+}: SessionCompletionModalProps) {
   const { session, addTime } = useFocusSession()
-  const [isLoadingBreakdown, setIsLoadingBreakdown] = useState(false)
   const [subSteps, setSubSteps] = useState<string[] | null>(null)
 
   useEffect(() => {
@@ -28,14 +32,9 @@ export default function SessionCompletionModal({ onDone, onNextTask }: SessionCo
     setSubSteps(null)
   }
 
-  const handleBreakDown = async () => {
-    setIsLoadingBreakdown(true)
-    try {
-      const steps = await requestTaskBreakdown(session.task)
-      setSubSteps(steps)
-    } finally {
-      setIsLoadingBreakdown(false)
-    }
+  const handleBreakDown = () => {
+    const plan = createTaskPlan(session.task, Math.max(5, Math.round(session.durationSeconds / 60)))
+    setSubSteps(plan.steps.map((step) => step.title))
   }
 
   return (
@@ -47,12 +46,16 @@ export default function SessionCompletionModal({ onDone, onNextTask }: SessionCo
           </div>
 
           <h3 className="mb-3 text-3xl font-light text-white">
-            How did it go?{' '}
-            <span className="font-serif italic font-normal text-emerald-200">You made it through.</span>
+            {planCompleteTask ? 'Whole plan complete. ' : 'How did it go? '}
+            <span className="font-serif italic font-normal text-emerald-200">
+              You made it through.
+            </span>
           </h3>
 
           <div className="mb-8 rounded-2xl border border-slate-700/40 bg-slate-800/40 px-5 py-4">
-            <p className="text-base font-medium text-white">{session.task || 'Your session'}</p>
+            <p className="text-base font-medium text-white">
+              {planCompleteTask || session.task || 'Your session'}
+            </p>
           </div>
 
           {subSteps ? (
@@ -86,12 +89,11 @@ export default function SessionCompletionModal({ onDone, onNextTask }: SessionCo
               </Button>
               <Button
                 onClick={handleBreakDown}
-                disabled={isLoadingBreakdown}
                 variant="outline"
                 className="rounded-xl border-slate-600 px-6 py-6 font-semibold text-slate-200 hover:border-emerald-400/40 hover:bg-slate-700/50 hover:text-white"
               >
                 <Sparkles data-icon="inline-start" />
-                {isLoadingBreakdown ? 'Breaking it down…' : 'Break it down'}
+                Break it down
               </Button>
               <Button
                 onClick={onNextTask}

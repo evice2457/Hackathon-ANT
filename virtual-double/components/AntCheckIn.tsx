@@ -1,51 +1,46 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Image from 'next/image'
-import { Coffee, ListChecks, Loader2, Play, Send, Sparkles, Lightbulb, ArrowRight } from 'lucide-react'
-import { CHECK_IN_RESPONSE, type CheckInState } from '@/lib/check-in'
+import { ArrowRight, Coffee, LogOut, Play, Send } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { parseSupportMinutes } from '@/lib/ant-support'
+import type { CheckInState } from '@/lib/check-in'
 import { useMascotName } from '@/lib/mascot-name'
 import { playAntChime } from '@/lib/ant-voice'
-import { requestTaskBreakdown } from '@/lib/task-breakdown'
 
 interface AntCheckInProps {
   checkIn: CheckInState
   compact?: boolean
-  task: string
   onAnswerChange: (answer: string) => void
   onSubmit: () => void
+  onQuickAction: (answer: string) => void
+  onSuggestedTitleChange: (title: string) => void
+  onSuggestedMinutesChange: (minutes: string) => void
+  onContinueWithStep: () => void
   onResume: () => void
-  onStayPaused: () => void
-  onTakeBreak: () => void
+  onEndSession: () => void
 }
 
 export default function AntCheckIn({
   checkIn,
   compact = false,
-  task,
   onAnswerChange,
   onSubmit,
+  onQuickAction,
+  onSuggestedTitleChange,
+  onSuggestedMinutesChange,
+  onContinueWithStep,
   onResume,
-  onStayPaused,
-  onTakeBreak,
+  onEndSession,
 }: AntCheckInProps) {
   const { mascotName } = useMascotName()
-  const [steps, setSteps] = useState<string[] | null>(null)
-  const [isBreakingDown, setIsBreakingDown] = useState(false)
+  const suggestedMinutes = parseSupportMinutes(checkIn.suggestedMinutesInput)
+  const suggestionValid = Boolean(checkIn.suggestedTitle.trim()) && suggestedMinutes !== null
 
   useEffect(() => {
     playAntChime('nudge')
   }, [])
-
-  const handleBreakDown = async () => {
-    setIsBreakingDown(true)
-    try {
-      const result = await requestTaskBreakdown(task)
-      setSteps(result)
-    } finally {
-      setIsBreakingDown(false)
-    }
-  }
 
   return (
     <section
@@ -64,8 +59,8 @@ export default function AntCheckIn({
         }
       >
         <div className="flex items-center gap-3">
-          <div className={`relative shrink-0 overflow-hidden rounded-full bg-cyan-400/10 ${compact ? 'size-12' : 'size-16'}`}>
-            <Image src="/ant-mascot-removebg.png" alt={`${mascotName} mascot`} fill sizes={compact ? '48px' : '64px'} className="object-contain" />
+          <div className={`relative shrink-0 overflow-hidden rounded-full bg-cyan-400/10 ${compact ? 'size-11' : 'size-16'}`}>
+            <Image src="/ant-mascot-removebg.png" alt={`${mascotName} mascot`} fill sizes={compact ? '44px' : '64px'} className="object-contain" />
           </div>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">{mascotName} check-in</p>
@@ -73,33 +68,7 @@ export default function AntCheckIn({
           </div>
         </div>
 
-        {steps !== null ? (
-          <div className={compact ? 'mt-3' : 'mt-6'}>
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300">
-              <Sparkles className="size-3.5" /> Small steps
-            </p>
-            <ol className={`space-y-2 ${compact ? 'mt-2' : 'mt-3'}`}>
-              {steps.map((step, index) => (
-                <li
-                  key={index}
-                  className="flex gap-3 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.07] p-3 text-sm leading-relaxed text-cyan-50"
-                >
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/20 text-[11px] font-semibold text-cyan-200">
-                    {index + 1}
-                  </span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-            <button
-              type="button"
-              onClick={onResume}
-              className={`flex w-full items-center justify-center gap-1.5 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-semibold text-white hover:bg-cyan-400 ${compact ? 'mt-3' : 'mt-5'}`}
-            >
-              <Play className="size-3.5" /> Back to it
-            </button>
-          </div>
-        ) : !checkIn.responseShown ? (
+        {!checkIn.responseShown ? (
           <form
             className={compact ? 'mt-3 space-y-2' : 'mt-6 space-y-4'}
             onSubmit={(event) => {
@@ -108,43 +77,24 @@ export default function AntCheckIn({
             }}
           >
             <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={onTakeBreak}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
-              >
-                <Coffee className="size-3.5" /> Take a Short Break
-              </button>
-              <button
-                type="button"
-                onClick={handleBreakDown}
-                disabled={isBreakingDown}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10 disabled:opacity-60"
-              >
-                {isBreakingDown ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <ListChecks className="size-3.5" />
-                )}
-                Break Down My Task
-              </button>
-              <button
-                type="button"
-                onClick={onResume}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
-              >
-                <Lightbulb className="size-3.5" /> I’m Just Thinking
-              </button>
-              <button
-                type="button"
-                onClick={onResume}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
-              >
-                <ArrowRight className="size-3.5" /> Keep Working
-              </button>
+              {[
+                ['I’m tired', 'I feel tired'],
+                ['I’m stuck', 'I feel stuck'],
+                ['It’s too much', 'This feels overwhelming and too much'],
+                ['Just thinking', 'I am just thinking'],
+              ].map(([label, answer]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onQuickAction(answer)}
+                  className="rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <label className="block text-xs text-slate-300" htmlFor={`check-in-answer-${compact ? 'pip' : 'main'}`}>
-              You can type what’s going on, or choose a quick action below.
+              You can type what’s going on or choose a quick answer.
             </label>
             <textarea
               id={`check-in-answer-${compact ? 'pip' : 'main'}`}
@@ -153,36 +103,73 @@ export default function AntCheckIn({
               rows={compact ? 2 : 4}
               autoFocus={!compact}
               className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
-              placeholder="What’s making this hard right now?"
+              placeholder="Anything getting in the way?"
             />
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-400"
-            >
-              <Send className="size-4" /> Get Support
+            <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-400">
+              <Send className="size-4" /> Get support
             </button>
           </form>
         ) : (
-          <div className={compact ? 'mt-3' : 'mt-6'}>
+          <div className={compact ? 'mt-3 space-y-3' : 'mt-6 space-y-4'}>
             <p className="rounded-xl border border-cyan-400/15 bg-cyan-400/[0.07] p-3 text-sm leading-relaxed text-cyan-50">
-              {CHECK_IN_RESPONSE}
+              <span className="font-semibold">{mascotName}:</span>{' '}
+              {checkIn.support?.message || "No worries. Let's make the next step smaller."}
             </p>
-            <div className={`flex gap-2 ${compact ? 'mt-3' : 'mt-5'}`}>
+
+            <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                Suggested next step
+              </label>
+              <Input
+                value={checkIn.suggestedTitle}
+                onChange={(event) => onSuggestedTitleChange(event.target.value)}
+                aria-label="Suggested next-step title"
+                className="border-white/10 bg-white/[0.06] text-white"
+              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={180}
+                  value={checkIn.suggestedMinutesInput}
+                  onChange={(event) => onSuggestedMinutesChange(event.target.value)}
+                  aria-label="Suggested next-step minutes"
+                  className={`w-24 border-white/10 bg-white/[0.06] text-white ${suggestedMinutes === null ? 'border-amber-400' : ''}`}
+                />
+                <span className="text-xs text-slate-300">minutes</span>
+              </div>
+              {suggestedMinutes === null && (
+                <p className="text-xs text-amber-300">Enter a duration between 1 and 180 minutes.</p>
+              )}
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={onContinueWithStep}
+                disabled={!suggestionValid}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-semibold text-white hover:bg-cyan-400 disabled:opacity-45"
+              >
+                <ArrowRight className="size-3.5" /> Continue with this step
+              </button>
               <button
                 type="button"
                 onClick={onResume}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-semibold text-white hover:bg-cyan-400"
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-xs font-semibold text-slate-200 hover:bg-white/10"
               >
-                <Play className="size-3.5" /> Resume session
-              </button>
-              <button
-                type="button"
-                onClick={onStayPaused}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-xs font-semibold text-slate-200 hover:bg-white/10"
-              >
-                <Coffee className="size-3.5" /> Stay paused
+                <Play className="size-3.5" /> Resume current task
               </button>
             </div>
+            <button
+              type="button"
+              onClick={onEndSession}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs text-slate-400 hover:bg-rose-500/10 hover:text-rose-300"
+            >
+              <LogOut className="size-3.5" /> End session
+            </button>
+            <p className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+              <Coffee className="size-3" /> The timer stays paused until you choose.
+            </p>
           </div>
         )}
       </div>

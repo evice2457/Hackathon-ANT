@@ -13,7 +13,7 @@ getUserMedia camera frame
   -> relative pose + exponential smoothing
   -> angular enter/exit hysteresis + dwell-time state machine
   -> FocusSessionContext.setFocusState(...)
-  -> 30-second continuous non-focus episode tracker
+  -> 10-second continuous non-focus episode tracker
   -> pause countdown + shared ANT check-in (main page and Document PiP)
 ```
 
@@ -84,7 +84,7 @@ and effective FPS; use those values on the demo laptop before changing the rate.
 - `lib/vision/smile-ritual.ts`: ritual-specific acquisition and smile heuristics.
 - `lib/vision/use-smile-ritual.ts`: MediaPipe adapter for `SmileRitualView`.
 - `components/VisionMonitor.tsx`: context bridge and development diagnostics.
-- `lib/check-in-episode.ts`: deterministic 30-second episode tracker.
+- `lib/check-in-episode.ts`: deterministic 10-second episode tracker.
 - `components/AntCheckIn.tsx`: shared main-page and PiP intervention UI.
 
 Another teammate can consume frame-level data by adding an `onObservation`
@@ -120,7 +120,7 @@ scientific or medical thresholds.
 For the running-session MVP, yaw remains observable in diagnostics but is
 excluded from focus-state classification. Only sustained relative head-down
 posture and sustained face absence can drive an intervention. After CV emits
-`possibly_distracted` or `away`, the application requires another 30 seconds of
+`possibly_distracted` or `away`, the application requires another 10 seconds of
 continuous non-focused state before pausing and opening the ANT check-in.
 Returning to `focused` before then cancels the pending episode.
 
@@ -155,7 +155,7 @@ preserved. Deliberate pause/resume starts a fresh monitor and calibration.
 
 The check-in timer treats `possibly_distracted` and `away` as one continuous
 non-focused condition, so switching between them does not reset the timer. It
-fires exactly once after 30 seconds, records a fixed prompt for that episode,
+fires exactly once after 10 seconds, records a fixed prompt for that episode,
 opens check-in state, and pauses the session. Pause resets focus state and stops
 CV, but the separately owned check-in remains open. Its free-text answer exists
 only in React memory and is never persisted or logged. Resume closes the
@@ -230,12 +230,12 @@ environment used for this change, so these physical values remain unverified.
 | 16. Verify CV continues in PiP | Head posture and absence transitions still update at roughly 10 FPS |
 | 17. Close PiP | PiP scheduler is cancelled without stopping/restarting the stream |
 | 18. Verify scheduler returns | Main-window scheduling resumes; still one inference loop and stream |
-| 19. Hide opener without PiP during non-focus | Public state resets to `focused`; stale pre-hide evidence cannot complete the 30-second episode; returning visible requires fresh CV evidence |
-| 20. Hide opener with visible PiP during non-focus | CV and the same 30-second episode continue normally without resetting |
-| 21. Recover before 30 s | Pending check-in cancels and countdown continues |
-| 22. Stay head-down/away for 30 s | Countdown pauses once; exactly one ANT check-in renders: full-page without PiP, compact inside active PiP |
+| 19. Hide opener without PiP during non-focus | Public state resets to `focused`; stale pre-hide evidence cannot complete the 10-second episode; returning visible requires fresh CV evidence |
+| 20. Hide opener with visible PiP during non-focus | CV and the same 10-second episode continue normally without resetting |
+| 21. Recover before 10 s | Pending check-in cancels and countdown continues |
+| 22. Stay head-down/away for 10 s | Countdown pauses once; exactly one ANT check-in renders: full-page without PiP, compact inside active PiP |
 | 23. Answer and resume | Hard-coded support appears, then resume closes check-in and starts fresh CV calibration |
-| 24. Later non-focus episode | A new check-in can trigger after another continuous 30 s |
+| 24. Later non-focus episode | A new check-in can trigger after another continuous 10 s |
 | 25. Permission denied | Actionable camera message; session remains manually usable |
 | 26. Camera busy/unavailable | Actionable message; no retry loop or leaked stream |
 | 27. Dim lighting | Note acquisition reliability; no rapid state changes |

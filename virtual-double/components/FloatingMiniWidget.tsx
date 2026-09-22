@@ -1,6 +1,6 @@
 'use client'
 
-import { Maximize2, Pause, Play } from 'lucide-react'
+import { Maximize2, Play } from 'lucide-react'
 import { useFocusSession, formatTime } from '@/lib/focus-session'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
 
@@ -15,7 +15,7 @@ interface FloatingMiniWidgetProps {
  * the countdown never resets when the window opens or closes.
  */
 export default function FloatingMiniWidget({ onExitPip }: FloatingMiniWidgetProps = {}) {
-  const { session, pauseSession, resumeSession } = useFocusSession()
+  const { session, resumeSession } = useFocusSession()
 
   const isPaused = session.status === 'paused'
 
@@ -56,19 +56,12 @@ export default function FloatingMiniWidget({ onExitPip }: FloatingMiniWidgetProp
       </div>
 
       <div className="mt-4 flex items-center gap-2">
-        {isPaused ? (
+        {isPaused && (
           <button
             onClick={resumeSession}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-200 transition-colors hover:bg-cyan-500/20"
           >
             <Play className="size-3.5" /> Resume
-          </button>
-        ) : (
-          <button
-            onClick={pauseSession}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-200/80 dark:bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-300/80 dark:hover:bg-white/10"
-          >
-            <Pause className="size-3.5" /> Pause
           </button>
         )}
         <button
