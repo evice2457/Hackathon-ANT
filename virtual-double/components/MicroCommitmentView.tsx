@@ -172,13 +172,13 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
         {/* Headline */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-4xl font-light tracking-tight text-slate-900 transition-colors dark:text-white md:text-5xl">
-            What small step{' '}
-            <span className="font-serif italic font-normal text-cyan-600 dark:text-cyan-300">
-              will you conquer
+            What will you{' '}
+            <span className="italic font-normal text-cyan-700 dark:text-cyan-300">
+              focus on
             </span>{' '}
-            in the next {minutes || 15} minutes?
+            next?
           </h2>
-          <p className="text-base text-slate-600 transition-colors dark:text-slate-400">
+          <p className="text-base text-slate-600 transition-colors dark:text-slate-300">
             Break it down. Keep it simple. Just one thing.
           </p>
         </div>
@@ -195,7 +195,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
                 }
               }}
               placeholder="Tell me what you’ll do..."
-              className="flex-1 rounded-2xl border-slate-300/80 bg-white/75 px-6 py-7 text-lg text-slate-900 placeholder-slate-400 shadow-sm backdrop-blur-md transition-all focus:border-cyan-500/60 focus:ring-cyan-500/20 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-500 dark:shadow-none"
+              className="flex-1 rounded-2xl border-slate-300/80 bg-white/75 px-6 py-7 text-lg text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-md transition-all focus:border-cyan-500/60 focus:ring-cyan-500/20 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-400 dark:shadow-none"
             />
             <button
               type="button"
@@ -203,14 +203,14 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
               disabled={!canStart}
               className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-7 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
-              Start with Me
+              Start with ANT
             </button>
             <Button
               size="icon"
               type="button"
               onClick={toggleSpeechRecognition}
-              aria-label={isListening ? 'Stop listening' : 'Voice input (Click to speak task)'}
-              title={isListening ? 'Listening... click to stop' : 'Click to speak your task'}
+              aria-label={isListening ? 'Stop listening' : 'Speak your task'}
+              title={isListening ? 'Listening... click to stop' : 'Speak your task'}
               className={`h-auto self-stretch w-14 shrink-0 rounded-2xl transition-all ${
                 isListening
                   ? 'border-rose-500 bg-rose-500 text-white animate-pulse shadow-lg shadow-rose-500/40 hover:bg-rose-600'
@@ -237,7 +237,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
 
         {/* Duration picker */}
         <div className="mb-10">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-600 transition-colors dark:text-slate-300">
             Session length
           </p>
           <div className="flex flex-wrap items-center gap-3">
@@ -265,9 +265,9 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
                 value={customMinutes}
                 onChange={(e) => handleCustomMinutes(e.target.value)}
                 placeholder="Custom"
-                className="h-8 w-20 border-0 bg-transparent p-0 text-center text-sm text-slate-900 placeholder-slate-400 focus-visible:ring-0 dark:text-white dark:placeholder-slate-500"
+                className="h-8 w-20 border-0 bg-transparent p-0 text-center text-sm text-slate-900 placeholder-slate-500 focus-visible:ring-0 dark:text-white dark:placeholder-slate-400"
               />
-              <span className="text-sm text-slate-500 dark:text-slate-400">min</span>
+              <span className="text-sm text-slate-600 dark:text-slate-300">min</span>
             </div>
           </div>
         </div>
@@ -275,14 +275,14 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
         {/* Quick Suggestion Pills (Compact single row, fills input on click) */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-600 transition-colors dark:text-slate-300">
               Quick suggestions (Click to fill)
             </p>
             {input && (
               <button
                 type="button"
                 onClick={() => setInput('')}
-                className="text-[11px] text-slate-400 hover:text-rose-500 transition-colors"
+                className="text-[11px] text-slate-500 hover:text-rose-500 transition-colors dark:text-slate-400"
               >
                 Clear input
               </button>
