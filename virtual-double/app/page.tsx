@@ -293,6 +293,7 @@ function AppShell() {
         {checkIn && !pipDocument && (
           <AntCheckIn
             checkIn={checkIn}
+            task={session.task}
             onAnswerChange={(answer) => setCheckIn((current) => (current ? { ...current, answer } : current))}
             onSubmit={() => setCheckIn((current) => (current ? { ...current, responseShown: true } : current))}
             onResume={() => {
@@ -300,6 +301,10 @@ function AppShell() {
               resumeSession()
             }}
             onStayPaused={() => setCheckIn(null)}
+            onTakeBreak={() => {
+              setCheckIn(null)
+              pauseSession()
+            }}
           />
         )}
 
@@ -309,6 +314,7 @@ function AppShell() {
             pipDocument={pipDocument}
             onExitPip={handleExitPip}
             checkIn={checkIn}
+            task={session.task}
             onCheckInAnswerChange={(answer) =>
               setCheckIn((current) => (current ? { ...current, answer } : current))
             }
@@ -320,6 +326,10 @@ function AppShell() {
               resumeSession()
             }}
             onCheckInStayPaused={() => setCheckIn(null)}
+            onCheckInTakeBreak={() => {
+              setCheckIn(null)
+              pauseSession()
+            }}
           />
         )}
       </div>

@@ -1,7 +1,7 @@
 export const CHECK_IN_PROMPTS = [
   'Are you okay?',
-  'Is something getting in the way?',
-  'Want to tell me what’s making this difficult right now?',
+  'Need a quick reset?',
+  "Want to tell me what's making this difficult right now?",
   'Need a hand getting back into it?',
 ] as const
 

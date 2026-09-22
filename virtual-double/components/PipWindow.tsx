@@ -10,10 +10,12 @@ interface PipWindowProps {
   /** Close the PiP window + switch presentation back to the main view. */
   onExitPip: () => void
   checkIn: CheckInState | null
+  task: string
   onCheckInAnswerChange: (answer: string) => void
   onCheckInSubmit: () => void
   onCheckInResume: () => void
   onCheckInStayPaused: () => void
+  onCheckInTakeBreak: () => void
 }
 
 /**
@@ -26,20 +28,24 @@ export default function PipWindow({
   pipDocument,
   onExitPip,
   checkIn,
+  task,
   onCheckInAnswerChange,
   onCheckInSubmit,
   onCheckInResume,
   onCheckInStayPaused,
+  onCheckInTakeBreak,
 }: PipWindowProps) {
   return createPortal(
     checkIn ? (
       <AntCheckIn
         compact
         checkIn={checkIn}
+        task={task}
         onAnswerChange={onCheckInAnswerChange}
         onSubmit={onCheckInSubmit}
         onResume={onCheckInResume}
         onStayPaused={onCheckInStayPaused}
+        onTakeBreak={onCheckInTakeBreak}
       />
     ) : (
       <FloatingMiniWidget onExitPip={onExitPip} />
