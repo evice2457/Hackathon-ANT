@@ -3,19 +3,30 @@
 import { createPortal } from 'react-dom'
 import FloatingMiniWidget from '@/components/FloatingMiniWidget'
 import AntCheckIn from '@/components/AntCheckIn'
+import StepTransitionView from '@/components/StepTransitionView'
 import type { CheckInState } from '@/lib/check-in'
+import type { TaskStep } from '@/lib/task-breakdown'
 
 interface PipWindowProps {
   pipDocument: Document
   /** Close the PiP window + switch presentation back to the main view. */
   onExitPip: () => void
   checkIn: CheckInState | null
-  task: string
   onCheckInAnswerChange: (answer: string) => void
   onCheckInSubmit: () => void
+  onCheckInQuickAction: (answer: string) => void
+  onCheckInSuggestedTitleChange: (title: string) => void
+  onCheckInSuggestedMinutesChange: (minutes: string) => void
+  onCheckInContinueWithStep: () => void
   onCheckInResume: () => void
-  onCheckInStayPaused: () => void
-  onCheckInTakeBreak: () => void
+  onCheckInEndSession: () => void
+  stepTransition?: {
+    completedStepNumber: number
+    totalSteps: number
+    nextStep: TaskStep
+    onContinue: () => void
+    onEndPlan: () => void
+  } | null
 }
 
 /**
@@ -28,25 +39,32 @@ export default function PipWindow({
   pipDocument,
   onExitPip,
   checkIn,
-  task,
   onCheckInAnswerChange,
   onCheckInSubmit,
+  onCheckInQuickAction,
+  onCheckInSuggestedTitleChange,
+  onCheckInSuggestedMinutesChange,
+  onCheckInContinueWithStep,
   onCheckInResume,
-  onCheckInStayPaused,
-  onCheckInTakeBreak,
+  onCheckInEndSession,
+  stepTransition,
 }: PipWindowProps) {
   return createPortal(
     checkIn ? (
       <AntCheckIn
         compact
         checkIn={checkIn}
-        task={task}
         onAnswerChange={onCheckInAnswerChange}
         onSubmit={onCheckInSubmit}
+        onQuickAction={onCheckInQuickAction}
+        onSuggestedTitleChange={onCheckInSuggestedTitleChange}
+        onSuggestedMinutesChange={onCheckInSuggestedMinutesChange}
+        onContinueWithStep={onCheckInContinueWithStep}
         onResume={onCheckInResume}
-        onStayPaused={onCheckInStayPaused}
-        onTakeBreak={onCheckInTakeBreak}
+        onEndSession={onCheckInEndSession}
       />
+    ) : stepTransition ? (
+      <StepTransitionView compact {...stepTransition} />
     ) : (
       <FloatingMiniWidget onExitPip={onExitPip} />
     ),

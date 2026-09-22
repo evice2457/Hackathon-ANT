@@ -11,13 +11,25 @@ import AntCheckIn from '@/components/AntCheckIn'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
 import VisionMonitor from '@/components/VisionMonitor'
+import StepTransitionView from '@/components/StepTransitionView'
 import { FocusSessionProvider, useFocusSession } from '@/lib/focus-session'
 import { useDistractionWatch } from '@/lib/use-distraction-watch'
 import { useDocumentPictureInPicture } from '@/lib/use-document-pip'
 import { FloatingCompanionProvider, type FloatingCompanionApi } from '@/lib/floating-companion'
-import { createCheckIn, type CheckInState } from '@/lib/check-in'
+import {
+  createCheckIn,
+  resolveCheckInChoice,
+  respondToCheckIn,
+  type CheckInState,
+} from '@/lib/check-in'
 import { MascotNameProvider } from '@/lib/mascot-name'
 import { startAudioKeepAlive, stopAudioKeepAlive } from '@/lib/ant-voice'
+import {
+  advanceTaskPlan,
+  startTaskPlan,
+  type TaskPlan,
+  type TaskPlanProgress,
+} from '@/lib/task-breakdown'
 
 export default function Page() {
   return (
@@ -32,7 +44,12 @@ export default function Page() {
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [hasStarted, setHasStarted] = useState(false)
-  const [stagedSession, setStagedSession] = useState<{ task: string; durationMinutes: number } | null>(null)
+  const [stagedSession, setStagedSession] = useState<{
+    task: string
+    durationMinutes: number
+    plan?: TaskPlan
+  } | null>(null)
+  const [activePlan, setActivePlan] = useState<TaskPlanProgress | null>(null)
   const [checkIn, setCheckIn] = useState<CheckInState | null>(null)
   const { session, startSession, stopSession, pauseSession, resumeSession } = useFocusSession()
   const { isSupported: pipSupported, pipDocument, openPip: openPipWindow, closePip } = useDocumentPictureInPicture()
@@ -80,12 +97,19 @@ function AppShell() {
   const isIdle = session.status === 'idle'
   const isCompleted = session.status === 'completed'
   const isSessionActive = session.status === 'running' || session.status === 'paused'
+  const planAdvance = activePlan ? advanceTaskPlan(activePlan) : null
+  const isBetweenPlanSteps = isCompleted && planAdvance?.status === 'next'
 
   const isSessionActiveRef = useRef(isSessionActive)
-  isSessionActiveRef.current = isSessionActive
-
   const isPipOpenRef = useRef(Boolean(pipDocument))
-  isPipOpenRef.current = Boolean(pipDocument)
+
+  useEffect(() => {
+    isSessionActiveRef.current = isSessionActive
+  }, [isSessionActive])
+
+  useEffect(() => {
+    isPipOpenRef.current = Boolean(pipDocument)
+  }, [pipDocument])
 
   const wasAwayRef = useRef(false)
   const lastPipOpenTimeRef = useRef(0)
@@ -236,6 +260,27 @@ function AppShell() {
     }
   }
 
+  const handleCheckInSubmit = (answer?: string) => {
+    setCheckIn((current) =>
+      current ? respondToCheckIn(current, session.task, answer ?? current.answer) : current,
+    )
+  }
+
+  const handleContinueWithSuggestedStep = () => {
+    if (!checkIn) return
+    const resolution = resolveCheckInChoice(checkIn, 'start-suggested')
+    if (!resolution || resolution.type !== 'start-suggested') return
+    setCheckIn(null)
+    setActivePlan(null)
+    startSession(resolution.task, resolution.durationSeconds, session.visionEnabled)
+  }
+
+  const handleEndSession = () => {
+    setCheckIn(null)
+    setActivePlan(null)
+    stopSession()
+  }
+
   return (
     <FloatingCompanionProvider value={floating}>
       <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
@@ -261,8 +306,9 @@ function AppShell() {
                 task={stagedSession.task}
                 durationMinutes={stagedSession.durationMinutes}
                 onComplete={(cameraOptIn) => {
-                  const { task, durationMinutes } = stagedSession
+                  const { task, durationMinutes, plan } = stagedSession
                   setStagedSession(null)
+                  setActivePlan(plan ? startTaskPlan(plan) : null)
                   startSession(task, Math.round(durationMinutes * 60), cameraOptIn)
                 }}
                 onCancel={() => setStagedSession(null)}
@@ -272,9 +318,19 @@ function AppShell() {
             {/* Main micro-commitment entry (after clicking GET STARTED) */}
             {isIdle && hasStarted && !stagedSession && (
               <MicroCommitmentView
-                onInitiateRitual={(task, durationMinutes) =>
+                onInitiateRitual={(task, durationMinutes) => {
+                  setActivePlan(null)
                   setStagedSession({ task, durationMinutes })
-                }
+                }}
+                onInitiatePlan={(plan) => {
+                  const firstStep = plan.steps[0]
+                  if (!firstStep) return
+                  setStagedSession({
+                    task: firstStep.title,
+                    durationMinutes: firstStep.minutes,
+                    plan,
+                  })
+                }}
               />
             )}
 
@@ -282,8 +338,38 @@ function AppShell() {
                 window is an additional surface, not a replacement for it. */}
             {!isIdle && !isCompleted && <DeepPresenceView />}
 
-            {isCompleted && (
-              <SessionCompletionModal onDone={stopSession} onNextTask={stopSession} />
+            {isBetweenPlanSteps && !pipDocument && planAdvance?.status === 'next' && activePlan && (
+              <StepTransitionView
+                completedStepNumber={activePlan.currentStepIndex + 1}
+                totalSteps={activePlan.plan.steps.length}
+                nextStep={planAdvance.step}
+                onContinue={() => {
+                  setActivePlan(planAdvance.progress)
+                  startSession(
+                    planAdvance.step.title,
+                    planAdvance.step.minutes * 60,
+                    session.visionEnabled,
+                  )
+                }}
+                onEndPlan={() => {
+                  setActivePlan(null)
+                  stopSession()
+                }}
+              />
+            )}
+
+            {isCompleted && !isBetweenPlanSteps && (
+              <SessionCompletionModal
+                planCompleteTask={activePlan?.plan.originalTask}
+                onDone={() => {
+                  setActivePlan(null)
+                  stopSession()
+                }}
+                onNextTask={() => {
+                  setActivePlan(null)
+                  stopSession()
+                }}
+              />
             )}
           </main>
         </div>
@@ -293,18 +379,21 @@ function AppShell() {
         {checkIn && !pipDocument && (
           <AntCheckIn
             checkIn={checkIn}
-            task={session.task}
             onAnswerChange={(answer) => setCheckIn((current) => (current ? { ...current, answer } : current))}
-            onSubmit={() => setCheckIn((current) => (current ? { ...current, responseShown: true } : current))}
+            onSubmit={() => handleCheckInSubmit()}
+            onQuickAction={handleCheckInSubmit}
+            onSuggestedTitleChange={(suggestedTitle) =>
+              setCheckIn((current) => (current ? { ...current, suggestedTitle } : current))
+            }
+            onSuggestedMinutesChange={(suggestedMinutesInput) =>
+              setCheckIn((current) => (current ? { ...current, suggestedMinutesInput } : current))
+            }
+            onContinueWithStep={handleContinueWithSuggestedStep}
             onResume={() => {
               setCheckIn(null)
               resumeSession()
             }}
-            onStayPaused={() => setCheckIn(null)}
-            onTakeBreak={() => {
-              setCheckIn(null)
-              pauseSession()
-            }}
+            onEndSession={handleEndSession}
           />
         )}
 
@@ -314,22 +403,44 @@ function AppShell() {
             pipDocument={pipDocument}
             onExitPip={handleExitPip}
             checkIn={checkIn}
-            task={session.task}
             onCheckInAnswerChange={(answer) =>
               setCheckIn((current) => (current ? { ...current, answer } : current))
             }
-            onCheckInSubmit={() =>
-              setCheckIn((current) => (current ? { ...current, responseShown: true } : current))
+            onCheckInSubmit={() => handleCheckInSubmit()}
+            onCheckInQuickAction={handleCheckInSubmit}
+            onCheckInSuggestedTitleChange={(suggestedTitle) =>
+              setCheckIn((current) => (current ? { ...current, suggestedTitle } : current))
             }
+            onCheckInSuggestedMinutesChange={(suggestedMinutesInput) =>
+              setCheckIn((current) => (current ? { ...current, suggestedMinutesInput } : current))
+            }
+            onCheckInContinueWithStep={handleContinueWithSuggestedStep}
             onCheckInResume={() => {
               setCheckIn(null)
               resumeSession()
             }}
-            onCheckInStayPaused={() => setCheckIn(null)}
-            onCheckInTakeBreak={() => {
-              setCheckIn(null)
-              pauseSession()
-            }}
+            onCheckInEndSession={handleEndSession}
+            stepTransition={
+              isBetweenPlanSteps && planAdvance?.status === 'next' && activePlan
+                ? {
+                    completedStepNumber: activePlan.currentStepIndex + 1,
+                    totalSteps: activePlan.plan.steps.length,
+                    nextStep: planAdvance.step,
+                    onContinue: () => {
+                      setActivePlan(planAdvance.progress)
+                      startSession(
+                        planAdvance.step.title,
+                        planAdvance.step.minutes * 60,
+                        session.visionEnabled,
+                      )
+                    },
+                    onEndPlan: () => {
+                      setActivePlan(null)
+                      stopSession()
+                    },
+                  }
+                : null
+            }
           />
         )}
       </div>

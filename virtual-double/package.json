@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:vision": "node --experimental-strip-types --test lib/vision/*.test.ts"
+    "test:vision": "node --experimental-strip-types --test lib/vision/*.test.ts",
+    "test:ant-ai": "node --experimental-strip-types --test lib/ant-ai/*.test.ts",
+    "test:demo": "node --experimental-strip-types --test lib/task-breakdown.test.ts lib/ant-support.test.ts lib/check-in.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -17,6 +19,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
+    "openai": "^7.21.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.21.0",

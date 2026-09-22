@@ -1,11 +1,19 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, MicOff } from 'lucide-react'
+import { ListChecks, Mic, MicOff, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DEFAULT_DURATION_MINUTES, DURATION_PRESETS, useFocusSession } from '@/lib/focus-session'
 import { primeAudioOnGesture } from '@/lib/ant-voice'
+import {
+  hasInvalidCustomDuration,
+  parseCustomDuration,
+  selectCustomDuration,
+  selectPresetDuration,
+  type DurationSelection,
+} from '@/lib/ant-ai/recommendation-state'
+import { createTaskPlan, type TaskPlan } from '@/lib/task-breakdown'
 
 const SUGGESTION_PILLS = [
   'Review 3 priority emails',
@@ -53,13 +61,22 @@ type SpeechRecognitionWindow = Window & {
 
 interface MicroCommitmentViewProps {
   onInitiateRitual?: (task: string, durationMinutes: number) => void
+  onInitiatePlan?: (plan: TaskPlan) => void
 }
 
-export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmentViewProps = {}) {
+export default function MicroCommitmentView({
+  onInitiateRitual,
+  onInitiatePlan,
+}: MicroCommitmentViewProps = {}) {
   const { startSession } = useFocusSession()
   const [input, setInput] = useState('')
-  const [minutes, setMinutes] = useState<number>(DEFAULT_DURATION_MINUTES)
-  const [customMinutes, setCustomMinutes] = useState('')
+  const [duration, setDuration] = useState<DurationSelection>({
+    minutes: DEFAULT_DURATION_MINUTES,
+    source: 'default',
+    customMinutes: null,
+  })
+  const [taskPlan, setTaskPlan] = useState<TaskPlan | null>(null)
+  const [stepMinuteInputs, setStepMinuteInputs] = useState<Record<string, string>>({})
 
   // Speech-to-Text State
   const [isListening, setIsListening] = useState(false)
@@ -77,6 +94,18 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
       }
     }
   }, [])
+
+  const updateTask = (value: string) => {
+    setInput(value)
+    setTaskPlan(null)
+    setStepMinuteInputs({})
+  }
+
+  const chooseManualDuration = (minutes: number) => {
+    setDuration(selectPresetDuration(minutes))
+    setTaskPlan(null)
+    setStepMinuteInputs({})
+  }
 
   const toggleSpeechRecognition = () => {
     setSpeechError(null)
@@ -119,7 +148,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
           .map((result) => result[0]?.transcript || '')
           .join('')
         if (transcript.trim()) {
-          setInput(transcript.trim())
+          updateTask(transcript.trim())
         }
       }
 
@@ -145,7 +174,9 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
   }
 
   const trimmed = input.trim()
-  const canStart = Boolean(trimmed) && Number.isFinite(minutes) && minutes > 0
+  const { minutes, customMinutes } = duration
+  const customDurationInvalid = hasInvalidCustomDuration(duration)
+  const canStart = Boolean(trimmed) && minutes !== null && !customDurationInvalid
 
   // Starts or stages a session.
   const startWith = (task: string, durationMinutes: number) => {
@@ -159,11 +190,74 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
   }
 
   const handleCustomMinutes = (value: string) => {
-    setCustomMinutes(value)
-    const parsed = Number.parseInt(value, 10)
-    if (Number.isFinite(parsed) && parsed > 0) {
-      setMinutes(parsed)
+    setDuration(selectCustomDuration(value))
+    setTaskPlan(null)
+    setStepMinuteInputs({})
+  }
+
+  const handleBreakDown = () => {
+    if (!canStart || minutes === null) return
+    const plan = createTaskPlan(trimmed, minutes)
+    setTaskPlan(plan)
+    setStepMinuteInputs(
+      Object.fromEntries(plan.steps.map((step) => [step.id, String(step.minutes)])),
+    )
+  }
+
+  const updateStepTitle = (id: string, title: string) => {
+    setTaskPlan((current) =>
+      current
+        ? { ...current, steps: current.steps.map((step) => (step.id === id ? { ...step, title } : step)) }
+        : current,
+    )
+  }
+
+  const updateStepMinutes = (id: string, value: string) => {
+    setStepMinuteInputs((current) => ({ ...current, [id]: value }))
+    const parsed = parseCustomDuration(value)
+    if (parsed === null) return
+    setTaskPlan((current) =>
+      current
+        ? {
+            ...current,
+            steps: current.steps.map((step) =>
+              step.id === id ? { ...step, minutes: parsed } : step,
+            ),
+          }
+        : current,
+    )
+  }
+
+  const removeStep = (id: string) => {
+    setTaskPlan((current) =>
+      current ? { ...current, steps: current.steps.filter((step) => step.id !== id) } : current,
+    )
+    setStepMinuteInputs((current) => {
+      const next = { ...current }
+      delete next[id]
+      return next
+    })
+  }
+
+  const planIsValid = Boolean(
+    taskPlan?.steps.length &&
+      taskPlan.steps.every(
+        (step) =>
+          step.title.trim() && parseCustomDuration(stepMinuteInputs[step.id] ?? '') !== null,
+      ),
+  )
+
+  const startStepByStep = () => {
+    if (!taskPlan || !planIsValid || !onInitiatePlan) return
+    const editedPlan: TaskPlan = {
+      ...taskPlan,
+      steps: taskPlan.steps.map((step) => ({
+        ...step,
+        title: step.title.trim(),
+        minutes: parseCustomDuration(stepMinuteInputs[step.id]) ?? step.minutes,
+      })),
     }
+    onInitiatePlan(editedPlan)
   }
 
   return (
@@ -188,9 +282,9 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
           <div className="relative flex items-stretch gap-3">
             <Input
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => updateTask(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing && canStart && minutes !== null) {
                   startWith(input, minutes)
                 }
               }}
@@ -199,7 +293,9 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
             />
             <button
               type="button"
-              onClick={() => startWith(input, minutes)}
+              onClick={() => {
+                if (minutes !== null) startWith(input, minutes)
+              }}
               disabled={!canStart}
               className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-7 font-semibold text-white shadow-lg shadow-cyan-500/30 transition-colors hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:shadow-none"
             >
@@ -245,11 +341,10 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
               <button
                 key={preset}
                 onClick={() => {
-                  setMinutes(preset)
-                  setCustomMinutes('')
+                  chooseManualDuration(preset)
                 }}
                 className={`rounded-xl border px-5 py-3 text-sm font-medium transition-all duration-200 backdrop-blur-md ${
-                  minutes === preset && !customMinutes
+                  minutes === preset && customMinutes === null
                     ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-800 shadow-sm dark:border-cyan-400/60 dark:bg-cyan-400/15 dark:text-cyan-200'
                     : 'border-slate-200/90 bg-white/60 text-slate-700 hover:border-cyan-500/50 hover:bg-white/80 hover:text-cyan-700 dark:border-slate-700/50 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-cyan-500/50 dark:hover:text-cyan-300'
                 }`}
@@ -262,7 +357,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
                 type="number"
                 min={1}
                 max={180}
-                value={customMinutes}
+                value={customMinutes ?? ''}
                 onChange={(e) => handleCustomMinutes(e.target.value)}
                 placeholder="Custom"
                 className="h-8 w-20 border-0 bg-transparent p-0 text-center text-sm text-slate-900 placeholder-slate-500 focus-visible:ring-0 dark:text-white dark:placeholder-slate-400"
@@ -270,7 +365,100 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
               <span className="text-sm text-slate-600 dark:text-slate-300">min</span>
             </div>
           </div>
+          {customDurationInvalid && (
+            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+              Enter a duration between 1 and 180 minutes.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleBreakDown}
+            disabled={!canStart}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-800 transition-colors hover:bg-cyan-500/20 disabled:opacity-45 dark:text-cyan-200"
+          >
+            <ListChecks className="size-4" /> Break down task
+          </button>
         </div>
+
+        {taskPlan && (
+          <div className="mb-10 rounded-2xl border border-cyan-500/20 bg-white/65 p-5 shadow-sm backdrop-blur-md dark:bg-slate-900/55">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">
+                  Step-by-step plan
+                </p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                  Edit the steps or time before you begin.
+                </p>
+              </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {taskPlan.steps.reduce(
+                  (total, step) => total + (parseCustomDuration(stepMinuteInputs[step.id] ?? '') ?? 0),
+                  0,
+                )}{' '}
+                min total
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {taskPlan.steps.map((step, index) => {
+                const stepMinutesValid = parseCustomDuration(stepMinuteInputs[step.id] ?? '') !== null
+                return (
+                  <div key={step.id} className="flex items-start gap-2 rounded-xl border border-slate-200/80 bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.04]">
+                    <span className="mt-2 flex size-6 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-semibold text-cyan-700 dark:text-cyan-200">
+                      {index + 1}
+                    </span>
+                    <Input
+                      value={step.title}
+                      onChange={(event) => updateStepTitle(step.id, event.target.value)}
+                      aria-label={`Step ${index + 1} title`}
+                      className="flex-1"
+                    />
+                    <div>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={180}
+                        value={stepMinuteInputs[step.id] ?? ''}
+                        onChange={(event) => updateStepMinutes(step.id, event.target.value)}
+                        aria-label={`Step ${index + 1} minutes`}
+                        className={`w-20 text-center ${stepMinutesValid ? '' : 'border-amber-500'}`}
+                      />
+                      {!stepMinutesValid && <span className="mt-1 block text-[10px] text-amber-600">1–180 min</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeStep(step.id)}
+                      aria-label={`Remove step ${index + 1}`}
+                      className="mt-1 rounded-lg p-2 text-slate-400 hover:bg-rose-500/10 hover:text-rose-500"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => minutes !== null && startWith(input, minutes)}
+                disabled={!canStart}
+                className="rounded-xl border border-slate-300 bg-white/70 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-cyan-500/50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200"
+              >
+                Start full task — {minutes} min
+              </button>
+              <button
+                type="button"
+                onClick={startStepByStep}
+                disabled={!planIsValid}
+                className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-45"
+              >
+                Start step-by-step
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Quick Suggestion Pills (Compact single row, fills input on click) */}
         <div>
@@ -281,7 +469,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
             {input && (
               <button
                 type="button"
-                onClick={() => setInput('')}
+                onClick={() => updateTask('')}
                 className="text-[11px] text-slate-500 hover:text-rose-500 transition-colors dark:text-slate-400"
               >
                 Clear input
@@ -295,7 +483,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
                 <button
                   key={pill}
                   type="button"
-                  onClick={() => setInput(pill)}
+                  onClick={() => updateTask(pill)}
                   className={`rounded-xl border px-3.5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center truncate ${
                     isSelected
                       ? 'border-cyan-500 bg-cyan-500/15 text-cyan-800 shadow-sm dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-cyan-200 ring-1 ring-cyan-400/40'

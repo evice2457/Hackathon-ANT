@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, LogOut, Pause, PictureInPicture2, Play } from 'lucide-react'
+import { Check, LogOut, PictureInPicture2, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BreathingAura from '@/components/BreathingAura'
 import FocusStateIndicator from '@/components/FocusStateIndicator'
@@ -10,7 +10,7 @@ import { useFloatingCompanion, useNativeClick } from '@/lib/floating-companion'
 import { primeAudioOnGesture } from '@/lib/ant-voice'
 
 export default function DeepPresenceView() {
-  const { session, pauseSession, resumeSession, completeSession, stopSession, minutesRemaining } =
+  const { session, resumeSession, completeSession, stopSession, minutesRemaining } =
     useFocusSession()
   const floating = useFloatingCompanion()
   const [isConfirmingEnd, setIsConfirmingEnd] = useState(false)
@@ -38,7 +38,7 @@ export default function DeepPresenceView() {
     }
   }, [])
 
-  // Keyboard shortcut listener: Space to toggle Pause/Resume, Escape to dismiss End confirmation
+  // Keyboard shortcut listener: Escape dismisses End confirmation.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts if user is typing in an input or textarea
@@ -47,14 +47,7 @@ export default function DeepPresenceView() {
         return
       }
 
-      if (e.code === 'Space') {
-        e.preventDefault()
-        if (isPaused) {
-          resumeSession()
-        } else {
-          pauseSession()
-        }
-      } else if (e.code === 'Escape') {
+      if (e.code === 'Escape') {
         if (isConfirmingEnd) {
           setIsConfirmingEnd(false)
         }
@@ -63,7 +56,7 @@ export default function DeepPresenceView() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isPaused, isConfirmingEnd, resumeSession, pauseSession])
+  }, [isConfirmingEnd])
 
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6 py-12">
@@ -88,20 +81,12 @@ export default function DeepPresenceView() {
       </div>
 
       <div className="mb-10 flex flex-wrap items-center justify-center gap-3">
-        {isPaused ? (
+        {isPaused && (
           <Button
             onClick={resumeSession}
             className="h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
           >
             <Play data-icon="inline-start" /> Resume
-          </Button>
-        ) : (
-          <Button
-            onClick={pauseSession}
-            variant="outline"
-            className="h-11 rounded-xl border-slate-200/90 bg-white/70 px-5 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-800 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200"
-          >
-            <Pause data-icon="inline-start" /> Take a pause
           </Button>
         )}
         <Button
@@ -153,10 +138,6 @@ export default function DeepPresenceView() {
       <div className="flex items-center gap-2 px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
         <span className="font-medium text-cyan-600 dark:text-cyan-400/80">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
-        </span>
-        <span className="hidden sm:inline text-slate-400 dark:text-slate-600">·</span>
-        <span className="hidden sm:inline text-[11px] text-slate-400 dark:text-slate-500">
-          Press <kbd className="rounded border border-slate-300/80 bg-slate-100/80 px-1.5 py-0.5 font-mono text-[10px] text-slate-700 dark:border-slate-700/80 dark:bg-slate-800/80 dark:text-slate-300">Space</kbd> to {isPaused ? 'resume' : 'pause'}
         </span>
       </div>
     </div>
