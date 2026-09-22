@@ -173,7 +173,7 @@ export default function MicroCommitmentView({ onInitiateRitual }: MicroCommitmen
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-4xl font-light tracking-tight text-slate-900 transition-colors dark:text-white md:text-5xl">
             What will you{' '}
-            <span className="italic font-normal text-cyan-700 dark:text-cyan-300">
+            <span className="font-serif italic font-normal text-cyan-600 dark:text-cyan-300">
               focus on
             </span>{' '}
             next?
