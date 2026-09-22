@@ -16,9 +16,9 @@ import {
 import { createTaskPlan, type TaskPlan } from '@/lib/task-breakdown'
 
 const SUGGESTION_PILLS = [
-  'Review 3 priority emails',
-  'Outline key bullet points',
-  'Finish draft introduction',
+  'Implement user authentication flow',
+  'Write the quarterly project report',
+  'Research React server components',
 ]
 
 interface SpeechRecognitionAlternativeLike {
