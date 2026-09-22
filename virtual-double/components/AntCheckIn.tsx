@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { parseSupportMinutes } from '@/lib/ant-support'
 import type { CheckInState } from '@/lib/check-in'
 import { useMascotName } from '@/lib/mascot-name'
+import { getMascotPresentation } from '@/lib/mascot-presentation'
 import { playAntChime } from '@/lib/ant-voice'
 
 interface AntCheckInProps {
@@ -35,6 +36,7 @@ export default function AntCheckIn({
   onEndSession,
 }: AntCheckInProps) {
   const { mascotName } = useMascotName()
+  const mascotPresentation = getMascotPresentation('check-in', mascotName)
   const suggestedMinutes = parseSupportMinutes(checkIn.suggestedMinutesInput)
   const suggestionValid = Boolean(checkIn.suggestedTitle.trim()) && suggestedMinutes !== null
 
@@ -60,7 +62,7 @@ export default function AntCheckIn({
       >
         <div className="flex items-center gap-3">
           <div className={`relative shrink-0 overflow-hidden rounded-full bg-cyan-400/10 ${compact ? 'size-11' : 'size-16'}`}>
-            <Image src="/ant-mascot-removebg.png" alt={`${mascotName} mascot`} fill sizes={compact ? '44px' : '64px'} className="object-contain" />
+            <Image src={mascotPresentation.src} alt={mascotPresentation.alt} fill sizes={compact ? '44px' : '64px'} className="object-contain" />
           </div>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">{mascotName} check-in</p>

@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
 import { ArrowRight, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { TaskStep } from '@/lib/task-breakdown'
 import { useMascotName } from '@/lib/mascot-name'
+import { getMascotPresentation } from '@/lib/mascot-presentation'
 
 interface StepTransitionViewProps {
   completedStepNumber: number
@@ -23,10 +25,20 @@ export default function StepTransitionView({
   compact = false,
 }: StepTransitionViewProps) {
   const { mascotName } = useMascotName()
+  const mascotPresentation = getMascotPresentation('step-transition', mascotName)
 
   return (
     <div className={`flex items-center justify-center ${compact ? 'h-screen bg-[#0B132B] p-3 text-white' : 'min-h-[calc(100vh-80px)] px-6 py-12'}`}>
       <div className={`w-full max-w-xl border border-cyan-500/20 text-center shadow-xl backdrop-blur-md ${compact ? 'rounded-2xl bg-slate-900/90 p-4' : 'rounded-3xl bg-white/75 p-8 dark:bg-slate-900/70'}`}>
+        <div className={`relative mx-auto ${compact ? 'size-20' : 'size-32'}`}>
+          <Image
+            src={mascotPresentation.src}
+            alt={mascotPresentation.alt}
+            fill
+            sizes={compact ? '80px' : '128px'}
+            className="object-contain"
+          />
+        </div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">
           {mascotName} · Step {completedStepNumber} of {totalSteps}
         </p>
