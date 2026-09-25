@@ -65,11 +65,11 @@ export default function DeepPresenceView() {
       </div>
 
       <div className="mb-10 max-w-2xl text-center">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500 transition-colors dark:text-slate-400">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-cyan-600 transition-colors dark:text-cyan-400">
           Current Focus
         </p>
-        <div className="rounded-2xl border border-cyan-500/20 bg-white/75 px-8 py-6 shadow-xl shadow-cyan-950/5 backdrop-blur-md transition-all dark:bg-gradient-to-br dark:from-slate-800/60 dark:to-slate-900/60 dark:shadow-none">
-          <p className="text-2xl font-light text-slate-900 transition-colors dark:text-white">{session.task}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white/85 px-8 py-6 shadow-sm backdrop-blur-md transition-all dark:border-cyan-500/25 dark:bg-[#0B132B]/85 dark:shadow-none">
+          <p className="text-2xl font-light text-slate-900 transition-colors dark:text-slate-100">{session.task}</p>
         </div>
       </div>
 
@@ -84,14 +84,14 @@ export default function DeepPresenceView() {
         {isPaused && (
           <Button
             onClick={resumeSession}
-            className="h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
+            className="h-11 rounded-full bg-cyan-500 hover:bg-cyan-400 px-6 font-bold text-slate-950 shadow-md shadow-cyan-500/25 transition-all"
           >
             <Play data-icon="inline-start" /> Resume
           </Button>
         )}
         <Button
           onClick={completeSession}
-          className="h-11 rounded-xl bg-emerald-500 px-5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300"
+          className="h-11 rounded-full bg-emerald-600 hover:bg-emerald-700 px-6 font-bold text-white shadow-md shadow-emerald-600/20 transition-all dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-white"
         >
           <Check data-icon="inline-start" /> Completed early
         </Button>
@@ -99,27 +99,27 @@ export default function DeepPresenceView() {
           <button
             ref={floatButtonRef}
             type="button"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-500/50 bg-cyan-500/15 px-5 text-sm font-semibold text-cyan-900 transition-colors hover:bg-cyan-500/25 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-100 dark:hover:bg-cyan-400/25"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-6 text-sm font-semibold text-slate-700 transition-colors hover:border-cyan-500 hover:text-cyan-600 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-100 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
           >
             <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
           </button>
         )}
         {isConfirmingEnd ? (
-          <div className="inline-flex h-11 items-center gap-2 rounded-xl border border-rose-300/60 bg-rose-500/10 px-3 backdrop-blur-md dark:border-rose-400/30 dark:bg-rose-950/40 animate-in fade-in zoom-in-95 duration-200">
-            <span className="text-xs font-medium text-rose-700 dark:text-rose-200">
+          <div className="inline-flex h-11 items-center gap-2 rounded-full border border-rose-300/80 bg-rose-50 px-4 backdrop-blur-md dark:border-rose-900/60 dark:bg-rose-950/60 animate-in fade-in zoom-in-95 duration-200">
+            <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">
               End session?
             </span>
             <button
               onClick={stopSession}
               type="button"
-              className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-500"
+              className="rounded-full bg-rose-600 px-3.5 py-1 text-xs font-bold text-white shadow-xs transition-colors hover:bg-rose-500"
             >
               Yes, end
             </button>
             <button
               onClick={() => setIsConfirmingEnd(false)}
               type="button"
-              className="rounded-lg px-2 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-white/50 dark:text-slate-300 dark:hover:bg-white/10"
+              className="rounded-full px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
             >
               Cancel
             </button>
@@ -128,15 +128,15 @@ export default function DeepPresenceView() {
           <Button
             onClick={() => setIsConfirmingEnd(true)}
             variant="outline"
-            className="h-11 rounded-xl border-rose-300/40 bg-rose-400/10 px-5 text-rose-700 hover:bg-rose-400/20 dark:border-rose-300/10 dark:bg-rose-400/[0.04] dark:text-rose-200 dark:hover:bg-rose-400/10"
+            className="h-11 rounded-full border-rose-200 bg-rose-50/70 px-6 text-sm font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/60"
           >
             <LogOut data-icon="inline-start" /> End now
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-2 px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
-        <span className="font-medium text-cyan-600 dark:text-cyan-400/80">
+      <div className="flex items-center gap-2 px-6 py-2 rounded-full border border-slate-200/80 bg-white/60 text-xs text-slate-600 backdrop-blur-xs dark:border-cyan-500/20 dark:bg-[#0B132B]/60 dark:text-slate-400">
+        <span className="font-semibold text-cyan-600 dark:text-cyan-400">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
         </span>
       </div>

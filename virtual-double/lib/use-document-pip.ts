@@ -43,12 +43,12 @@ function syncPipTheme(pipDoc: Document) {
   const isDark = document.documentElement.classList.contains('dark')
   if (isDark) {
     pipDoc.documentElement.classList.add('dark')
-    pipDoc.body.style.backgroundColor = '#0B132B'
-    pipDoc.body.style.color = '#FFFFFF'
+    pipDoc.body.style.backgroundColor = '#160B0F'
+    pipDoc.body.style.color = '#FAF4EB'
   } else {
     pipDoc.documentElement.classList.remove('dark')
-    pipDoc.body.style.backgroundColor = '#F8FAFC'
-    pipDoc.body.style.color = '#0F172A'
+    pipDoc.body.style.backgroundColor = '#FAF7F2'
+    pipDoc.body.style.color = '#201416'
   }
 }
 

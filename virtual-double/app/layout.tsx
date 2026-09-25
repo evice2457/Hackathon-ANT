@@ -1,9 +1,13 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['400', '500', '600', '700', '800'],
+})
 const playfair = Playfair_Display({ subsets: ['latin'], style: ['italic'], variable: '--font-serif' })
 
 export const metadata: Metadata = {
@@ -64,7 +68,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+      <body className={`${jakarta.variable} ${playfair.variable} antialiased`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
