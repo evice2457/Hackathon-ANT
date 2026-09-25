@@ -392,9 +392,10 @@ export default function MicroCommitmentView({
             type="button"
             onClick={handleBreakDown}
             disabled={!canStart}
-            className="mt-5 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/30 px-4 py-2 text-xs font-bold text-cyan-300 transition-colors hover:bg-cyan-900/40 disabled:opacity-45"
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-cyan-500/40 bg-white/95 px-4.5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide text-cyan-900 shadow-sm transition-all hover:bg-cyan-50 hover:border-cyan-500 hover:shadow-cyan-500/15 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none dark:border-cyan-500/40 dark:bg-[#0E1A38] dark:text-cyan-200 dark:hover:bg-[#13234d] dark:hover:border-cyan-400 dark:shadow-md dark:shadow-cyan-950/40"
           >
-            <ListChecks className="size-3.5" /> Break down task
+            <ListChecks className="size-4 text-cyan-600 dark:text-cyan-400" />
+            <span>Break down task</span>
           </button>
         </div>
 

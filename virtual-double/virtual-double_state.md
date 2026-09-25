@@ -133,6 +133,15 @@ virtual-double/
 
 ## 5. NHẬT KÝ THAY ĐỔI (CHANGELOG)
 
+### Version 3.2.0 — Focus Indicator Frameless Alignment & High-Contrast Break Down Task
+- **1. Xóa Bỏ Hoàn Toàn Bounding Box Viền Đỏ Của Chỉ Số Trạng Thái Tập Trung ([FocusStateIndicator.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/FocusStateIndicator.tsx))**:
+  - Loại bỏ hoàn toàn khối hộp viền đỏ/burgundy (`dark:border-[#42202B] dark:bg-[#201016]/70` và `border-[#EADBCE]`) bao quanh trạng thái `Focused`, `Checking in…`, `Away`.
+  - Giữ lại thuần túy chấm tròn trạng thái (đèn xanh pulsing) và dòng chữ (`(green dot) Focused`), trôi nhẹ nhàng và thoáng đãng ngay dưới thông điệp *"Your AI body double is quietly working alongside you."* theo đúng mẫu thiết kế.
+- **2. Nâng Cấp Nổi Bật Nút "Break down task" Trong Cả Light Mode và Dark Mode ([MicroCommitmentView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/MicroCommitmentView.tsx))**:
+  - Khắc phục triệt để lỗi nút bị mờ, chìm, ngả màu xám đục khó đọc ở Light Mode do `bg-cyan-950/30 text-cyan-300`.
+  - **Light Mode**: Thiết kế nổi bật với nền trắng ngọc lam `bg-white/95`, viền cyan rõ nét `border-cyan-500/40`, chữ đậm màu xanh đậm `text-cyan-900` và icon danh sách `text-cyan-600` với đổ bóng nhẹ `shadow-sm`.
+  - **Dark Mode**: Nền saphire cao cấp `dark:bg-[#0E1A38]`, viền phát sáng cyan `dark:border-cyan-500/40`, chữ xanh ngọc `dark:text-cyan-200`, mang lại độ tương phản sắc sảo và hiện đại.
+
 ### Version 3.1.0 — Visual Polishing: Mascot Tail De-crimsoning, Numeric Sans Typography, Dark Mode Age Harmony & Form Fixes
 - **1. Triệt Tiêu Hoàn Toàn Tàn Dư Màu Đỏ Trên Màn Hình Ready to Focus ([SmileRitualView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/SmileRitualView.tsx))**:
   - Đã loại bỏ triệt để màu đỏ/crimson (`#C92A43`, `#221017`) ở phần nhọn đuôi ô thoại truyện tranh (`Comic Bubble Pointer Tail`), chuyển về màu nền `#0B132B` với viền cyan tinh tế.
