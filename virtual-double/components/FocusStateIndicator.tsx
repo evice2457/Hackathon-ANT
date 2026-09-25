@@ -24,14 +24,14 @@ export default function FocusStateIndicator({ state, className, size = 'sm' }: F
   const dotSize = size === 'md' ? 'size-2.5' : 'size-2'
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn('inline-flex items-center gap-2 rounded-full border border-[#EADBCE] bg-white/70 px-3.5 py-1 backdrop-blur-xs dark:border-[#42202B] dark:bg-[#201016]/70', className)}>
       <span className="relative flex">
         {state === 'focused' && (
           <span className={cn('absolute inline-flex animate-ping rounded-full opacity-50', meta.dot, dotSize)} />
         )}
         <span className={cn('relative inline-flex rounded-full', meta.dot, dotSize)} />
       </span>
-      <span className={cn('font-medium', meta.text, size === 'md' ? 'text-sm' : 'text-[11px]')}>
+      <span className={cn('font-semibold', meta.text, size === 'md' ? 'text-sm' : 'text-[11px]')}>
         {meta.label}
       </span>
     </div>

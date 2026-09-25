@@ -15,8 +15,8 @@ export default function BreathingAura({ remainingSeconds, progress = 0, label }:
 
   return (
     <div className="relative flex size-72 items-center justify-center select-none">
-      {/* Outer ambient glow layer */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-500/35 to-blue-600/25 opacity-70 blur-3xl dark:opacity-75" />
+      {/* Outer ambient glow layer (Crimson, Butter & Rose) */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#A61C30]/20 via-[#FBE8A6]/25 to-[#E8929E]/20 opacity-80 blur-3xl dark:from-[#C92A43]/25 dark:via-[#FBE8A6]/10 dark:to-[#8F1627]/25" />
 
       {/* Progress ring track and indicator */}
       <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
@@ -27,7 +27,7 @@ export default function BreathingAura({ remainingSeconds, progress = 0, label }:
           fill="none"
           stroke="currentColor"
           strokeWidth="1.2"
-          className="text-slate-300/80 transition-colors dark:text-slate-700/60"
+          className="text-[#EADBCE] transition-colors dark:text-[#381822]"
         />
         <circle
           cx="50"
@@ -35,37 +35,37 @@ export default function BreathingAura({ remainingSeconds, progress = 0, label }:
           r="46"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.2"
           strokeLinecap="round"
-          className="text-cyan-600 transition-[stroke-dashoffset] duration-1000 ease-linear dark:text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+          className="text-[#A61C30] transition-[stroke-dashoffset] duration-1000 ease-linear dark:text-[#F39BA9] drop-shadow-[0_0_8px_rgba(166,28,48,0.4)] dark:drop-shadow-[0_0_10px_rgba(243,155,169,0.5)]"
           strokeDasharray={2 * Math.PI * 46}
           strokeDashoffset={2 * Math.PI * 46 * (1 - Math.min(1, Math.max(0, progress)))}
         />
       </svg>
 
       {/* Middle rotating decorative ring */}
-      <div className="absolute inset-0 animate-[spin_10s_linear_infinite] rounded-full border border-cyan-500/30 opacity-60 dark:border-cyan-400/30 dark:opacity-60" />
+      <div className="absolute inset-0 animate-[spin_12s_linear_infinite] rounded-full border border-[#EADBCE] opacity-60 dark:border-[#42202B]/60 dark:opacity-60" />
 
       {/* Inner pulsating breathing aura */}
-      <div className="absolute inset-2 animate-[pulse_4s_ease-in-out_infinite] rounded-full border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/30 dark:border-cyan-400/60 dark:shadow-[0_0_30px_rgba(6,182,212,0.4)]" />
+      <div className="absolute inset-2 animate-[pulse_4s_ease-in-out_infinite] rounded-full border-2 border-[#A61C30]/35 shadow-lg shadow-[#A61C30]/20 dark:border-[#C92A43]/40 dark:shadow-[0_0_30px_rgba(201,42,67,0.3)]" />
 
-      {/* Center Countdown Sphere: High Contrast in Dark Mode (Pure deep midnight, no white stripe) */}
-      <div className="absolute flex size-36 items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-xl border-cyan-500/30 bg-gradient-to-br from-white via-sky-50 to-slate-100 shadow-xl shadow-cyan-950/10 dark:border-cyan-400/60 dark:bg-[#071329] dark:bg-gradient-to-b dark:from-[#0b1b3d] dark:via-[#071329] dark:to-[#030914] dark:shadow-[0_0_40px_rgba(6,182,212,0.3)] dark:ring-1 dark:ring-cyan-400/40">
+      {/* Center Countdown Sphere: High Contrast Porcelain Cream & Deep Velvet Plum */}
+      <div className="absolute flex size-36 items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-xl border-[#EADBCE] bg-gradient-to-br from-white via-[#FAF7F2] to-[#F5ECE3] shadow-lg shadow-[#A61C30]/5 dark:border-[#52232F] dark:bg-[#1C0B12] dark:bg-gradient-to-b dark:from-[#251019] dark:via-[#1C0B12] dark:to-[#12070A] dark:shadow-[0_0_35px_rgba(201,42,67,0.2)] dark:ring-1 dark:ring-[#C92A43]/30">
         <div className="text-center">
-          {/* Numbers: Crisp, bold, high-contrast cyan glow */}
-          <div className="font-mono text-3xl font-extrabold tracking-wider text-cyan-950 transition-colors dark:text-cyan-200 dark:drop-shadow-[0_0_14px_rgba(34,211,238,0.9)]">
+          {/* Numbers: Crisp, bold, high-contrast typography */}
+          <div className="font-mono text-3xl font-extrabold tracking-wider text-[#201416] transition-colors dark:text-[#FAF4EB]">
             {display}
           </div>
-          <div className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-500 transition-colors dark:text-cyan-100/70">
+          <div className="mt-1 text-xs font-semibold uppercase tracking-widest text-[#786663] transition-colors dark:text-[#C5B3B1]">
             Just breathe
           </div>
         </div>
       </div>
 
-      {/* Subtle floating particles */}
-      <div className="absolute left-1/2 top-7 size-2 -translate-x-1/2 animate-[float_6s_ease-in-out_infinite] rounded-full bg-cyan-500/60 dark:bg-cyan-400/60" />
-      <div className="absolute bottom-7 right-7 size-2 animate-[float_7s_ease-in-out_infinite_2s] rounded-full bg-blue-500/60 dark:bg-blue-400/60" />
-      <div className="absolute bottom-7 left-7 size-2 animate-[float_5s_ease-in-out_infinite_1s] rounded-full bg-cyan-500/50 dark:bg-cyan-400/50" />
+      {/* Subtle floating ambient particles */}
+      <div className="absolute left-1/2 top-7 size-2 -translate-x-1/2 animate-[float_6s_ease-in-out_infinite] rounded-full bg-[#A61C30]/50 dark:bg-[#F39BA9]/50" />
+      <div className="absolute bottom-7 right-7 size-2 animate-[float_7s_ease-in-out_infinite_2s] rounded-full bg-[#FBE8A6]/80 dark:bg-[#FBE8A6]/50" />
+      <div className="absolute bottom-7 left-7 size-2 animate-[float_5s_ease-in-out_infinite_1s] rounded-full bg-[#E8929E]/60 dark:bg-[#C92A43]/50" />
     </div>
   )
 }

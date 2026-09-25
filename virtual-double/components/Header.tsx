@@ -35,14 +35,14 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
     <header
       className={`sticky top-0 z-30 transition-colors duration-300 backdrop-blur-md ${
         isDarkMode
-          ? 'border-b border-white/10 bg-[#070f26]/60 shadow-lg shadow-black/10'
-          : 'border-b border-slate-200/80 bg-white/60 shadow-sm shadow-slate-200/50'
+          ? 'border-b border-[#3D1A25] bg-[#160B0F]/80 shadow-sm'
+          : 'border-b border-[#EADBCE] bg-[#FAF7F2]/80 shadow-xs'
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         {/* Logo and Customizable Title */}
         <div className="flex items-center gap-3">
-          <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-cyan-400/50 bg-[#0B132B] shadow-lg shadow-cyan-500/25 ring-2 ring-cyan-400/20">
+          <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-[#EADBCE] bg-white shadow-sm ring-2 ring-[#A61C30]/15 dark:border-[#42202B] dark:bg-[#201016] dark:ring-[#C92A43]/20">
             <Image
               src="/ant-mascot.png"
               alt={`${mascotName} mascot`}
@@ -52,7 +52,7 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
             />
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               {isEditingName ? (
                 <div className="flex items-center gap-1">
                   <input
@@ -69,17 +69,17 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
                       }
                     }}
                     maxLength={24}
-                    className={`h-7 rounded-lg border px-2 text-base font-semibold outline-none transition-colors ${
+                    className={`h-7 rounded-full border px-3 text-base font-semibold outline-none transition-colors ${
                       isDarkMode
-                        ? 'border-cyan-400/50 bg-slate-900/90 text-white focus:ring-1 focus:ring-cyan-400'
-                        : 'border-cyan-500/60 bg-white text-slate-900 focus:ring-1 focus:ring-cyan-500'
+                        ? 'border-[#C92A43]/60 bg-[#25121B] text-[#FAF4EB] focus:ring-1 focus:ring-[#C92A43]'
+                        : 'border-[#A61C30]/50 bg-white text-[#201416] focus:ring-1 focus:ring-[#A61C30]'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={handleSaveName}
                     title="Save name"
-                    className="rounded-lg p-1 text-cyan-500 hover:bg-cyan-500/10"
+                    className="rounded-full p-1 text-[#A61C30] hover:bg-[#A61C30]/10 dark:text-[#F39BA9]"
                   >
                     <Check className="size-4" />
                   </button>
@@ -95,22 +95,22 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
                   className="group flex items-center gap-1.5 text-left rounded-lg transition-colors hover:opacity-90"
                 >
                   <h1
-                    className={`text-xl font-semibold tracking-tight transition-colors ${
-                      isDarkMode ? 'text-white' : 'text-slate-900'
+                    className={`text-xl font-bold tracking-tight transition-colors ${
+                      isDarkMode ? 'text-[#FAF4EB]' : 'text-[#201416]'
                     }`}
                   >
                     {mascotName}
                   </h1>
-                  <Pencil className="size-3 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100 group-hover:text-cyan-500" />
+                  <Pencil className="size-3 text-[#786663] opacity-40 transition-opacity group-hover:opacity-100 group-hover:text-[#A61C30] dark:text-[#A89299]" />
                 </button>
               )}
-              <span className="rounded-md bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">
-                ANT
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#E8D5CE] bg-[#F7ECE8] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#A61C30] dark:border-[#52232B] dark:bg-[#32141A] dark:text-[#F39BA9]">
+                <span className="text-[9px]">✦</span> ANT
               </span>
             </div>
             <p
               className={`text-xs transition-colors ${
-                isDarkMode ? 'text-slate-400' : 'text-slate-500 font-medium'
+                isDarkMode ? 'text-[#A89299]' : 'text-[#786663] font-medium'
               }`}
             >
               AI Cognitive Body Doubler
@@ -125,13 +125,13 @@ export default function Header({ isDarkMode, onToggleDarkMode }: HeaderProps) {
             size="icon"
             onClick={onToggleDarkMode}
             title={isDarkMode ? 'Chuyển sang chế độ Sáng' : 'Chuyển sang chế độ Tối'}
-            className={`size-9 rounded-xl transition-all duration-200 ${
+            className={`size-9 rounded-full transition-all duration-200 ${
               isDarkMode
-                ? 'border border-white/10 bg-slate-800/60 text-amber-300 hover:bg-slate-700/70 hover:text-amber-200 shadow-sm'
-                : 'border border-slate-200/90 bg-white/80 text-slate-700 hover:bg-slate-100 hover:text-cyan-700 shadow-sm'
+                ? 'border border-[#42202B] bg-[#24121A] text-[#FBE8A6] hover:bg-[#341824] hover:text-[#FBE8A6] shadow-xs'
+                : 'border border-[#EADBCE] bg-white/90 text-[#4A3E3D] hover:bg-[#F5ECE5] hover:text-[#A61C30] shadow-xs'
             }`}
           >
-            {isDarkMode ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
+            {isDarkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </Button>
         </div>
       </div>

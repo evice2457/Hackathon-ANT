@@ -45,27 +45,21 @@ export default function FocusGlassCard({
     <article
       aria-label="Current Focus Commitment"
       className={`relative w-full max-w-xl select-none overflow-hidden rounded-3xl transition-all duration-300 ease-out
-        /* 1. Backdrop Blur & Controlled Opacity (Zero visual bleed-through) */
-        bg-white/85 backdrop-blur-xl dark:bg-[#0c162e]/90
-        
-        /* 2. Sharp Visual Anchors: Specular highlight top rim + 1px crisp perimeter */
-        border border-slate-200/90 dark:border-white/12
-        shadow-[0_12px_40px_-10px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.6)]
-        ring-1 ring-inset ring-black/5 dark:ring-white/5
-        
-        /* 3. Spacious Layout & Ergonomics */
+        bg-white/85 backdrop-blur-xl dark:bg-[#201016]/90
+        border border-[#EADBCE] dark:border-[#42202B]
+        shadow-sm dark:shadow-2xl
         p-8 md:p-10 ${className}`}
     >
-      {/* Subtle Top Specular Reflection Gradient (Anchors top edge crisply) */}
+      {/* Subtle Top Specular Reflection Gradient */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent dark:via-cyan-400/50"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A61C30]/30 to-transparent dark:via-[#F39BA9]/30"
         aria-hidden="true"
       />
 
       {/* Header: Status Pill + Time Badge */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         {/* Visual Anchor Tag */}
-        <div className="flex items-center gap-2 rounded-full border border-cyan-600/30 bg-cyan-50/80 px-3.5 py-1.5 backdrop-blur-md dark:border-cyan-400/30 dark:bg-cyan-950/50">
+        <div className="flex items-center gap-2 rounded-full border border-[#E8D5CE] bg-[#F7ECE8] px-3.5 py-1.5 backdrop-blur-md dark:border-[#52232B] dark:bg-[#32141A]">
           <span className="relative flex size-2">
             <span
               className={`size-full rounded-full ${
@@ -80,40 +74,40 @@ export default function FocusGlassCard({
               }`}
             />
           </span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-cyan-950 dark:text-cyan-200">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#A61C30] dark:text-[#F39BA9]">
             {isRunning ? 'Deep Work · Focused' : 'Session Paused'}
           </span>
         </div>
 
         {/* Time Allocation */}
-        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-          <Clock className="size-3.5 text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-[#614F4D] dark:text-[#C5B3B1]">
+          <Clock className="size-3.5 text-[#A61C30] dark:text-[#F39BA9]" aria-hidden="true" />
           <span>{allocatedMinutes} min sprint</span>
         </div>
       </div>
 
-      {/* Primary Focus Title (WCAG AAA High Contrast) */}
+      {/* Primary Focus Title */}
       <div className="mb-6">
-        <h3 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900 transition-colors dark:text-white md:text-3xl">
+        <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#201416] transition-colors dark:text-[#FAF4EB] md:text-3xl">
           {taskTitle}
         </h3>
-        <p className="text-sm font-normal leading-relaxed text-slate-700 transition-colors dark:text-slate-300">
+        <p className="text-sm font-normal leading-relaxed text-[#614F4D] transition-colors dark:text-[#C5B3B1]">
           One single goal. Everything else can wait until the timer rings.
         </p>
       </div>
 
-      {/* Single Next Micro-Step Card (Visual Isolation for ADHD) */}
-      <div className="mb-8 rounded-2xl border border-slate-200/80 bg-slate-50/90 p-5 transition-colors dark:border-slate-800/80 dark:bg-slate-900/60">
-        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-800 dark:text-cyan-300">
+      {/* Single Next Micro-Step Card */}
+      <div className="mb-8 rounded-2xl border border-[#EADBCE] bg-[#FDFBF7] p-5 transition-colors dark:border-[#42202B] dark:bg-[#1A0B10]/80">
+        <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A61C30] dark:text-[#F39BA9]">
           <Target className="size-4" aria-hidden="true" />
           <span>Immediate Next Micro-Step</span>
         </div>
-        <p className="text-base font-medium text-slate-900 dark:text-slate-100">
+        <p className="text-base font-medium text-[#201416] dark:text-[#FAF4EB]">
           {currentStep}
         </p>
       </div>
 
-      {/* Action Controls with Tactile Contrast & Clear Affordance */}
+      {/* Action Controls with Capsule Buttons */}
       <footer className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <div className="flex items-center gap-2">
           {/* Pause / Resume Button */}
@@ -121,7 +115,7 @@ export default function FocusGlassCard({
             type="button"
             onClick={handleToggleTimer}
             variant="outline"
-            className="rounded-xl border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 shadow-sm transition-all hover:border-cyan-500 hover:text-cyan-800 hover:shadow dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-200"
+            className="rounded-full border-[#EADBCE] bg-white px-4 py-2 text-xs font-semibold text-[#4A3E3D] shadow-2xs transition-all hover:border-[#A61C30] hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016] dark:text-[#FAF4EB] dark:hover:border-[#C92A43] dark:hover:text-[#F39BA9]"
           >
             {isRunning ? (
               <>
@@ -134,14 +128,14 @@ export default function FocusGlassCard({
             )}
           </Button>
 
-          {/* AI Task Breakdown (Instant relief for cognitive overwhelm) */}
+          {/* AI Task Breakdown */}
           <Button
             type="button"
             onClick={onBreakdown}
             variant="outline"
-            className="rounded-xl border-amber-300/80 bg-amber-50/60 px-4 py-2 text-xs font-semibold text-amber-900 transition-all hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-900/40"
+            className="rounded-full border-[#EADBCE] bg-[#FBE8A6]/40 px-4 py-2 text-xs font-semibold text-[#614F4D] transition-all hover:bg-[#FBE8A6]/70 dark:border-[#42202B] dark:bg-[#3A1823] dark:text-[#FBE8A6]"
           >
-            <Sparkles className="mr-1.5 size-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            <Sparkles className="mr-1.5 size-3.5 text-[#A61C30] dark:text-[#FBE8A6]" aria-hidden="true" />
             Chia nhỏ việc
           </Button>
         </div>
@@ -151,7 +145,7 @@ export default function FocusGlassCard({
           type="button"
           onClick={handleComplete}
           disabled={isCompleted}
-          className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 transition-all hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 dark:from-emerald-500 dark:to-teal-500 dark:shadow-emerald-950/40"
+          className="rounded-full bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-600"
         >
           <CheckCircle2 className="mr-1.5 size-4" aria-hidden="true" />
           {isCompleted ? 'Đã hoàn thành!' : 'Hoàn tất bước này'}

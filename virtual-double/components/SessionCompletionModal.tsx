@@ -38,36 +38,36 @@ export default function SessionCompletionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 py-12 backdrop-blur-sm">
-      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-slate-800/95 to-slate-900/95 shadow-2xl shadow-emerald-950/30 backdrop-blur-md">
-        <div className="p-10">
-          <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-emerald-500/40 bg-gradient-to-br from-emerald-500/25 to-teal-500/15">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-6 py-12 backdrop-blur-sm">
+      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-[#4A202A] bg-gradient-to-br from-[#24121A] to-[#160B0F] shadow-2xl shadow-[#A61C30]/20 backdrop-blur-md">
+        <div className="p-8 sm:p-10">
+          <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20">
             <Check className="size-7 text-emerald-300" />
           </div>
 
           <h3 className="mb-3 text-3xl font-light text-white">
             {planCompleteTask ? 'Whole plan complete. ' : 'How did it go? '}
-            <span className="font-serif italic font-normal text-emerald-200">
+            <span className="font-serif italic font-normal text-[#FBE8A6]">
               You made it through.
             </span>
           </h3>
 
-          <div className="mb-8 rounded-2xl border border-slate-700/40 bg-slate-800/40 px-5 py-4">
-            <p className="text-base font-medium text-white">
+          <div className="mb-8 rounded-2xl border border-[#4A202A] bg-[#1E0D15] px-5 py-4">
+            <p className="text-base font-medium text-[#FAF4EB]">
               {planCompleteTask || session.task || 'Your session'}
             </p>
           </div>
 
           {subSteps ? (
             <div className="mb-8">
-              <p className="mb-3 text-xs uppercase tracking-wide text-slate-400">Try a smaller step first</p>
+              <p className="mb-3 text-xs uppercase tracking-wider text-[#A89299]">Try a smaller step first</p>
               <ul className="space-y-2">
                 {subSteps.map((step) => (
                   <li
                     key={step}
-                    className="flex items-start gap-2.5 rounded-xl border border-slate-700/40 bg-slate-800/40 px-4 py-3 text-sm text-slate-200"
+                    className="flex items-start gap-2.5 rounded-2xl border border-[#4A202A] bg-[#2E1622] px-4 py-3 text-sm text-[#FAF4EB]"
                   >
-                    <Sparkles className="mt-0.5 size-4 shrink-0 text-emerald-300" />
+                    <Sparkles className="mt-0.5 size-4 shrink-0 text-[#FBE8A6]" />
                     {step}
                   </li>
                 ))}
@@ -77,28 +77,28 @@ export default function SessionCompletionModal({
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 onClick={onDone}
-                className="rounded-xl bg-emerald-500 px-6 py-6 font-semibold text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300"
+                className="rounded-full bg-emerald-600 hover:bg-emerald-700 py-6 font-bold text-white shadow-md shadow-emerald-600/20 transition-all dark:bg-emerald-500 dark:hover:bg-emerald-600"
               >
                 <Check data-icon="inline-start" /> Done
               </Button>
               <Button
                 onClick={handleAddTime}
-                className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-6 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
+                className="rounded-full bg-[#A61C30] hover:bg-[#8F1627] py-6 font-bold text-white shadow-md shadow-[#A61C30]/25 transition-all dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
               >
                 <ClockPlus data-icon="inline-start" /> +5 min
               </Button>
               <Button
                 onClick={handleBreakDown}
                 variant="outline"
-                className="rounded-xl border-slate-600 px-6 py-6 font-semibold text-slate-200 hover:border-emerald-400/40 hover:bg-slate-700/50 hover:text-white"
+                className="rounded-full border-[#4A202A] bg-white/5 py-6 font-semibold text-[#FAF4EB] hover:bg-white/10 hover:border-[#FBE8A6]/40"
               >
-                <Sparkles data-icon="inline-start" />
+                <Sparkles data-icon="inline-start" className="text-[#FBE8A6]" />
                 Break it down
               </Button>
               <Button
                 onClick={onNextTask}
                 variant="outline"
-                className="rounded-xl border-slate-600 px-6 py-6 font-semibold text-slate-200 hover:border-cyan-400/40 hover:bg-slate-700/50 hover:text-white"
+                className="rounded-full border-[#4A202A] bg-white/5 py-6 font-semibold text-[#FAF4EB] hover:bg-white/10 hover:border-[#F39BA9]/40"
               >
                 <MoveRight data-icon="inline-start" /> Next task
               </Button>
@@ -109,14 +109,14 @@ export default function SessionCompletionModal({
             <div className="mt-6 flex gap-3">
               <Button
                 onClick={handleAddTime}
-                className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-400"
+                className="flex-1 rounded-full bg-[#A61C30] hover:bg-[#8F1627] py-5 font-bold text-white shadow-md shadow-[#A61C30]/25 dark:bg-[#C92A43]"
               >
                 <ClockPlus data-icon="inline-start" /> +5 min
               </Button>
               <Button
                 onClick={onNextTask}
                 variant="outline"
-                className="flex-1 rounded-xl border-slate-600 px-6 py-5 font-semibold text-slate-200 hover:bg-slate-700/50"
+                className="flex-1 rounded-full border-[#4A202A] bg-white/5 py-5 font-semibold text-[#FAF4EB] hover:bg-white/10"
               >
                 <MoveRight data-icon="inline-start" /> Next task
               </Button>
