@@ -265,14 +265,14 @@ export default function MicroCommitmentView({
       <div className="w-full max-w-2xl">
         {/* Headline */}
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-light tracking-tight text-[#201416] transition-colors dark:text-[#FAF4EB] md:text-5xl">
+          <h2 className="mb-4 text-4xl font-light tracking-tight text-slate-900 transition-colors dark:text-slate-100 md:text-5xl">
             What will you{' '}
-            <span className="font-serif italic font-normal text-[#A61C30] dark:text-[#F39BA9]">
+            <span className="font-semibold text-cyan-600 dark:text-cyan-400">
               focus on
             </span>{' '}
             next?
           </h2>
-          <p className="text-base text-[#614F4D] transition-colors dark:text-[#C5B3B1]">
+          <p className="text-base text-slate-600 transition-colors dark:text-slate-400">
             Break it down. Keep it simple. Just one thing.
           </p>
         </div>
@@ -289,7 +289,7 @@ export default function MicroCommitmentView({
                 }
               }}
               placeholder="Tell me what you’ll do..."
-              className="flex-1 rounded-full border-[#EADBCE] bg-white/85 px-6 py-7 text-lg text-[#201416] placeholder:text-[#8D7B78] shadow-xs backdrop-blur-md transition-all focus:border-[#A61C30]/60 focus:ring-[#A61C30]/20 dark:border-[#42202B] dark:bg-[#201016]/80 dark:text-[#FAF4EB] dark:placeholder:text-[#A89299] dark:shadow-none"
+              className="flex-1 rounded-full border-slate-200 bg-white/85 px-6 py-7 text-lg text-slate-900 placeholder:text-slate-400 shadow-xs backdrop-blur-md transition-all focus:border-cyan-500/60 focus:ring-cyan-500/20 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-100 dark:placeholder:text-slate-500 dark:shadow-none"
             />
             <button
               type="button"
@@ -297,7 +297,7 @@ export default function MicroCommitmentView({
                 if (minutes !== null) startWith(input, minutes)
               }}
               disabled={!canStart}
-              className="rounded-full bg-[#A61C30] px-7 font-semibold text-white shadow-md shadow-[#A61C30]/25 transition-all hover:bg-[#8F1627] hover:shadow-[#A61C30]/40 disabled:opacity-45 disabled:shadow-none dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
+              className="rounded-full bg-cyan-500 px-7 font-semibold text-slate-950 shadow-md shadow-cyan-500/25 transition-all hover:bg-cyan-400 hover:shadow-cyan-500/40 disabled:opacity-45 disabled:shadow-none"
             >
               Start with ANT
             </button>
@@ -309,8 +309,8 @@ export default function MicroCommitmentView({
               title={isListening ? 'Listening... click to stop' : 'Speak your task'}
               className={`h-auto self-stretch w-14 shrink-0 rounded-full transition-all ${
                 isListening
-                  ? 'border-[#A61C30] bg-[#A61C30] text-white animate-pulse shadow-md shadow-[#A61C30]/40 hover:bg-[#8F1627]'
-                  : 'border-[#EADBCE] bg-white/80 text-[#4A3E3D] hover:border-[#A61C30]/50 hover:bg-white hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/80 dark:text-[#FAF4EB] dark:hover:border-[#C92A43] dark:hover:text-[#F39BA9]'
+                  ? 'border-cyan-500 bg-cyan-500 text-slate-950 animate-pulse shadow-md shadow-cyan-500/40 hover:bg-cyan-400'
+                  : 'border-slate-200 bg-white/80 text-slate-700 hover:border-cyan-500/50 hover:bg-white hover:text-cyan-600 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-300'
               }`}
             >
               {isListening ? <MicOff className="size-5" /> : <Mic className="size-5" />}
@@ -319,8 +319,8 @@ export default function MicroCommitmentView({
 
           {/* Speech Feedback message */}
           {isListening && (
-            <p className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-[#A61C30] dark:text-[#F39BA9] animate-pulse">
-              <span className="size-2 rounded-full bg-[#A61C30] dark:bg-[#F39BA9] animate-ping" />
+            <p className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400 animate-pulse">
+              <span className="size-2 rounded-full bg-cyan-500 animate-ping" />
               Listening… Say your task and I&apos;ll fill it in above.
             </p>
           )}
@@ -333,7 +333,7 @@ export default function MicroCommitmentView({
 
         {/* Duration picker */}
         <div className="mb-10">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#614F4D] transition-colors dark:text-[#C5B3B1]">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
             Session length
           </p>
           <div className="flex flex-wrap items-center gap-3">
@@ -345,14 +345,14 @@ export default function MicroCommitmentView({
                 }}
                 className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-all duration-200 backdrop-blur-md ${
                   minutes === preset && customMinutes === null
-                    ? 'border-[#A61C30] bg-[#A61C30] text-white shadow-md shadow-[#A61C30]/25 dark:border-[#C92A43] dark:bg-[#C92A43] dark:text-white'
-                    : 'border-[#EADBCE] bg-white/70 text-[#4A3E3D] hover:border-[#A61C30]/50 hover:bg-white/90 hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/60 dark:text-[#D1C0BE] dark:hover:border-[#C92A43]/50 dark:hover:text-[#F39BA9]'
+                    ? 'border-cyan-500 bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/25 dark:border-cyan-400 dark:bg-cyan-400 dark:text-slate-950 font-bold'
+                    : 'border-slate-200 bg-white/70 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/60 dark:text-slate-300 dark:hover:border-cyan-400/50 dark:hover:text-cyan-300'
                 }`}
               >
                 {preset} min
               </button>
             ))}
-            <div className="flex items-center gap-2 rounded-full border border-[#EADBCE] bg-white/70 px-3.5 py-1.5 backdrop-blur-md dark:border-[#42202B] dark:bg-[#201016]/60">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3.5 py-1.5 backdrop-blur-md dark:border-cyan-500/20 dark:bg-[#0B132B]/60">
               <Input
                 type="number"
                 min={1}
@@ -374,24 +374,24 @@ export default function MicroCommitmentView({
             type="button"
             onClick={handleBreakDown}
             disabled={!canStart}
-            className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#E8D5CE] bg-[#F7ECE8] px-4 py-2 text-xs font-bold text-[#A61C30] transition-colors hover:bg-[#F3DFDA] disabled:opacity-45 dark:border-[#52232B] dark:bg-[#32141A] dark:text-[#F39BA9]"
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/30 px-4 py-2 text-xs font-bold text-cyan-300 transition-colors hover:bg-cyan-900/40 disabled:opacity-45"
           >
             <ListChecks className="size-3.5" /> Break down task
           </button>
         </div>
 
         {taskPlan && (
-          <div className="mb-10 rounded-3xl border border-[#EADBCE] bg-white/85 p-6 shadow-xs backdrop-blur-md dark:border-[#42202B] dark:bg-[#201016]/85">
+          <div className="mb-10 rounded-3xl border border-cyan-500/20 bg-white/85 p-6 shadow-xs backdrop-blur-md dark:border-cyan-500/25 dark:bg-[#0B132B]/85">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#A61C30] dark:text-[#F39BA9]">
+                <p className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
                   Step-by-step plan
                 </p>
-                <p className="mt-1 text-sm text-[#614F4D] dark:text-[#C5B3B1]">
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   Edit the steps or time before you begin.
                 </p>
               </div>
-              <span className="rounded-full bg-[#F7ECE8] px-3 py-1 text-xs font-semibold text-[#A61C30] dark:bg-[#32141A] dark:text-[#F39BA9]">
+              <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300">
                 {taskPlan.steps.reduce(
                   (total, step) => total + (parseCustomDuration(stepMinuteInputs[step.id] ?? '') ?? 0),
                   0,
@@ -404,15 +404,15 @@ export default function MicroCommitmentView({
               {taskPlan.steps.map((step, index) => {
                 const stepMinutesValid = parseCustomDuration(stepMinuteInputs[step.id] ?? '') !== null
                 return (
-                  <div key={step.id} className="flex items-start gap-2.5 rounded-2xl border border-[#EADBCE]/80 bg-white/90 p-3 dark:border-[#42202B]/80 dark:bg-[#26131B]/70">
-                    <span className="mt-1.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#F7ECE8] text-xs font-bold text-[#A61C30] dark:bg-[#32141A] dark:text-[#F39BA9]">
+                  <div key={step.id} className="flex items-start gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3 dark:border-cyan-500/20 dark:bg-[#0E1A38]/70">
+                    <span className="mt-1.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-xs font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">
                       {index + 1}
                     </span>
                     <Input
                       value={step.title}
                       onChange={(event) => updateStepTitle(step.id, event.target.value)}
                       aria-label={`Step ${index + 1} title`}
-                      className="flex-1 rounded-xl border-[#EADBCE] dark:border-[#42202B]"
+                      className="flex-1 rounded-xl border-slate-200 dark:border-cyan-500/20"
                     />
                     <div>
                       <Input
@@ -422,7 +422,7 @@ export default function MicroCommitmentView({
                         value={stepMinuteInputs[step.id] ?? ''}
                         onChange={(event) => updateStepMinutes(step.id, event.target.value)}
                         aria-label={`Step ${index + 1} minutes`}
-                        className={`w-20 text-center rounded-xl ${stepMinutesValid ? 'border-[#EADBCE] dark:border-[#42202B]' : 'border-amber-500'}`}
+                        className={`w-20 text-center rounded-xl ${stepMinutesValid ? 'border-slate-200 dark:border-cyan-500/20' : 'border-amber-500'}`}
                       />
                       {!stepMinutesValid && <span className="mt-1 block text-[10px] text-amber-600">1–180 min</span>}
                     </div>
@@ -430,7 +430,7 @@ export default function MicroCommitmentView({
                       type="button"
                       onClick={() => removeStep(step.id)}
                       aria-label={`Remove step ${index + 1}`}
-                      className="mt-1 rounded-full p-2 text-[#786663] hover:bg-rose-500/10 hover:text-rose-600 dark:text-[#A89299]"
+                      className="mt-1 rounded-full p-2 text-slate-400 hover:bg-rose-500/10 hover:text-rose-600 dark:text-slate-500"
                     >
                       <Trash2 className="size-4" />
                     </button>
@@ -444,7 +444,7 @@ export default function MicroCommitmentView({
                 type="button"
                 onClick={() => minutes !== null && startWith(input, minutes)}
                 disabled={!canStart}
-                className="rounded-full border border-[#EADBCE] bg-white/80 px-5 py-3 text-sm font-semibold text-[#4A3E3D] hover:border-[#A61C30]/50 hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/60 dark:text-[#FAF4EB]"
+                className="rounded-full border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 hover:border-cyan-500/50 hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/60 dark:text-slate-200"
               >
                 Start full task — {minutes} min
               </button>
@@ -452,7 +452,7 @@ export default function MicroCommitmentView({
                 type="button"
                 onClick={startStepByStep}
                 disabled={!planIsValid}
-                className="rounded-full bg-[#A61C30] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#A61C30]/25 hover:bg-[#8F1627] disabled:opacity-45 dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
+                className="rounded-full bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-md shadow-cyan-500/25 hover:bg-cyan-400 disabled:opacity-45"
               >
                 Start step-by-step
               </button>
@@ -463,14 +463,14 @@ export default function MicroCommitmentView({
         {/* Quick Suggestion Pills */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#614F4D] transition-colors dark:text-[#C5B3B1]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors dark:text-slate-400">
               Quick suggestions (Click to fill)
             </p>
             {input && (
               <button
                 type="button"
                 onClick={() => updateTask('')}
-                className="text-[11px] text-[#786663] hover:text-[#A61C30] transition-colors dark:text-[#A89299]"
+                className="text-[11px] text-slate-400 hover:text-cyan-500 transition-colors dark:text-slate-500"
               >
                 Clear input
               </button>
@@ -486,8 +486,8 @@ export default function MicroCommitmentView({
                   onClick={() => updateTask(pill)}
                   className={`rounded-full border px-4 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center truncate ${
                     isSelected
-                      ? 'border-[#A61C30] bg-[#F7ECE8] text-[#A61C30] shadow-xs dark:border-[#C92A43] dark:bg-[#32141A] dark:text-[#F39BA9] ring-1 ring-[#A61C30]/30'
-                      : 'border-[#EADBCE] bg-white/70 text-[#4A3E3D] shadow-2xs hover:border-[#A61C30]/50 hover:bg-white hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/70 dark:text-[#D1C0BE] dark:hover:border-[#C92A43]/50 dark:hover:text-[#F39BA9]'
+                      ? 'border-cyan-500 bg-cyan-50 text-cyan-800 shadow-xs dark:border-cyan-400 dark:bg-cyan-950/60 dark:text-cyan-300 ring-1 ring-cyan-500/30'
+                      : 'border-slate-200 bg-white/70 text-slate-700 shadow-2xs hover:border-cyan-500/50 hover:bg-white hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/70 dark:text-slate-300 dark:hover:border-cyan-400/50 dark:hover:text-cyan-300'
                   }`}
                   title={pill}
                 >
@@ -501,3 +501,4 @@ export default function MicroCommitmentView({
     </div>
   )
 }
+

@@ -65,16 +65,16 @@ export default function DeepPresenceView() {
       </div>
 
       <div className="mb-10 max-w-2xl text-center">
-        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#A61C30] transition-colors dark:text-[#F39BA9]">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-cyan-600 transition-colors dark:text-cyan-400">
           Current Focus
         </p>
-        <div className="rounded-3xl border border-[#EADBCE] bg-white/85 px-8 py-6 shadow-sm backdrop-blur-md transition-all dark:border-[#42202B] dark:bg-[#201016]/85 dark:shadow-none">
-          <p className="text-2xl font-light text-[#201416] transition-colors dark:text-[#FAF4EB]">{session.task}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white/85 px-8 py-6 shadow-sm backdrop-blur-md transition-all dark:border-cyan-500/25 dark:bg-[#0B132B]/85 dark:shadow-none">
+          <p className="text-2xl font-light text-slate-900 transition-colors dark:text-slate-100">{session.task}</p>
         </div>
       </div>
 
       <div className="mb-10 flex flex-col items-center gap-3 text-center">
-        <p className="text-base text-[#614F4D] transition-colors dark:text-[#C5B3B1]">
+        <p className="text-base text-slate-600 transition-colors dark:text-slate-400">
           {isPaused ? 'Taking a pause — resume when you’re ready.' : 'Your AI body double is quietly working alongside you.'}
         </p>
         <FocusStateIndicator state={session.focusState} size="md" />
@@ -84,7 +84,7 @@ export default function DeepPresenceView() {
         {isPaused && (
           <Button
             onClick={resumeSession}
-            className="h-11 rounded-full bg-[#A61C30] hover:bg-[#8F1627] px-6 font-bold text-white shadow-md shadow-[#A61C30]/25 transition-all dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
+            className="h-11 rounded-full bg-cyan-500 hover:bg-cyan-400 px-6 font-bold text-slate-950 shadow-md shadow-cyan-500/25 transition-all"
           >
             <Play data-icon="inline-start" /> Resume
           </Button>
@@ -99,27 +99,27 @@ export default function DeepPresenceView() {
           <button
             ref={floatButtonRef}
             type="button"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[#EADBCE] bg-white/80 px-6 text-sm font-semibold text-[#4A3E3D] transition-colors hover:border-[#A61C30] hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/80 dark:text-[#FAF4EB] dark:hover:border-[#C92A43] dark:hover:text-[#F39BA9]"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-6 text-sm font-semibold text-slate-700 transition-colors hover:border-cyan-500 hover:text-cyan-600 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-100 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
           >
             <PictureInPicture2 className="size-4 shrink-0" /> Open floating companion
           </button>
         )}
         {isConfirmingEnd ? (
           <div className="inline-flex h-11 items-center gap-2 rounded-full border border-rose-300/80 bg-rose-50 px-4 backdrop-blur-md dark:border-rose-900/60 dark:bg-rose-950/60 animate-in fade-in zoom-in-95 duration-200">
-            <span className="text-xs font-semibold text-[#A61C30] dark:text-[#F39BA9]">
+            <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">
               End session?
             </span>
             <button
               onClick={stopSession}
               type="button"
-              className="rounded-full bg-[#A61C30] px-3.5 py-1 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#8F1627] dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
+              className="rounded-full bg-rose-600 px-3.5 py-1 text-xs font-bold text-white shadow-xs transition-colors hover:bg-rose-500"
             >
               Yes, end
             </button>
             <button
               onClick={() => setIsConfirmingEnd(false)}
               type="button"
-              className="rounded-full px-2.5 py-1 text-xs font-semibold text-[#786663] transition-colors hover:bg-white/60 dark:text-[#A89299] dark:hover:bg-white/10"
+              className="rounded-full px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
             >
               Cancel
             </button>
@@ -128,15 +128,15 @@ export default function DeepPresenceView() {
           <Button
             onClick={() => setIsConfirmingEnd(true)}
             variant="outline"
-            className="h-11 rounded-full border-rose-200 bg-rose-50/70 px-6 text-sm font-semibold text-[#A61C30] hover:bg-rose-100 hover:text-[#8F1627] dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-[#F39BA9] dark:hover:bg-rose-950/60"
+            className="h-11 rounded-full border-rose-200 bg-rose-50/70 px-6 text-sm font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/60"
           >
             <LogOut data-icon="inline-start" /> End now
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-2 px-6 py-2 rounded-full border border-[#EADBCE]/80 bg-white/60 text-xs text-[#786663] backdrop-blur-xs dark:border-[#42202B]/80 dark:bg-[#201016]/60 dark:text-[#A89299]">
-        <span className="font-semibold text-[#A61C30] dark:text-[#F39BA9]">
+      <div className="flex items-center gap-2 px-6 py-2 rounded-full border border-slate-200/80 bg-white/60 text-xs text-slate-600 backdrop-blur-xs dark:border-cyan-500/20 dark:bg-[#0B132B]/60 dark:text-slate-400">
+        <span className="font-semibold text-cyan-600 dark:text-cyan-400">
           {minutesRemaining} min remaining · {isPaused ? 'paused' : 'running'}
         </span>
       </div>

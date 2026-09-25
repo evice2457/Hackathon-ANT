@@ -122,15 +122,14 @@ export default function SmileRitualView({
             <button
               onClick={onCancel}
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#EADBCE] bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-[#4A3E3D] shadow-2xs backdrop-blur-md transition-all hover:bg-white hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/80 dark:text-[#D1C0BE] dark:hover:text-[#F39BA9]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs backdrop-blur-md transition-all hover:bg-white hover:text-cyan-600 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-300 dark:hover:text-cyan-300"
             >
               <ArrowLeft className="size-3.5" /> Back to task{' '}
-              <span className="hidden sm:inline text-[10px] text-[#8D7B78]">(Esc)</span>
+              <span className="hidden sm:inline text-[10px] text-slate-400">(Esc)</span>
             </button>
           </div>
 
-          <div className="justify-self-center inline-flex items-center gap-2 rounded-full border border-[#E8D5CE] bg-[#F7ECE8]/90 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#A61C30] backdrop-blur-md dark:border-[#52232B] dark:bg-[#32141A]/90 dark:text-[#F39BA9]">
-            <span className="text-[10px]">✦</span>
+          <div className="justify-self-center inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-950/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-cyan-300 backdrop-blur-md">
             <span>Ready to Focus</span>
           </div>
 
@@ -139,15 +138,15 @@ export default function SmileRitualView({
               onClick={toggleAudio}
               type="button"
               title={audioEnabled ? `Mute ${mascotName} voice` : `Enable ${mascotName} voice`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#EADBCE] bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-[#4A3E3D] shadow-2xs backdrop-blur-md transition-all hover:bg-white hover:text-[#A61C30] dark:border-[#42202B] dark:bg-[#201016]/80 dark:text-[#D1C0BE] dark:hover:text-[#F39BA9]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs backdrop-blur-md transition-all hover:bg-white hover:text-cyan-600 dark:border-cyan-500/30 dark:bg-[#0B132B]/80 dark:text-slate-300 dark:hover:text-cyan-300"
             >
               {audioEnabled ? (
                 <>
-                  <Volume2 className="size-3.5 text-[#A61C30] dark:text-[#F39BA9]" /> Sound on
+                  <Volume2 className="size-3.5 text-cyan-500 dark:text-cyan-400" /> Sound on
                 </>
               ) : (
                 <>
-                  <VolumeX className="size-3.5 text-[#8D7B78]" /> Sound off
+                  <VolumeX className="size-3.5 text-slate-400" /> Sound off
                 </>
               )}
             </button>
@@ -156,12 +155,12 @@ export default function SmileRitualView({
 
         {/* Next Step reinforcement — the task the user is about to begin */}
         <div className="mb-8 w-full">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#A61C30] dark:text-[#F39BA9]">
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-600 dark:text-cyan-400">
             Your next step
           </p>
-          <p className="text-xl font-semibold tracking-tight text-[#201416] dark:text-[#FAF4EB] md:text-2xl">
+          <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-2xl">
             {task}
-            <span className="ml-2.5 align-middle rounded-full bg-[#F7ECE8] px-3 py-1 text-xs font-bold text-[#A61C30] dark:bg-[#32141A] dark:text-[#F39BA9]">
+            <span className="ml-2.5 align-middle rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">
               {durationMinutes} min
             </span>
           </p>
@@ -173,10 +172,10 @@ export default function SmileRitualView({
           <div className="flex w-full max-w-[380px] flex-col items-center gap-4 md:w-auto md:-translate-x-6">
             {/* Speech bubble — tail points down toward ANT */}
             <div className="relative max-w-[19rem] px-4 z-20">
-              <div className="relative rounded-[2rem] border-[3px] border-[#201416] bg-white px-5 py-3.5 shadow-xl transition-all duration-300 dark:border-[#C92A43] dark:bg-[#221017]">
-                <p className="font-sans text-base font-semibold tracking-tight text-[#201416] dark:text-[#FAF4EB] md:text-lg leading-relaxed">
+              <div className="relative rounded-[2rem] border-[3px] border-slate-900 bg-white px-5 py-3.5 shadow-xl transition-all duration-300 dark:border-cyan-500/40 dark:bg-[#0B132B]">
+                <p className="font-sans text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100 md:text-lg leading-relaxed">
                   {isFinishing || isSmiling ? (
-                    <span className="text-[#A61C30] dark:text-[#F39BA9] animate-pulse font-bold">
+                    <span className="text-cyan-600 dark:text-cyan-400 animate-pulse font-bold">
                       🎉 {CELEBRATION_DIALOGUE}
                     </span>
                   ) : (
@@ -230,11 +229,11 @@ export default function SmileRitualView({
 
           {/* Camera card — the primary interactive element on this screen */}
           <div className="w-full max-w-[380px]">
-            <div className="flex flex-col gap-3.5 rounded-3xl border border-[#EADBCE] bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-[#42202B] dark:bg-[#201016]/85">
+            <div className="flex flex-col gap-3.5 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-md dark:border-cyan-500/25 dark:bg-[#0B132B]/85">
               {/* Card header */}
               <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-[#4A3E3D] dark:text-[#FAF4EB]">
-                  <Camera className="size-4 text-[#A61C30] dark:text-[#F39BA9]" />
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-100">
+                  <Camera className="size-4 text-cyan-500 dark:text-cyan-400" />
                   <span>Camera Preview</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-300">
@@ -244,7 +243,7 @@ export default function SmileRitualView({
               </div>
 
               {/* Webcam Video Mirror — 4:3, matches the 320×240 capture source */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-2 border-[#EADBCE] bg-[#160B0F] shadow-inner dark:border-[#42202B]">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-2 border-slate-200 bg-[#070F26] shadow-inner dark:border-cyan-500/30">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -254,10 +253,10 @@ export default function SmileRitualView({
                 />
 
                 {/* Target Face Focus Overlay */}
-                <div className="absolute inset-6 rounded-xl border border-dashed border-[#A61C30]/50 pointer-events-none dark:border-[#F39BA9]/50" />
+                <div className="absolute inset-6 rounded-xl border border-dashed border-cyan-400/50 pointer-events-none" />
 
                 {isSmiling && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#160B0F]/70 backdrop-blur-xs text-5xl animate-in zoom-in-75">
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#070F26]/70 backdrop-blur-xs text-5xl animate-in zoom-in-75">
                     😄
                   </div>
                 )}
@@ -265,19 +264,19 @@ export default function SmileRitualView({
 
               {/* Ready meter — describes progress without scoring the face */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-[#614F4D] dark:text-[#C5B3B1]">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
                   <span>Ready meter</span>
-                  <span className="font-bold text-[#A61C30] dark:text-[#F39BA9]">
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">
                     {isSmiling ? 'Smile detected 😊' : 'Getting ready...'}
                   </span>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#F5ECE5] dark:bg-[#2A141D]">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
-                    className="h-full bg-gradient-to-r from-[#FBE8A6] via-[#E8929E] to-[#A61C30] transition-all duration-150 rounded-full dark:to-[#C92A43]"
+                    className="h-full bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-500 transition-all duration-150 rounded-full"
                     style={{ width: `${smileProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-[#786663] dark:text-[#A89299]">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {cameraError
                     ? 'Camera unavailable — tap the button below to start.'
                     : isSmiling
@@ -291,7 +290,7 @@ export default function SmileRitualView({
                 onClick={() => finishRitual(false)}
                 disabled={isFinishing}
                 type="button"
-                className="w-full rounded-full bg-[#A61C30] px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-[#A61C30]/25 transition-all hover:bg-[#8F1627] hover:shadow-[#A61C30]/40 disabled:opacity-60 dark:bg-[#C92A43] dark:hover:bg-[#B32038]"
+                className="w-full rounded-full bg-cyan-500 px-4 py-3.5 text-sm font-bold text-slate-950 shadow-md shadow-cyan-500/25 transition-all hover:bg-cyan-400 hover:shadow-cyan-500/40 disabled:opacity-60"
               >
                 {isFinishing ? 'Starting...' : "I'm Ready"}
               </button>

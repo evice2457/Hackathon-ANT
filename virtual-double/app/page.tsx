@@ -1,12 +1,15 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Header from '@/components/Header'
+import Header, { type NavTab } from '@/components/Header'
 import InteractiveBackground from '@/components/InteractiveBackground'
 import AntWelcomeView from '@/components/AntWelcomeView'
 import SmileRitualView from '@/components/SmileRitualView'
 import MicroCommitmentView from '@/components/MicroCommitmentView'
 import DeepPresenceView from '@/components/DeepPresenceView'
+import DashboardView from '@/components/DashboardView'
+import RecoveryView from '@/components/RecoveryView'
+import ChatWithAntModal from '@/components/ChatWithAntModal'
 import AntCheckIn from '@/components/AntCheckIn'
 import SessionCompletionModal from '@/components/SessionCompletionModal'
 import PipWindow from '@/components/PipWindow'
@@ -43,6 +46,8 @@ export default function Page() {
 
 function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [currentTab, setCurrentTab] = useState<NavTab>('focus')
+  const [isChatOpen, setIsChatOpen] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const [stagedSession, setStagedSession] = useState<{
     task: string
@@ -140,8 +145,6 @@ function AppShell() {
 
     const handleWindowBlur = () => {
       wasAwayRef.current = true
-      // On Windows, clicking the minimize button fires blur immediately during the title bar mouse click.
-      // Calling openPipWindow here preserves the transient user gesture from the minimize click!
       if (isSessionActiveRef.current && pipSupported && !isPipOpenRef.current) {
         lastPipOpenTimeRef.current = Date.now()
         void openPipWindow().catch(() => {})
@@ -149,8 +152,6 @@ function AppShell() {
     }
 
     const handleWindowFocus = () => {
-      // ONLY close the PiP window if the main web document is currently VISIBLE
-      // This prevents the OS minimize focus flutter from killing the newly opened PiP window
       if (document.visibilityState !== 'visible') return
 
       if (wasAwayRef.current) {
@@ -238,9 +239,6 @@ function AppShell() {
     }
   }, [isSessionActive, pipSupported, session.task, openPipWindow, pauseSession, resumeSession])
 
-  // The floating companion is opened from the session view button's NATIVE
-  // click handler (see DeepPresenceView) so requestWindow() runs inside the
-  // real user gesture. This API is exposed via context for that purpose.
   const floating: FloatingCompanionApi = {
     isSupported: pipSupported,
     isOpen: Boolean(pipDocument),
@@ -272,6 +270,7 @@ function AppShell() {
     if (!resolution || resolution.type !== 'start-suggested') return
     setCheckIn(null)
     setActivePlan(null)
+    setCurrentTab('focus')
     startSession(resolution.task, resolution.durationSeconds, session.visionEnabled)
   }
 
@@ -284,7 +283,7 @@ function AppShell() {
   return (
     <FloatingCompanionProvider value={floating}>
       <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
-        {/* Ambient Gradient Background with Peaceful Particles */}
+        {/* Dynamic Fluid Wave Dither Canvas (Hover reactive as in Includio) */}
         <InteractiveBackground isDarkMode={isDarkMode} />
 
         {/* Main Content Layer */}
@@ -292,89 +291,130 @@ function AppShell() {
           <Header
             isDarkMode={isDarkMode}
             onToggleDarkMode={handleToggleDarkMode}
+            currentTab={currentTab}
+            onSelectTab={setCurrentTab}
+            onOpenChat={() => setIsChatOpen(true)}
+            isChatOpen={isChatOpen}
+            isSessionActive={isSessionActive}
           />
 
           <main className="flex-1">
-            {/* First time / Initial landing: ANT Mascot Welcome Screen */}
-            {isIdle && !hasStarted && (
-              <AntWelcomeView onStart={() => setHasStarted(true)} />
-            )}
+            {/* View Mode 1: User Analytics Dashboard */}
+            {currentTab === 'dashboard' && <DashboardView />}
 
-            {/* Intermediate Positive Start Ritual: Smile Check-in with Mascot ANT */}
-            {isIdle && hasStarted && stagedSession && (
-              <SmileRitualView
-                task={stagedSession.task}
-                durationMinutes={stagedSession.durationMinutes}
-                onComplete={(cameraOptIn) => {
-                  const { task, durationMinutes, plan } = stagedSession
-                  setStagedSession(null)
-                  setActivePlan(plan ? startTaskPlan(plan) : null)
-                  startSession(task, Math.round(durationMinutes * 60), cameraOptIn)
-                }}
-                onCancel={() => setStagedSession(null)}
-              />
-            )}
-
-            {/* Main micro-commitment entry (after clicking GET STARTED) */}
-            {isIdle && hasStarted && !stagedSession && (
-              <MicroCommitmentView
-                onInitiateRitual={(task, durationMinutes) => {
-                  setActivePlan(null)
-                  setStagedSession({ task, durationMinutes })
-                }}
-                onInitiatePlan={(plan) => {
-                  const firstStep = plan.steps[0]
-                  if (!firstStep) return
+            {/* View Mode 2: Recovery Session & Sound Recommendation */}
+            {currentTab === 'recovery' && (
+              <RecoveryView
+                onStartFocusWithMusic={(genre) => {
                   setStagedSession({
-                    task: firstStep.title,
-                    durationMinutes: firstStep.minutes,
-                    plan,
+                    task: `Focus Sprint (${genre})`,
+                    durationMinutes: 25,
                   })
+                  setHasStarted(true)
+                  setCurrentTab('focus')
                 }}
               />
             )}
 
-            {/* The main view stays on screen for the whole session — the PiP
-                window is an additional surface, not a replacement for it. */}
-            {!isIdle && !isCompleted && <DeepPresenceView />}
+            {/* View Mode 3: Core Focus Flow (Welcome -> MicroCommitment -> SmileRitual -> DeepPresence) */}
+            {currentTab === 'focus' && (
+              <>
+                {/* Initial landing: Editorial Waving ANT Screen */}
+                {isIdle && !hasStarted && (
+                  <AntWelcomeView
+                    onStart={() => setHasStarted(true)}
+                    onOpenDashboard={() => setCurrentTab('dashboard')}
+                    onOpenChat={() => setIsChatOpen(true)}
+                  />
+                )}
 
-            {isBetweenPlanSteps && !pipDocument && planAdvance?.status === 'next' && activePlan && (
-              <StepTransitionView
-                completedStepNumber={activePlan.currentStepIndex + 1}
-                totalSteps={activePlan.plan.steps.length}
-                nextStep={planAdvance.step}
-                onContinue={() => {
-                  setActivePlan(planAdvance.progress)
-                  startSession(
-                    planAdvance.step.title,
-                    planAdvance.step.minutes * 60,
-                    session.visionEnabled,
-                  )
-                }}
-                onEndPlan={() => {
-                  setActivePlan(null)
-                  stopSession()
-                }}
-              />
-            )}
+                {/* Positive Start Ritual: Smile Check-in */}
+                {isIdle && hasStarted && stagedSession && (
+                  <SmileRitualView
+                    task={stagedSession.task}
+                    durationMinutes={stagedSession.durationMinutes}
+                    onComplete={(cameraOptIn) => {
+                      const { task, durationMinutes, plan } = stagedSession
+                      setStagedSession(null)
+                      setActivePlan(plan ? startTaskPlan(plan) : null)
+                      startSession(task, Math.round(durationMinutes * 60), cameraOptIn)
+                    }}
+                    onCancel={() => setStagedSession(null)}
+                  />
+                )}
 
-            {isCompleted && !isBetweenPlanSteps && (
-              <SessionCompletionModal
-                planCompleteTask={activePlan?.plan.originalTask}
-                onDone={() => {
-                  setActivePlan(null)
-                  stopSession()
-                }}
-                onNextTask={() => {
-                  setActivePlan(null)
-                  stopSession()
-                }}
-              />
+                {/* Micro-commitment task setup */}
+                {isIdle && hasStarted && !stagedSession && (
+                  <MicroCommitmentView
+                    onInitiateRitual={(task, durationMinutes) => {
+                      setActivePlan(null)
+                      setStagedSession({ task, durationMinutes })
+                    }}
+                    onInitiatePlan={(plan) => {
+                      const firstStep = plan.steps[0]
+                      if (!firstStep) return
+                      setStagedSession({
+                        task: firstStep.title,
+                        durationMinutes: firstStep.minutes,
+                        plan,
+                      })
+                    }}
+                  />
+                )}
+
+                {/* Active Focus Session Screen */}
+                {!isIdle && !isCompleted && <DeepPresenceView />}
+
+                {isBetweenPlanSteps && !pipDocument && planAdvance?.status === 'next' && activePlan && (
+                  <StepTransitionView
+                    completedStepNumber={activePlan.currentStepIndex + 1}
+                    totalSteps={activePlan.plan.steps.length}
+                    nextStep={planAdvance.step}
+                    onContinue={() => {
+                      setActivePlan(planAdvance.progress)
+                      startSession(
+                        planAdvance.step.title,
+                        planAdvance.step.minutes * 60,
+                        session.visionEnabled,
+                      )
+                    }}
+                    onEndPlan={() => {
+                      setActivePlan(null)
+                      stopSession()
+                    }}
+                  />
+                )}
+
+                {isCompleted && !isBetweenPlanSteps && (
+                  <SessionCompletionModal
+                    planCompleteTask={activePlan?.plan.originalTask}
+                    onDone={() => {
+                      setActivePlan(null)
+                      stopSession()
+                    }}
+                    onNextTask={() => {
+                      setActivePlan(null)
+                      stopSession()
+                    }}
+                  />
+                )}
+              </>
             )}
           </main>
         </div>
 
         <VisionMonitor pipDocument={pipDocument} />
+
+        {/* Live Sliding ANT Chat Modal */}
+        <ChatWithAntModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          onApplyAction={(task, duration) => {
+            setStagedSession({ task, durationMinutes: duration })
+            setHasStarted(true)
+            setCurrentTab('focus')
+          }}
+        />
 
         {checkIn && !pipDocument && (
           <AntCheckIn
@@ -397,7 +437,7 @@ function AppShell() {
           />
         )}
 
-        {/* Document PiP surface — same provider, portal into the PiP document. */}
+        {/* Document PiP surface */}
         {pipDocument && (
           <PipWindow
             pipDocument={pipDocument}
