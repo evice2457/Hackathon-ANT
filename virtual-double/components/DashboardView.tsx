@@ -149,7 +149,7 @@ export default function DashboardView() {
         {/* Focus Score Gauge Card (4 cols) */}
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 dark:border-cyan-500/20 dark:bg-[#0B132B]/90 p-6 shadow-sm dark:shadow-xl backdrop-blur-xl md:col-span-4 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-cyan-400/80">
+            <span className="text-xs font-sans uppercase tracking-widest font-semibold text-slate-500 dark:text-cyan-400/80">
               FOCUS SCORE
             </span>
             <span className="inline-flex items-center gap-1 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-200 px-2.5 py-0.5 text-xs font-semibold dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300">
@@ -182,7 +182,7 @@ export default function DashboardView() {
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="font-serif text-5xl font-bold tracking-tight text-[#0A1128] dark:text-cyan-200">
+                <span className="font-sans text-5xl font-extrabold tracking-tight tabular-nums text-[#0A1128] dark:text-cyan-200">
                   {focusIndex}
                 </span>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
@@ -209,7 +209,7 @@ export default function DashboardView() {
             </div>
             <div>
               <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Focused</p>
-              <p className="mt-1 text-2xl font-serif font-bold text-[#0A1128] dark:text-white">4h 25m</p>
+              <p className="mt-1 text-2xl font-sans font-bold tracking-tight text-[#0A1128] dark:text-white">4h 25m</p>
             </div>
             <p className="mt-2 text-[11px] text-cyan-600 dark:text-cyan-400 flex items-center gap-1 font-medium">
               <TrendingUp className="size-3" /> +24% vs yesterday
@@ -222,7 +222,7 @@ export default function DashboardView() {
             </div>
             <div>
               <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completed Sessions</p>
-              <p className="mt-1 text-2xl font-serif font-bold text-[#0A1128] dark:text-white">7 Sprints</p>
+              <p className="mt-1 text-2xl font-sans font-bold tracking-tight text-[#0A1128] dark:text-white">7 Sprints</p>
             </div>
             <p className="mt-2 text-[11px] text-cyan-600 dark:text-cyan-400 flex items-center gap-1 font-medium">
               100% micro-commitment
@@ -235,7 +235,7 @@ export default function DashboardView() {
             </div>
             <div>
               <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Distraction Rescues</p>
-              <p className="mt-1 text-2xl font-serif font-bold text-[#0A1128] dark:text-white">96%</p>
+              <p className="mt-1 text-2xl font-sans font-bold tracking-tight text-[#0A1128] dark:text-white">96%</p>
             </div>
             <p className="mt-2 text-[11px] text-cyan-600 dark:text-cyan-400 flex items-center gap-1 font-medium">
               4 of 4 restored in 10s
@@ -248,7 +248,7 @@ export default function DashboardView() {
             </div>
             <div>
               <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Avg Sprint Block</p>
-              <p className="mt-1 text-2xl font-serif font-bold text-[#0A1128] dark:text-white">28 mins</p>
+              <p className="mt-1 text-2xl font-sans font-bold tracking-tight text-[#0A1128] dark:text-white">28 mins</p>
             </div>
             <p className="mt-2 text-[11px] text-cyan-600 dark:text-cyan-400 flex items-center gap-1 font-medium">
               Optimal biological rhythm
@@ -260,11 +260,11 @@ export default function DashboardView() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <BarChart3 className="size-4 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                   REAL-TIME FOCUS TIMELINE
                 </span>
               </div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-600 dark:text-cyan-400">
+              <span className="inline-flex items-center gap-1 text-[11px] font-sans font-medium text-cyan-600 dark:text-cyan-400">
                 <span className="size-1.5 rounded-full bg-cyan-500 animate-pulse" /> Live Telemetry
               </span>
             </div>
@@ -299,12 +299,12 @@ export default function DashboardView() {
               </svg>
             </div>
 
-            <div className="mt-2 flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+            <div className="mt-2 flex justify-between text-xs font-sans font-medium text-slate-500 dark:text-slate-400">
               <span>08:00 (Warm up)</span>
               <span>10:00 (Peak 98%)</span>
               <span>12:00 (Rest block)</span>
               <span>14:30 (Deep Flow 94%)</span>
-              <span className="text-cyan-600 dark:text-cyan-400 font-bold">Current (94%)</span>
+              <span className="text-cyan-600 dark:text-cyan-400 font-semibold">Current (94%)</span>
             </div>
           </div>
         </div>
@@ -383,7 +383,7 @@ export default function DashboardView() {
                     className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/40 dark:bg-slate-900/80 dark:text-white"
                   />
                 ) : (
-                  <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 font-mono">
+                  <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 font-sans">
                     {profile.email}
                   </p>
                 )}
@@ -402,7 +402,7 @@ export default function DashboardView() {
                       className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/40 dark:bg-slate-900/80 dark:text-white"
                     />
                   ) : (
-                    <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 font-mono">
+                    <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 font-sans">
                       {profile.phone}
                     </p>
                   )}
@@ -422,7 +422,7 @@ export default function DashboardView() {
                       className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/40 dark:bg-slate-900/80 dark:text-white"
                     />
                   ) : (
-                    <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm font-semibold text-cyan-700 dark:text-cyan-300">
+                    <p className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-sm font-semibold text-cyan-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-cyan-300 font-sans">
                       {profile.age} years old
                     </p>
                   )}
@@ -433,13 +433,13 @@ export default function DashboardView() {
 
           {/* Age-Cohort Insight (Clean borderless accent block — NO redundant box) */}
           <div className="mt-6 border-l-2 border-cyan-500 pl-4 py-1">
-            <p className="text-xs font-semibold text-slate-800 dark:text-cyan-300 uppercase tracking-wider mb-1">
+            <p className="text-xs font-semibold text-slate-800 dark:text-cyan-300 uppercase tracking-wider mb-1 font-sans">
               Age Cohort Benchmark ({ageCohort})
             </p>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
               Your focus persistence places you in the <strong className="text-cyan-700 dark:text-cyan-300">Top {cohortBenchmark.topPercent}%</strong> for age {profile.age}. Average peer focus time is {cohortBenchmark.avgHours}/day.
             </p>
-            <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-cyan-400/90">
+            <div className="mt-2 flex items-center justify-between text-xs font-sans text-slate-500 dark:text-cyan-400/90">
               <span>Distraction recovery latency: {cohortBenchmark.recoverySpeed}</span>
               <span>ANT compatibility: 99.2%</span>
             </div>
@@ -455,12 +455,12 @@ export default function DashboardView() {
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#0A1128] dark:text-white">Completed Tasks History</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Recently conquered micro-commitments</p>
+                  <h3 className="text-base font-bold text-[#0A1128] dark:text-white font-sans">Completed Tasks History</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Recently conquered micro-commitments</p>
                 </div>
               </div>
 
-              <span className="text-xs font-mono text-slate-500 dark:text-cyan-400">
+              <span className="text-xs font-sans font-medium text-slate-500 dark:text-cyan-400">
                 {completedTasks.length} tasks
               </span>
             </div>

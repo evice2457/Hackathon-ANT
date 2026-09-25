@@ -133,6 +133,23 @@ virtual-double/
 
 ## 5. NHẬT KÝ THAY ĐỔI (CHANGELOG)
 
+### Version 3.1.0 — Visual Polishing: Mascot Tail De-crimsoning, Numeric Sans Typography, Dark Mode Age Harmony & Form Fixes
+- **1. Triệt Tiêu Hoàn Toàn Tàn Dư Màu Đỏ Trên Màn Hình Ready to Focus ([SmileRitualView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/SmileRitualView.tsx))**:
+  - Đã loại bỏ triệt để màu đỏ/crimson (`#C92A43`, `#221017`) ở phần nhọn đuôi ô thoại truyện tranh (`Comic Bubble Pointer Tail`), chuyển về màu nền `#0B132B` với viền cyan tinh tế.
+  - Thay thế bóng đổ viền đỏ của chú kiến ANT (`drop-shadow-[0_18px_36px_rgba(166,28,48,0.22)]`) và bóng sàn (`bg-[#3D141C]/20`) thành ánh sáng cyan ngọc lam dịu nhẹ (`rgba(6,182,212,0.18)`), loại bỏ hoàn toàn viền đỏ bao quanh mascot.
+- **2. Đồng Bộ Typography Plus Jakarta Sans Cho Timeline Theo Giờ ([DashboardView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/DashboardView.tsx))**:
+  - Chuyển đổi toàn bộ mốc thời gian `08:00 (Warm up)`, `10:00 (Peak 98%)`, `12:00 (Rest block)`, `14:30 (Deep Flow 94%)`, `Current (94%)` từ font monospace thô sang font **Plus Jakarta Sans** (`font-sans font-medium text-xs`) thanh lịch, hài hòa tuyệt đối với giao diện.
+- **3. Phông Chữ To, Rõ, Thanh Thoát Cho Điểm Tập Trung & Thẻ Chỉ Số ([DashboardView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/DashboardView.tsx))**:
+  - Chuyển chỉ số Focus Score (`94 / 100 PTS`) từ `font-serif` sang `font-sans text-5xl font-extrabold tracking-tight tabular-nums`.
+  - Chuyển 4 thẻ số liệu (`Total Focused: 4h 25m`, `Completed Sessions: 7 Sprints`, `Distraction Rescues: 96%`, `Avg Sprint Block: 28 mins`) sang `font-sans text-2xl font-bold tracking-tight text-[#0A1128] dark:text-white`, tạo diện mạo khoa học, hiện đại và chuẩn xác.
+- **4. Khắc Phục Lệch Tone Dark Mode Cho Ô Tuổi Trong Demographic Analytics ([DashboardView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/DashboardView.tsx))**:
+  - Bổ sung `dark:border-slate-800 dark:bg-slate-900/40 dark:text-cyan-300 font-sans` cho ô hiển thị `26 years old`, xóa bỏ hiện tượng ô trắng sáng lệch tông, giúp toàn bộ hàng thông tin Full Name, Email, Phone, Age hiển thị liền mạch và đồng bộ tone màu trong Dark Mode.
+- **5. Phục Hồi Tương Tác Click-to-Fill Cho Quick Suggestions ([MicroCommitmentView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/MicroCommitmentView.tsx))**:
+  - Gắn lại sự kiện `onClick={() => updateTask(pill)}` cho 3 gợi ý cam kết nhanh (`Implement user authentication flow`, `Write the quarterly project report`, `Research React server components`), cho phép người dùng click là tự động điền nhiệm vụ vào ô input tức thì.
+- **6. Thiết Kế Lại Ô "Custom min" Chuẩn Pill Đồng Bộ ([MicroCommitmentView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/MicroCommitmentView.tsx))**:
+  - Loại bỏ hoàn toàn khối hộp inner input bị lồng và che chữ "min", thay thế bằng thẻ `<input>` thuần trong suốt nằm trong pill `rounded-full` đồng nhất chiều cao, padding và bo góc với các nút preset `5 min`, `10 min`, `15 min`, `25 min`, `50 min`.
+  - Tự động highlight cyan sáng rực khi người dùng nhập số phút tùy chỉnh.
+
 ### Version 3.0.0 — Editorial Polish: Borderless Hero, 100% English Views, Executive Copilot & Ultra-Smooth Hover Physics
 - **1. Borderless Hero Section ([AntWelcomeView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AntWelcomeView.tsx))**:
   - Loại bỏ hoàn toàn bounding box bao quanh khối nội dung hero.

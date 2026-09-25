@@ -186,18 +186,18 @@ export default function SmileRitualView({
                 {/* Comic Bubble Pointer Tail — points down at ANT */}
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
                   <svg
-                    className="h-5 w-7 text-white dark:text-[#221017]"
+                    className="h-5 w-7 text-white dark:text-[#0B132B]"
                     viewBox="0 0 36 24"
                     fill="currentColor"
                   >
                     <path d="M0 0 C 12 12, 14 24, 6 24 C 20 20, 28 12, 36 0 Z" />
                   </svg>
                   <svg
-                    className="absolute inset-0 h-5 w-7 text-[#201416] dark:text-[#C92A43] pointer-events-none"
+                    className="absolute inset-0 h-5 w-7 text-slate-900 dark:text-cyan-500/50 pointer-events-none"
                     viewBox="0 0 36 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="3.5"
+                    strokeWidth="3"
                     strokeLinecap="round"
                   >
                     <path d="M0 0 C 12 12, 14 24, 6 24 C 20 20, 28 12, 36 0" />
@@ -211,7 +211,7 @@ export default function SmileRitualView({
                 isFinishing || isSmiling ? 'scale-110 -translate-y-3' : 'animate-mascot-float'
               }`}
             >
-              <div className="relative h-64 w-60 md:h-[22rem] md:w-80 drop-shadow-[0_18px_36px_rgba(166,28,48,0.22)]">
+              <div className="relative h-64 w-60 md:h-[22rem] md:w-80 drop-shadow-[0_16px_32px_rgba(6,182,212,0.18)]">
                 <Image
                   src="/ant-mascot-removebg.png"
                   alt={`${mascotName} mascot - Ready to begin`}
@@ -223,7 +223,7 @@ export default function SmileRitualView({
                 />
               </div>
               {/* Floor shadow */}
-              <div className="animate-mascot-shadow mx-auto mt-1.5 h-3 w-36 rounded-[100%] bg-[#3D141C]/20 blur-[6px] dark:bg-[#C92A43]/25" />
+              <div className="animate-mascot-shadow mx-auto mt-1.5 h-3 w-36 rounded-[100%] bg-slate-400/20 blur-[6px] dark:bg-cyan-950/40" />
             </div>
           </div>
 

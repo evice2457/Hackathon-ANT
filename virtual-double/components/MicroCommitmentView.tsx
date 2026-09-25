@@ -352,17 +352,35 @@ export default function MicroCommitmentView({
                 {preset} min
               </button>
             ))}
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3.5 py-1.5 backdrop-blur-md dark:border-cyan-500/20 dark:bg-[#0B132B]/60">
-              <Input
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 backdrop-blur-md ${
+                customMinutes !== null
+                  ? 'border-cyan-500 bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/25 dark:border-cyan-400 dark:bg-cyan-400 dark:text-slate-950 font-bold'
+                  : 'border-slate-200 bg-white/70 text-slate-700 hover:border-cyan-500/50 hover:bg-white/90 hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/60 dark:text-slate-300 dark:hover:border-cyan-400/50 dark:hover:text-cyan-300'
+              }`}
+            >
+              <input
                 type="number"
                 min={1}
                 max={180}
                 value={customMinutes ?? ''}
                 onChange={(e) => handleCustomMinutes(e.target.value)}
                 placeholder="Custom"
-                className="h-7 w-16 border-0 bg-transparent p-0 text-center text-sm text-[#201416] placeholder:text-[#8D7B78] focus-visible:ring-0 dark:text-[#FAF4EB] dark:placeholder:text-[#A89299]"
+                className={`w-14 bg-transparent p-0 text-center text-sm font-semibold outline-none focus:outline-none placeholder:font-normal ${
+                  customMinutes !== null
+                    ? 'text-slate-950 placeholder:text-slate-700'
+                    : 'text-slate-800 placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500'
+                }`}
               />
-              <span className="text-xs font-medium text-[#614F4D] dark:text-[#C5B3B1]">min</span>
+              <span
+                className={`text-xs ${
+                  customMinutes !== null
+                    ? 'text-slate-900 font-bold'
+                    : 'text-slate-500 dark:text-slate-400 font-medium'
+                }`}
+              >
+                min
+              </span>
             </div>
           </div>
           {customDurationInvalid && (
@@ -483,7 +501,8 @@ export default function MicroCommitmentView({
                 <button
                   key={pill}
                   type="button"
-                  className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center break-words ${
+                  onClick={() => updateTask(pill)}
+                  className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center break-words cursor-pointer ${
                     isSelected
                       ? 'border-cyan-500 bg-cyan-50 text-cyan-800 shadow-xs dark:border-cyan-400 dark:bg-cyan-950/60 dark:text-cyan-300 ring-1 ring-cyan-500/30'
                       : 'border-slate-200 bg-white/70 text-slate-700 shadow-2xs hover:border-cyan-500/50 hover:bg-white hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/70 dark:text-slate-300 dark:hover:border-cyan-400/50 dark:hover:text-cyan-300'
