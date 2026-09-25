@@ -1,11 +1,14 @@
 'use client'
 
+import { useEffect } from 'react'
 import { ArrowRight, Play, Send } from 'lucide-react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import type { CheckInState } from '@/lib/check-in'
 import { parseCustomDuration } from '@/lib/ant-ai/recommendation-state'
 import { useMascotName } from '@/lib/mascot-name'
+import { getMascotPresentation } from '@/lib/mascot-presentation'
+import { playAntChime } from '@/lib/ant-voice'
 
 interface AntCheckInProps {
   checkIn: CheckInState
@@ -33,9 +36,14 @@ export default function AntCheckIn({
   compact = false,
 }: AntCheckInProps) {
   const { mascotName } = useMascotName()
+  const mascotPresentation = getMascotPresentation('check-in', mascotName)
   const suggestedMinutes = parseCustomDuration(checkIn.suggestedMinutesInput)
   const suggestionValid =
     checkIn.suggestedTitle.trim().length > 0 && suggestedMinutes !== null
+
+  useEffect(() => {
+    playAntChime('nudge')
+  }, [])
 
   return (
     <div
@@ -56,7 +64,7 @@ export default function AntCheckIn({
       >
         <div className="flex items-center gap-3.5">
           <div className={`relative shrink-0 overflow-hidden rounded-full border border-cyan-500/30 bg-[#0E1A38] ${compact ? 'size-11' : 'size-16'}`}>
-            <Image src="/ant-mascot-removebg.png" alt={`${mascotName} mascot`} fill sizes={compact ? '44px' : '64px'} className="object-contain" />
+            <Image src={mascotPresentation.src} alt={mascotPresentation.alt} fill sizes={compact ? '44px' : '64px'} className="object-contain" />
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-400">{mascotName} check-in</p>

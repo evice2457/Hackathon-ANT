@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Check, ClockPlus, Sparkles, MoveRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFocusSession } from '@/lib/focus-session'
 import { createTaskPlan } from '@/lib/task-breakdown'
+import { playAntChime } from '@/lib/ant-voice'
+import { useMascotName } from '@/lib/mascot-name'
+import { getMascotPresentation } from '@/lib/mascot-presentation'
 
 interface SessionCompletionModalProps {
   onDone: () => void
@@ -18,7 +22,13 @@ export default function SessionCompletionModal({
   planCompleteTask,
 }: SessionCompletionModalProps) {
   const { session, startSession } = useFocusSession()
+  const { mascotName } = useMascotName()
+  const mascotPresentation = getMascotPresentation('completion', mascotName)
   const [subSteps, setSubSteps] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    playAntChime('complete')
+  }, [])
 
   const handleAddTime = () => {
     startSession(session.task || 'Continued Session', 5 * 60, session.visionEnabled)
@@ -33,19 +43,27 @@ export default function SessionCompletionModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-6 py-12 backdrop-blur-sm">
       <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-[#0B132B] to-[#070F26] shadow-2xl shadow-cyan-950/40 backdrop-blur-md">
         <div className="p-8 sm:p-10">
-          <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20">
-            <Check className="size-7 text-emerald-300" />
+          <div className="relative mx-auto mb-4 size-36">
+            <Image
+              src={mascotPresentation.src}
+              alt={mascotPresentation.alt}
+              fill
+              sizes="144px"
+              className="object-contain"
+            />
           </div>
 
-          <h3 className="mb-3 text-3xl font-light text-white">
-            {planCompleteTask ? 'Whole plan complete. ' : 'How did it go? '}
+          <h3 className="mb-2 text-center text-3xl font-light text-white">
+            Nice work — you did it!{' '}
             <span className="font-serif italic font-normal text-cyan-300">
-              You made it through.
+              {planCompleteTask ? 'Whole plan complete.' : 'Task complete.'}
             </span>
           </h3>
 
+          <p className="mb-6 text-center text-sm text-slate-300">{mascotName} is celebrating with you.</p>
+
           <div className="mb-8 rounded-2xl border border-cyan-500/20 bg-[#0E1A38]/80 px-5 py-4">
-            <p className="text-base font-medium text-slate-100">
+            <p className="text-base font-medium text-slate-100 text-center">
               {planCompleteTask || session.task || 'Your session'}
             </p>
           </div>

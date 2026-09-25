@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:vision": "node --experimental-strip-types --test lib/vision/*.test.ts",
     "test:ant-ai": "node --experimental-strip-types --test lib/ant-ai/*.test.ts",
-    "test:demo": "node --experimental-strip-types --test lib/task-breakdown.test.ts lib/ant-support.test.ts lib/check-in.test.ts"
+    "test:demo": "node --experimental-strip-types --test lib/task-breakdown.test.ts lib/ant-support.test.ts lib/check-in.test.ts lib/mascot-presentation.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

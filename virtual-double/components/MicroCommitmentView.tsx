@@ -16,9 +16,9 @@ import {
 import { createTaskPlan, type TaskPlan } from '@/lib/task-breakdown'
 
 const SUGGESTION_PILLS = [
-  'Review 3 priority emails',
-  'Outline key bullet points',
-  'Finish draft introduction',
+  'Implement user authentication flow',
+  'Write the quarterly project report',
+  'Research React server components',
 ]
 
 interface SpeechRecognitionAlternativeLike {
@@ -483,8 +483,7 @@ export default function MicroCommitmentView({
                 <button
                   key={pill}
                   type="button"
-                  onClick={() => updateTask(pill)}
-                  className={`rounded-full border px-4 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center truncate ${
+                  className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md text-center break-words ${
                     isSelected
                       ? 'border-cyan-500 bg-cyan-50 text-cyan-800 shadow-xs dark:border-cyan-400 dark:bg-cyan-950/60 dark:text-cyan-300 ring-1 ring-cyan-500/30'
                       : 'border-slate-200 bg-white/70 text-slate-700 shadow-2xs hover:border-cyan-500/50 hover:bg-white hover:text-cyan-600 dark:border-cyan-500/20 dark:bg-[#0B132B]/70 dark:text-slate-300 dark:hover:border-cyan-400/50 dark:hover:text-cyan-300'
