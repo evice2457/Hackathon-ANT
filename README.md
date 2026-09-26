@@ -425,6 +425,6 @@ This project is licensed under the **MIT License** — see the LICENSE file for 
 
 <div align="center">
 
-**Built with ❤️ for people who want to focus, not be judged.**
+**Built with ❤️ for people who want to focus, not be judged**
 
 </div>
