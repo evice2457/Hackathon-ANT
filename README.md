@@ -12,6 +12,17 @@
 
 ---
 
+## ✨ What's New
+
+- **🗂️ Three-Tab Workspace** — **Focus**, **Dashboard**, and **Recovery** views in a single shell
+- **📊 Progress Dashboard** — Completed-task history, focus metrics, and an editable user profile (persisted to `localStorage`)
+- **🌬️ Recovery Studio** — Guided **4-7-8 breathing** cycle plus a curated library of focus soundscapes, previewable live via the Web Audio API
+- **💬 Chat with ANT** — A conversational side panel that decomposes tasks, recommends sprint lengths, and hands off directly to a focus session
+- **😊 Emotion-Aware Mascot** — ANT now shows context-aware artwork (waving, happy/celebrating, and empathetic check-in states)
+- **🫧 Breathing Aura Timer** — An ambient focus timer with an animated progress ring replacing the old digital countdown
+
+---
+
 ## 🎯 What is VirtualDouble?
 
 VirtualDouble is a **neurodivergent-friendly focus companion** designed to help people with ADHD traits (and anyone who struggles with focus) enter, maintain, and return to deep work.
@@ -68,6 +79,33 @@ Optionally breaks larger tasks into micro-steps (5–50 minutes each) based on t
 - Pause/resume with context preservation
 - Add +5 min on the fly
 
+### 🗂️ Tabbed Workspace
+Everything lives in one shell with three switchable views:
+- **Focus** — The core flow: Welcome → Task entry → Smile ritual → Deep presence
+- **Dashboard** — Your progress and profile
+- **Recovery** — Decompress and recharge between sessions
+
+### 📊 Progress Dashboard
+- Completed-task history with duration, tag, and focus score
+- Aggregate focus metrics over **today / week / month** ranges
+- Editable user profile (name, email, phone, age) saved to `localStorage`
+
+### 🌬️ Recovery Studio
+- **Guided 4-7-8 breathing** — An animated inhale/hold/exhale cycle to downshift before returning to work
+- **Focus soundscape library** — Curated tracks mapped to task types (Binaural Alpha Waves for logic, Brown Noise & Drone for deep work, Lo-Fi for light tasks, and more)
+- **Live preview** — Each soundscape is synthesized in-browser with the Web Audio API, no audio files required
+- One-tap handoff to start a focus session with the chosen soundscape
+
+### 💬 Chat with ANT
+A conversational side panel for on-demand guidance:
+- Decomposes large, ambiguous tasks into micro-commitment phases
+- Recommends sprint lengths grounded in Ultradian-rhythm reasoning
+- Offers distraction-recovery protocols
+- Suggests soundscapes and applies a chosen task + duration straight into a focus session
+
+### 😊 Emotion-Aware Mascot
+ANT's artwork adapts to the moment — **waving** on the welcome screen, **happy/celebrating** on completion and step transitions, and an **empathetic** pose for gentle check-ins.
+
 ---
 
 ## 🎬 Demo
@@ -75,12 +113,13 @@ Optionally breaks larger tasks into micro-steps (5–50 minutes each) based on t
 **Flow Overview:**
 
 1. **Welcome Screen** — ANT greets you and asks what you want to work on
-2. **Task Entry** — Enter your task and choose a session length
+2. **Task Entry** — Enter your task and choose a session length (or ask ANT in the chat panel)
 3. **Smile Ritual** — The camera detects your smile when you're ready (or skip it)
-4. **Focus Session** — Work while the companion stays visible in a floating window
+4. **Focus Session** — Work while the companion stays visible in a floating window, framed by the breathing aura timer
 5. **Adaptive Monitoring** — ANT watches for disengagement cues (if camera is enabled)
 6. **Check-In (if needed)** — Gentle intervention after 10 seconds of sustained non-focus
 7. **Completion Celebration** — Positive reinforcement when the session ends
+8. **Dashboard & Recovery** — Review progress and recharge between sessions
 
 ---
 
@@ -156,6 +195,7 @@ VirtualDouble uses the **Document Picture-in-Picture API** (Chrome 116+) to floa
 - **Floating window:** Document Picture-in-Picture API
 - **Media Session:** Chrome Auto-PiP qualification
 - **Audio keep-alive:** Inaudible audio track for PiP eligibility
+- **Web Audio API:** In-browser synthesis of Recovery soundscape previews
 
 ### AI (Optional, Dormant)
 - **Provider:** OpenAI SDK (GPT-5.6-terra via Responses API)
@@ -244,16 +284,23 @@ virtual-double/
 │       └── ant/recommend-time/
 │           └── route.ts      # OpenAI time recommendation API (dormant)
 ├── components/
-│   ├── AntWelcomeView.tsx    # Initial greeting screen
+│   ├── AntWelcomeView.tsx    # Initial greeting screen (waving ANT)
 │   ├── MicroCommitmentView.tsx  # Task entry + session length picker
 │   ├── SmileRitualView.tsx   # Positive start ritual (camera + smile)
-│   ├── DeepPresenceView.tsx  # Main session view (countdown, controls)
+│   ├── DeepPresenceView.tsx  # Main session view (aura timer, controls)
+│   ├── BreathingAura.tsx     # Ambient focus timer with animated progress ring
+│   ├── FocusGlassCard.tsx    # Glass session card (task, step, controls)
+│   ├── FocusStateIndicator.tsx  # Non-alarming focus-state dot + label
+│   ├── DashboardView.tsx     # Progress analytics + editable user profile
+│   ├── RecoveryView.tsx      # 4-7-8 breathing + soundscape library
+│   ├── ChatWithAntModal.tsx  # Conversational ANT side panel
 │   ├── AntCheckIn.tsx        # Check-in modal (pause + support)
 │   ├── SessionCompletionModal.tsx  # Celebration screen
 │   ├── PipWindow.tsx         # Document PiP content portal
+│   ├── FloatingMiniWidget.tsx  # Companion surface rendered inside PiP
 │   ├── VisionMonitor.tsx     # CV context bridge + debug panel
 │   ├── StepTransitionView.tsx  # Multi-step plan transitions
-│   ├── Header.tsx            # App header + theme toggle
+│   ├── Header.tsx            # App header, tab nav, chat + theme toggle
 │   ├── InteractiveBackground.tsx  # Animated gradient particles
 │   └── ui/                   # shadcn/ui primitives (Button, Input)
 ├── lib/
@@ -268,7 +315,7 @@ virtual-double/
 │   ├── session-clock.ts      # Clock reconciliation
 │   ├── ant-voice.ts          # Audio keep-alive for PiP
 │   ├── mascot-name.tsx       # ANT name context
-│   ├── mascot-presentation.ts  # ANT character logic
+│   ├── mascot-presentation.ts  # Emotion-aware mascot artwork selection
 │   ├── vision/
 │   │   ├── config.ts         # All CV thresholds (tunable)
 │   │   ├── face-landmarker.ts  # MediaPipe model singleton
@@ -292,7 +339,10 @@ virtual-double/
 │   │       ├── vision_wasm_internal.{js,wasm}
 │   │       ├── vision_wasm_nosimd_internal.{js,wasm}
 │   │       └── vision_wasm_module_internal.{js,wasm}
-│   └── ant-*.png             # ANT mascot images
+│   ├── ant-mascot.png        # Default ANT artwork
+│   ├── ant-waving.webp       # Welcome screen
+│   ├── ant-happy-removebg.png  # Completion & step transitions
+│   └── ant-sad-removebg.png  # Check-in moments
 ├── docs/
 │   ├── vision.md             # CV architecture deep dive
 │   └── ant-ai.md             # AI recommendation groundwork
@@ -319,7 +369,7 @@ virtual-double/
 - ✅ **Observes behavioral cues** (face presence, head orientation, smile geometry)
 - ✅ **Respects camera opt-out** — you can start sessions without vision monitoring
 - ✅ **Processes locally** — MediaPipe runs in your browser (WebAssembly)
-- ✅ **Syncs theme/state to localStorage** — session data never leaves your device
+- ✅ **Syncs theme/state to localStorage** — session data and your dashboard profile never leave your device
 - ✅ **Uses support language** — "Want a check-in?" not "You are distracted"
 
 **Note:** MediaPipe Tasks SDK may send non-image performance/utilization metrics to Google. See the [MediaPipe privacy notice](https://github.com/google-ai-edge/mediapipe#privacy-notice).
@@ -358,8 +408,13 @@ VirtualDouble is designed for people who struggle with:
 
 ## 🗺️ Roadmap
 
-### Current Version (v0.1.0)
-- ✅ ANT mascot companion
+### Current Version (v0.2.0)
+- ✅ ANT mascot companion with emotion-aware artwork
+- ✅ Tabbed workspace (Focus / Dashboard / Recovery)
+- ✅ Progress dashboard (task history, metrics, editable profile)
+- ✅ Recovery studio (4-7-8 breathing + Web Audio soundscapes)
+- ✅ Chat with ANT (task decomposition & session handoff)
+- ✅ Breathing aura focus timer
 - ✅ Smile ritual start
 - ✅ Browser-side computer vision (MediaPipe)
 - ✅ Document Picture-in-Picture floating window
