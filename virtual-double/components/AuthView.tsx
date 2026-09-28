@@ -704,61 +704,62 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
             }`}
           >
             {/* Inner mascot content with smooth cross-fade */}
-            <div className="h-full w-full p-8 flex flex-col items-center justify-between text-center select-none">
+            <div className="h-full w-full p-6 sm:p-8 flex flex-col items-center justify-center text-center select-none">
               
-              {/* Mascot & Greeting Group (Clean text directly on board, moved closer to ANT's head) */}
-              <div className="my-auto flex flex-col items-center justify-center">
-                <h3 className="font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-cyan-200 mb-3 drop-shadow-sm">
+              {/* Mascot, Greeting & Switcher Unified Group */}
+              <div className="flex flex-col items-center justify-center">
+                {/* Clean Greeting Text directly on board */}
+                <h3 className="font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-cyan-200 mb-2 drop-shadow-sm">
                   {isSignUp ? 'Hello new friend!' : 'Welcome back!'}
                 </h3>
 
                 {/* ANT Mascot Waving with interactive hover zoom effect (matching Focus view) */}
-                <div className="group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 flex flex-col items-center">
-                <div className="relative h-56 w-52 lg:h-64 lg:w-60 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_14px_32px_rgba(6,182,212,0.22)] group-hover:drop-shadow-[0_20px_45px_rgba(6,182,212,0.35)] animate-mascot-float">
-                  <Image
-                    src="/ant-mascot-removebg.png"
-                    alt="ANT Mascot Waving"
-                    width={380}
-                    height={460}
-                    priority
-                    className="h-full w-full object-contain pointer-events-none select-none transition-transform duration-300 group-hover:scale-105"
-                  />
+                <div className="group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 flex flex-col items-center mt-1">
+                  <div className="relative h-56 w-52 lg:h-64 lg:w-60 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_14px_32px_rgba(6,182,212,0.22)] group-hover:drop-shadow-[0_20px_45px_rgba(6,182,212,0.35)] animate-mascot-float">
+                    <Image
+                      src="/ant-mascot-removebg.png"
+                      alt="ANT Mascot Waving"
+                      width={380}
+                      height={460}
+                      priority
+                      className="h-full w-full object-contain pointer-events-none select-none transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="mx-auto -mt-3 h-3 w-28 rounded-full bg-cyan-500/20 blur-md dark:bg-cyan-400/25 animate-mascot-shadow transition-transform duration-300 group-hover:scale-110" />
                 </div>
-                <div className="mx-auto -mt-3 h-3 w-28 rounded-full bg-cyan-500/20 blur-md dark:bg-cyan-400/25 animate-mascot-shadow transition-transform duration-300 group-hover:scale-110" />
-              </div>
-            </div>
 
-            {/* Switcher Button */}
-              <div className="mb-4 flex flex-col items-center gap-2">
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
-                </span>
+                {/* Switcher Button - Moved closer up to mascot ANT */}
+                <div className="mt-5 flex flex-col items-center gap-1.5">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
+                  </span>
 
-                {isSignUp ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signin')
-                      setErrorMsg(null)
-                      setSuccessMsg(null)
-                    }}
-                    className="rounded-full border-2 border-cyan-500/80 bg-white/90 px-6 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-500 hover:text-slate-950 dark:bg-cyan-950/40 dark:text-cyan-300 dark:hover:bg-cyan-400 dark:hover:text-slate-950 transition-all shadow-sm active:scale-95 cursor-pointer"
-                  >
-                    Sign In to Website
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signup')
-                      setErrorMsg(null)
-                      setSuccessMsg(null)
-                    }}
-                    className="rounded-full border-2 border-cyan-500/80 bg-white/90 px-6 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-500 hover:text-slate-950 dark:bg-cyan-950/40 dark:text-cyan-300 dark:hover:bg-cyan-400 dark:hover:text-slate-950 transition-all shadow-sm active:scale-95 cursor-pointer"
-                  >
-                    Create New Account
-                  </button>
-                )}
+                  {isSignUp ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('signin')
+                        setErrorMsg(null)
+                        setSuccessMsg(null)
+                      }}
+                      className="rounded-full border-2 border-cyan-500/80 bg-white/90 px-6 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-500 hover:text-slate-950 dark:bg-cyan-950/40 dark:text-cyan-300 dark:hover:bg-cyan-400 dark:hover:text-slate-950 transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      Sign In to Website
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('signup')
+                        setErrorMsg(null)
+                        setSuccessMsg(null)
+                      }}
+                      className="rounded-full border-2 border-cyan-500/80 bg-white/90 px-6 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-500 hover:text-slate-950 dark:bg-cyan-950/40 dark:text-cyan-300 dark:hover:bg-cyan-400 dark:hover:text-slate-950 transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      Create New Account
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
