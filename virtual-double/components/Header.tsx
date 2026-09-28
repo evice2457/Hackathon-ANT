@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Moon, Sun, Pencil, Check, Target, LayoutDashboard, Sparkles, MessageSquareHeart } from 'lucide-react'
+import { Moon, Sun, Pencil, Check, Target, LayoutDashboard, Sparkles, MessageSquareHeart, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useMascotName } from '@/lib/mascot-name'
+import { useAuth } from '@/lib/auth/auth-context'
 
 export type NavTab = 'focus' | 'dashboard' | 'recovery'
 
@@ -16,6 +17,7 @@ interface HeaderProps {
   onOpenChat: () => void
   isChatOpen: boolean
   isSessionActive: boolean
+  onReturnToFocus?: () => void
 }
 
 export default function Header({
@@ -26,8 +28,10 @@ export default function Header({
   onOpenChat,
   isChatOpen,
   isSessionActive,
+  onReturnToFocus,
 }: HeaderProps) {
   const { mascotName, setMascotName } = useMascotName()
+  const { user, signOut, isAuthenticated } = useAuth()
   const [isEditingName, setIsEditingName] = useState(false)
   const [tempName, setTempName] = useState(mascotName)
   const nameInputRef = useRef<HTMLInputElement>(null)
@@ -57,15 +61,27 @@ export default function Header({
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Brand Logo & Mascot Name */}
         <div className="flex items-center gap-3">
-          <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-sky-200/50 bg-white shadow-sm ring-2 ring-cyan-500/20 dark:border-cyan-500/30 dark:bg-[#0B132B] dark:ring-cyan-400/20">
+          {/* Interactive ANT Mascot Avatar Button: Returns to Focus screen */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onReturnToFocus) {
+                onReturnToFocus()
+              } else {
+                onSelectTab('focus')
+              }
+            }}
+            title="Return to Flow State by Design (Focus)"
+            className="group relative size-10 shrink-0 overflow-hidden rounded-full border border-sky-200/50 bg-white shadow-sm ring-2 ring-cyan-500/20 transition-all hover:scale-105 hover:ring-cyan-400 dark:border-cyan-500/30 dark:bg-[#0B132B] dark:ring-cyan-400/30 active:scale-95 cursor-pointer"
+          >
             <Image
               src="/ant-mascot.png"
               alt={`${mascotName} mascot`}
               fill
-              className="object-cover object-center"
+              className="object-cover object-center transition-transform group-hover:scale-110"
               sizes="40px"
             />
-          </div>
+          </button>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               {isEditingName ? (
@@ -226,6 +242,38 @@ export default function Header({
           >
             {isDarkMode ? <Sun className="size-4 text-cyan-300" /> : <Moon className="size-4 text-slate-700" />}
           </Button>
+
+          {/* User Account / Sign Out Pill */}
+          {isAuthenticated && user && (
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => onSelectTab('dashboard')}
+                title={`Profile: ${user.fullName} (${user.email})`}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                  currentTab === 'dashboard'
+                    ? 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40 shadow-xs'
+                    : isDarkMode
+                    ? 'bg-[#0B132B] text-slate-300 border border-[#0E1A38] hover:border-cyan-500/30 hover:text-cyan-200'
+                    : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200/70'
+                }`}
+              >
+                <div className="size-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-300 font-bold text-[10px]">
+                  {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate">{user.fullName.split(' ')[0]}</span>
+              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => signOut()}
+                title="Đăng xuất (Sign Out)"
+                className="size-8 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+              >
+                <LogOut className="size-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

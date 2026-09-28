@@ -428,3 +428,199 @@ virtual-double/
 
 ### Version 1.3.0 — Water Ripple Physics & High-Contrast Countdown
 - Sửa màu countdown sphere sang sapphire `#071329` với số Cyan phát sáng.
+
+---
+
+## 4. PHIÊN BẢN 4.0.0 — SUPABASE AUTH, DATA ISOLATION, HEADER RETURN & FLEXIBLE COPILOT (7-AGENT PIPELINE)
+
+### 4.1. Đội ngũ 7 Agents & Pipeline Điều phối
+- **3 Kỹ sư Hệ thống (Engineers)**:
+  1. *Engineer 1 (Auth & Backend)*: Xây dựng Supabase Client (`lib/supabase/client.ts`), Auth Context (`lib/auth/auth-context.tsx`), schema SQL Supabase (`supabase/schema.sql`), và cô lập dữ liệu người dùng (isolated telemetry & profile).
+  2. *Engineer 2 (Frontend Architecture)*: Xây dựng màn hình đăng nhập / đăng ký (`components/AuthView.tsx`), modal điều khoản bảo mật (`components/TermsAndPrivacyModal.tsx`), và tích hợp auth gate vào `app/page.tsx`.
+  3. *Engineer 3 (UI/UX & Interactions)*: Tái cấu trúc khung chat ANT Copilot (`components/ChatWithAntModal.tsx`) thành non-blocking resizable drawer (`<->` resize handle), đồng thời biến đổi avatar ANT góc trên cùng bên trái của Header (`components/Header.tsx`) thành interactive button đưa người dùng về màn hình Focus ("Flow state by design").
+- **2 Dò lỗi sai (Bug Hunters / QA)**:
+  1. *Bug Hunter 1 (Automated Build & Types)*: Chạy pipeline kiểm thử tự động `npm run build` xác thực 100% Turbopack compilation và TypeScript types.
+  2. *Bug Hunter 2 (E2E & Functional Testing)*: Sử dụng browser subagent kiểm tra toàn bộ luồng đăng nhập, demo account, chuyển tab, resizable drawer, và navigation.
+- **2 Tracking Coordinators (State & Branch Management)**:
+  1. *Tracking Coordinator 1 (Git Branch & Commit)*: Quản lý nhánh riêng `feat/supabase-auth-flexible-copilot` và lưu vết commits.
+  2. *Tracking Coordinator 2 (Documentation & Logs)*: Ghi nhận trạng thái dự án, lưu trữ toàn bộ thay đổi vào `virtual-double_state.md`.
+
+### 4.2. Chi tiết 3 Tính năng Nâng cấp Cốt lõi
+
+#### 1. Hệ thống Đăng nhập / Đăng ký & Cô lập Dữ liệu Supabase (Data Isolation)
+- **Component**: [AuthView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AuthView.tsx), [TermsAndPrivacyModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/TermsAndPrivacyModal.tsx), [auth-context.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/auth-context.tsx).
+- **Thiết kế theo Calm Editorial**: Tông màu Indigo-Navy (`#0B132B`, `#070F26`) và Light Cream (`#F8FAFC`), hiệu ứng typography Plus Jakarta Sans, card nổi không viền thô.
+- **Workflow Người dùng**: Màn hình Login/Signup $\rightarrow$ Màn hình Focus hiện tại (*"Flow state by design"*).
+- **Trường thông tin Đăng ký**:
+  - Họ và tên (`fullName`)
+  - Email (`email`)
+  - Số điện thoại (`phone`)
+  - Giới tính (`gender`: Nam, Nữ, Phi nhị nguyên, Không tiết lộ)
+  - Ngày tháng năm sinh (`dateOfBirth`: YYYY-MM-DD $\rightarrow$ Tự động suy ra tuổi thực tế `age` cho Demographic Analytics)
+  - Mật khẩu (`password` & `confirmPassword`)
+  - Checkbox bắt buộc đồng ý Điều khoản & Chính sách quyền riêng tư (`Terms & Privacy Agreement`).
+- **Modal Điều khoản & Quyền riêng tư ([TermsAndPrivacyModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/TermsAndPrivacyModal.tsx))**:
+  - Cam kết bảo mật sinh trắc học On-device: MediaPipe FaceLandmarker xử lý 100% tại trình duyệt qua WebAssembly, không bao giờ gửi video hay hình ảnh webcam lên server.
+  - Quyền sở hữu dữ liệu tập trung: Dữ liệu telemetry và phiên tập trung thuộc quyền riêng tư cá nhân của người dùng.
+- **Tính năng Quên Mật Khẩu (Forgot Password Recovery)**:
+  - Khôi phục qua Email hoặc Số điện thoại.
+  - Tích hợp **Human Verification Captcha** (phép tính xác thực chống spam bot).
+  - Nhập mã xác minh OTP gửi về hòm thư để đặt lại mật khẩu an toàn.
+- **Hỗ trợ Backend Supabase & Isolated Local Sandbox**:
+  - Cung cấp schema PostgreSQL hoàn chỉnh tại [schema.sql](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/supabase/schema.sql) với Row Level Security (RLS) policies.
+  - Tự động nhận diện cấu hình Supabase qua `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Khi chưa gắn credentials hoặc ở chế độ offline, hệ thống tự động fallback sang Sandbox LocalStorage cô lập dữ liệu theo từng account id (`virtualdouble_telemetry_<userId>`).
+  - Nút **"Quick Demo Login (Alex Nguyen)"** giúp ban giám khảo và kiểm thử trải nghiệm ngay lập tức với 1 cú click.
+
+#### 2. Avatar ANT Header Góc Trái Trở thành Nút Quay lại Màn hình Focus
+- **Component**: [Header.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/Header.tsx).
+- **Tương tác**: Avatar chú kiến tròn ANT `/ant-mascot.png` ở góc trên cùng bên trái được chuyển thành button tương tác với hiệu ứng `hover:scale-105 active:scale-95 ring-2 ring-cyan-500/20`.
+- **Hành vi**: Khi người dùng nhấn vào avatar này từ bất kỳ tab nào (Dashboard, Recovery, hoặc khi đang ở giữa các bước thiết lập), hệ thống kích hoạt `onReturnToFocus()`, lập tức đưa người dùng quay lại màn hình chính của Flow State ("Flow state by design" / `AntWelcomeView`).
+
+#### 3. Khung Chat ANT Copilot Linh Hoạt & Co Giãn Không Chặn Thao Tác (Flexible & Resizable Non-Blocking Drawer)
+- **Component**: [ChatWithAntModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/ChatWithAntModal.tsx).
+- **Kiến trúc Không Chặn Thao Tác (Non-Blocking Overlay)**:
+  - Loại bỏ hoàn toàn backdrop tối che phủ toàn màn hình (`bg-black/60`).
+  - Container cố định ngoài cùng sử dụng `pointer-events-none`, trong khi drawer bên phải sử dụng `pointer-events-auto`.
+  - Nhờ đó, người dùng có thể mở khung chat và **đồng thời thực hiện các thao tác khác trên website** (chuyển đổi giữa tab Focus, Dashboard, Recovery, nhấn các nút action) mà khung chat không bị đóng và không chặn chuột.
+- **Tính năng Co Giãn Chiều Rộng (<-> Resize Handle)**:
+  - Thanh tay cầm co giãn dọc ở mép trái của drawer với con trỏ chuột `<->` (`cursor-ew-resize`).
+  - Hỗ trợ kéo chuột trái (`startResizing`) mượt mà theo phương ngang, tự do thu hẹp hoặc mở rộng độ rộng khung chat từ `340px` đến `880px`.
+  - Tự động lưu trữ độ rộng ưu thích vào `localStorage` (`virtualdouble_chat_drawer_width`) để duy trì trạng thái khi người dùng mở lại.
+  - Bổ sung nút Quick Preset Toggle ở góc trên để chuyển nhanh giữa chế độ hẹp (`380px`) và chế độ mở rộng (`640px`).
+- **Bảo toàn Giao diện Nguyên bản**: Giữ trọn vẹn phong cách hội thoại chuyên nghiệp, avatar ANT, các gợi ý nhanh (task breakdown chips), và nút ứng dụng hành động nhiệm vụ vào Focus session.
+
+---
+
+## 5. PHIÊN BẢN 4.1.0 — SPLIT-PANEL AUTHVIEW, ANT SPEECH BUBBLE & SEPARATED FORM ROWS
+
+### 5.1. Cấu trúc Đội ngũ 7 Agents Thực thi
+- **Kỹ sư 1 (Layout & Panel Swapping)**: Xây dựng card xác thực đôi 2 nửa (Split-panel card) lấy cảm hứng từ video thiết kế, quản lý cơ chế tráo đổi vị trí giữa cột Mascot Hero và cột Form theo từng trạng thái (Sign In vs Sign Up).
+- **Kỹ sư 2 (Mascot Comic Speech Bubble)**: Tích hợp sân khấu chú kiến ANT vẫy tay kèm Comic Speech Bubble có đuôi trỏ SVG đặc trưng truyện tranh (tương tự như màn hình Smile Ritual). Bubble hiển thị `"Welcome back!"` khi Sign In và `"Hello new friend!"` khi Sign Up.
+- **Kỹ sư 3 (Form Rows Re-architecture & Remember Me)**: Tách riêng từng hàng nhập liệu cho form Create Account: Full Name (Hàng 1), Email (Hàng 2), Phone (Hàng 3), Gender & DOB (Hàng 4, 2 cột), Password (Hàng 5), Confirm Password (Hàng 6), Terms & Privacy (Hàng 7). Thêm checkbox "Remember me" cho form Sign In chuẩn visual đồng bộ.
+- **Dò lỗi sai 1 (Automated Build & Types)**: Chạy pipeline kiểm thử tự động `npm run build` xác thực 100% Turbopack compilation và TypeScript types: **0 errors**.
+- **Dò lỗi sai 2 (Browser End-to-End Validation)**: Sử dụng Browser Subagent kiểm thử tương tác thực tế: chuyển đổi Sign In $\leftrightarrow$ Sign Up mượt mà, kiểm tra vị trí cột và câu thoại Mascot, test tick box Remember me, test One-Click Demo Account đăng nhập vào màn hình Focus Hero.
+- **Tracking 1 (Git Branch & Commit)**: Thực thi trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`, tạo commit lưu vết.
+- **Tracking 2 (State Documentation)**: Ghi chép toàn diện log cập nhật vào `virtual-double_state.md`.
+
+### 5.2. Chi tiết Cải tiến Giao diện & Trải nghiệm
+1. **Thiết kế Card Đôi 2 Nửa (Split-Panel Card)**:
+   - Thùng chứa bo tròn cong mềm mại `rounded-[2.5rem]`, viền phát sáng cyan tinh tế, đổ bóng chiều sâu 3D trên nền canvas gradient dither.
+   - Khi ở chế độ **Sign In**: Form Sign In nằm ở nửa bên TRÁI; Nửa bên PHẢI là Mascot ANT vẫy tay kèm khung thoại `"Welcome back!"` và nút chuyển `"Create New Account"`.
+   - Khi ở chế độ **Sign Up**: Nửa bên TRÁI là Mascot ANT vẫy tay kèm khung thoại `"Hello new friend!"` và nút chuyển `"Sign In to Website"`; Nửa bên PHẢI là form Create Account.
+2. **Khung Thoại Truyện Tranh Mascot ANT (Comic Speech Bubble)**:
+   - Khung thoại bo tròn `rounded-[2rem]`, viền nổi bật `border-[3px] border-slate-900 dark:border-cyan-400`, nền `dark:bg-[#070F26]`.
+   - Đuôi trỏ SVG nhọn cong đặc trưng truyện tranh chỉ thẳng vào đỉnh đầu chú kiến ANT.
+   - Chú kiến ANT vẫy tay chuyển động lơ lửng `animate-mascot-float` kèm đổ bóng sàn `animate-mascot-shadow`.
+3. **Tách Riêng Từng Hàng Form Đăng Ký (Create Account)**:
+   - **Hàng 1**: Họ và tên (`fullName`)
+   - **Hàng 2**: Địa chỉ email (`email`)
+   - **Hàng 3**: Số điện thoại (`phone`)
+   - **Hàng 4**: Giới tính (`gender`) & Ngày sinh (`dateOfBirth`) trên cùng 1 hàng (2 cột cân đối)
+   - **Hàng 5**: Mật khẩu (`password`) với nút ẩn/hiện mắt
+   - **Hàng 6**: Xác nhận mật khẩu (`confirmPassword`) với nút ẩn/hiện mắt
+   - **Hàng 7**: Checkbox đồng ý Điều khoản Dịch vụ & Chính sách Bảo mật (xử lý 100% On-device WASM)
+4. **Checkbox "Remember me" cho Form Sign In**:
+   - Nút tick box vuông với dấu tích Check icon cyan đồng bộ chuẩn thiết kế của checkbox Terms & Privacy.
+   - Tự động lưu và điền lại thông tin đăng nhập vào `localStorage` (`virtualdouble_remembered_email`).
+   - Nút liên kết `"Forgot password?"` đặt ngang hàng tiện lợi.
+
+---
+
+## 6. PHIÊN BẢN 4.2.0 — SLIDING OVERLAY ANIMATION, GMAIL OTP PIPELINE, REDUCED BORDER RADIUS & CLEAN TYPOGRAPHY
+
+### 6.1. Cấu trúc Đội ngũ 7 Agents Thực thi
+- **Kỹ sư 1 (Sliding Overlay Architecture)**: Xây dựng cơ chế trượt tráo đổi Overlay Panel theo chuẩn chuyển động ngang 60fps từ video tham khảo (`transition-transform duration-700 ease-in-out`), panel chú kiến trượt từ phải sang trái khi mở Sign Up và trượt mượt mà ngược lại khi mở Sign In.
+- **Kỹ sư 2 (Real Gmail OTP Pipeline)**: Xây dựng hệ thống gửi mã OTP thật kết nối trực tiếp đến Gmail của người dùng qua API endpoints [send-otp](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/api/auth/send-otp/route.ts) và [verify-otp](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/api/auth/verify-otp/route.ts) tích hợp Supabase Auth `resetPasswordForEmail` và mô-đun sinh mã bảo mật [otp-store.ts](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/otp-store.ts).
+- **Kỹ sư 3 (Refined Typography, Scale & Form Fields)**: Căn giữa tiêu đề `Create Account` và `Sign In`, đổi sang font Plus Jakarta Sans to rõ (`font-sans font-bold text-3xl sm:text-4xl tracking-tight text-center`); giảm độ bo viền xuống `rounded-2xl` (16px); thu gọn 90% kích thước tổng thể (`max-w-[850px]`); giới hạn tùy chọn giới tính chỉ gồm `Male` và `Female`; loại bỏ toàn bộ chữ tiếng Việt phụ đề và nút demo account.
+- **Dò lỗi sai 1 (Automated Build & Types)**: Chạy pipeline kiểm thử tự động `npm run build` với Turbopack: **0 lỗi, 0 cảnh báo TypeScript strict mode, 7/7 route static/dynamic hoàn hảo**.
+- **Dò lỗi sai 2 (Browser End-to-End Validation)**: Sử dụng Browser Subagent kiểm thử tương tác thực tế: chuyển đổi Sign In $\leftrightarrow$ Sign Up với hiệu ứng trượt mượt mà, xác thực tiêu đề to rõ căn giữa, kiểm tra độ bo viền `rounded-2xl`, kiểm thử gửi mã OTP đến Gmail (`test@gmail.com`) với captcha tính nhẩm và đăng nhập tài khoản Alex Nguyen thành công vào màn hình Focus Hero.
+- **Tracking 1 (Git Branch & Commit)**: Thực thi trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`, tạo commit lưu vết.
+- **Tracking 2 (State Documentation)**: Ghi chép toàn diện log cập nhật vào `virtual-double_state.md`.
+
+### 6.2. Chi tiết 8 Điểm Thay đổi Cốt lõi
+1. **Hiệu ứng Chuyển Đổi Trượt Mượt Mà (Sliding Overlay Animation)**:
+   - Thay thế cơ chế switch tĩnh bằng Overlay Panel trượt ngang 50% (`translate-x-0` $\leftrightarrow$ `translate-x-full`) với `duration-700 ease-in-out` chân thực như video mẫu.
+   - Khi bấm `"Create New Account"`, panel chú kiến ANT lướt êm ái sang bên trái, đồng thời form Create Account xuất hiện bên phải.
+   - Khi bấm `"Sign In to Website"`, panel chú kiến ANT lướt êm ái trở lại bên phải, để lộ form Sign In bên trái.
+2. **Loại Bỏ Header Ribbon Phụ**:
+   - Xóa bỏ hoàn toàn thanh thông tin `Account-Isolated Telemetry Engine` và `ANT COGNITIVE BODY DOUBLER` ở đầu card để giao diện thanh thoát, tối giản.
+3. **Tiêu Đề Căn Giữa & Typography To Rõ**:
+   - Tiêu đề `Sign In` và `Create Account` được đặt căn giữa (`text-center`).
+   - Sử dụng font chữ Plus Jakarta Sans to rõ (`font-sans font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-slate-100`) đồng bộ với tiêu đề *"What will you focus on next?"*.
+4. **Giảm Độ Bo Viền Khung (Reduced Border Radius)**:
+   - Giảm độ cong từ `rounded-[2.5rem]` (40px) xuống `rounded-2xl` (16px), tạo cảm giác sắc nét, hiện đại và cao cấp hơn.
+5. **Dọn Sạch Tiếng Việt & Nút Demo Phụ**:
+   - Xóa bỏ nút One-Click Demo Account.
+   - Xóa bỏ toàn bộ chú thích tiếng Việt trong ngoặc: `Full Name` (bỏ `HỌ VÀ TÊN`), `Phone Number` (bỏ `SỐ ĐIỆN THOẠI`), `Gender` (bỏ `GIỚI TÍNH`).
+   - Xóa bỏ các dòng mô tả phụ: *"Register your private ANT profile for isolated metrics..."* và *"Enter your email or phone number to resume your focus flow."*.
+   - Xóa bỏ các tag badge *"New Explorer Orientation"* và *"Welcome Back"* trên đỉnh bóng thoại chú kiến.
+6. **Thu Gọn 90% Kích Thước Board**:
+   - Giảm chiều rộng tối đa từ `max-w-5xl` (1024px) xuống `max-w-[850px]` (tương đương 85-90%), căn đối hài hòa trên mọi kích cỡ màn hình.
+7. **Tùy Chọn Giới Tính Tinh Gọn**:
+   - Menu Gender rút gọn chỉ giữ lại đúng 2 lựa chọn: `Male` và `Female`.
+8. **Hệ Thống Gửi Mã OTP Thật Đến Gmail (Real Gmail OTP Pipeline)**:
+   - Xây dựng API route `/api/auth/send-otp` kết nối Supabase Auth `resetPasswordForEmail` gửi thư thật đến hòm thư Gmail của người dùng.
+   - Tích hợp mô-đun lưu trữ mã xác thực mật mã học server-side [otp-store.ts](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/otp-store.ts) với giới hạn thời gian 10 phút và chống brute-force.
+   - Xây dựng API route `/api/auth/verify-otp` xác thực mã 6 chữ số từ Gmail và cập nhật mật khẩu mới an toàn.
+
+---
+
+## 7. PHIÊN BẢN 4.3.0 — PERFECT VERTICAL CENTERING, BALANCED ROW SPACING & MASCOT HOVER ZOOM EFFECT
+
+### 7.1. Cấu trúc Đội ngũ 7 Agents & Phân bổ Công việc
+- **Kỹ sư 1 (Lead FE & Typography Balancer)**:
+  - Tinh chỉnh cân đối cỡ chữ: Giảm kích thước tiêu đề từ `text-3xl / 4xl` xuống `text-2xl lg:text-[28px] font-bold tracking-tight text-center mb-2` (Plus Jakarta Sans) để loại bỏ cảm giác chen chúc.
+  - Tối ưu hóa kích thước nhãn (`text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1`) và input padding (`px-3.5 py-2 text-xs sm:text-[13px] rounded-xl`).
+  - Mở rộng khoảng cách dòng giữa các components (`space-y-3.5`) giúp bố cục thoáng đãng, dễ thở và tinh tế.
+- **Kỹ sư 2 (Layout Geometry & Vertical Centering Specialist)**:
+  - Xử lý triệt để bài toán căn giữa theo chiều dọc: Bổ sung `min-h-screen w-full flex flex-col items-center justify-center` ở vùng unauthenticated container trong [app/page.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/page.tsx) và `min-h-screen items-center justify-center my-auto` trong [components/AuthView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AuthView.tsx).
+  - Tăng chiều cao cố định của Desktop double-panel container lên `h-[660px]` để cung cấp đủ headroom cho toàn bộ 7 hàng của form Create Account mà không bị chật chội.
+  - Đảm bảo lề trên và lề dưới bằng nhau tuyệt đối trên toàn bộ các tỷ lệ màn hình (1920x945, 1440x900, 1366x768).
+- **Kỹ sư 3 (Motion & Interaction Engineer - Mascot Parity)**:
+  - Đồng bộ hiệu ứng hover zoom cho Chú kiến Mascot ANT trên Auth board giống hệt màn hình Focus ([AntWelcomeView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AntWelcomeView.tsx)):
+  - Thêm `group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 my-auto flex flex-col items-center` vào mascot container.
+  - Khi hover: Chú kiến ANT phóng to mượt mà (`group-hover:scale-105`), bóng đổ sàn mở rộng tương xứng (`group-hover:scale-110`), và vầng sáng cyan bao quanh rực rỡ hơn (`group-hover:drop-shadow-[0_22px_48px_rgba(6,182,212,0.38)]`).
+- **Dò lỗi sai 1 (Automated Build & Types Hunter)**:
+  - Thực thi tự động pipeline `npm run build` với Turbopack: Hoàn thành trong 2.8s, TypeScript type check 0 lỗi, toàn bộ 7 routes (3 API endpoints dynamic và 4 static pages) biên dịch thành công 100%.
+- **Dò lỗi sai 2 (Browser End-to-End & Visual Hunter)**:
+  - Sử dụng Browser Subagent kiểm thử tương tác thực tế trên `http://localhost:3000`:
+  - Đo đạc trực quan xác nhận toàn bộ card Sign In / Sign Up nằm chính giữa màn hình theo phương thẳng đứng (khoảng cách lề trên và lề dưới hoàn toàn cân xứng).
+  - Kiểm thử rê chuột hover vào Mascot ANT: xác nhận hiệu ứng zoom-in mượt mà kèm vầng sáng Cyan.
+  - Kiểm thử chuyển đổi Sign In $\leftrightarrow$ Sign Up mượt mà, xác thực khoảng cách giữa các hàng rộng rãi, chữ số rõ nét, không bị chồng lấn.
+- **Tracking 1 (Git Branch & Release Manager)**:
+  - Duy trì tuyệt đối trên branch `feat/supabase-auth-flexible-copilot`.
+  - Tạo commit lưu vết sạch sẽ, mô tả chi tiết các thay đổi.
+- **Tracking 2 (Audit Logger & State Historian)**:
+  - Ghi lại toàn bộ log chỉnh sửa, thông số thiết kế và hình ảnh minh chứng vào [virtual-double_state.md](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/virtual-double_state.md).
+
+### 7.2. Tóm tắt 3 Cải tiến Trọng tâm Đã Hoàn thiện
+1. **Cân đối Khoảng cách Hàng & Cỡ Chữ (Balanced Row Spacing & Typography)**:
+   - Khoảng cách giữa các hàng tăng lên `space-y-3.5` (14px) thay vì chật chội.
+   - Nhãn trường input đổi sang `text-[11px] font-semibold` với icon đồng bộ kích thước `size-3`.
+   - Tiêu đề `Create Account` và `Sign In` giảm nhẹ xuống `text-2xl lg:text-[28px]` giúp bố cục tổng thể thanh thoát, cao cấp.
+2. **Căn Giữa Toàn Bộ Board Theo Chiều Dọc (Perfect Vertical Centering)**:
+   - Khắc phục tình trạng card lệch lên mép trên bằng cấu trúc Flex container `min-h-screen w-full flex items-center justify-center my-auto`.
+   - Card giờ đây nằm ngay vị trí trọng tâm thị giác của người dùng, khoảng cách tới lề trên và lề dưới hoàn toàn đối xứng.
+3. **Hiệu ứng Hover Zoom Chú Kiến Mascot ANT (Interactive Mascot Zoom Parity)**:
+   - Rê chuột vào Chú kiến ANT kích hoạt chuyển động phóng to 105% êm dịu (`transition-all duration-300 hover:scale-105`), đổ bóng sàn giãn ra 110%, vầng sáng phát quang cyan tăng cường chiều sâu, tạo cảm giác phản hồi sinh động tương tự như màn hình Focus Hero.
+
+---
+
+## 8. PHIÊN BẢN 4.3.1 — REFINED TITLE SPACING & CLEAN FRAMELESS MASCOT GREETINGS
+
+### 8.1. Tóm tắt 2 Điểm Chỉnh sửa Tinh gọn
+1. **Tăng Khoảng Cách Giữa Tiêu Đề Và Ô Nhập Đầu Tiên (Refined Title Bottom Margin)**:
+   - Tăng lề dưới của tiêu đề `Sign In` từ `mb-2` lên `mb-5` (20px), tạo khoảng trống thoáng đãng trước trường nhập `Email Address or Phone`.
+   - Tăng lề dưới của tiêu đề `Create Account` từ `mb-2` lên `mb-5` (20px), tạo khoảng thở tự nhiên trước trường nhập `Full Name`.
+   - Đồng bộ trên mobile view với `mb-4`.
+2. **Loại Bỏ Hoàn Toàn Khung Thoại & Đặt Dòng Chữ Gần Đầu Chú Kiến (Clean Frameless Greetings)**:
+   - Loại bỏ triệt để viền hộp bo cong (`border-[3px] border-slate-900 bg-white dark:border-cyan-400 dark:bg-[#070F26]`), bóng đổ hộp và đuôi trỏ SVG comic bubble.
+   - Đặt trực tiếp 2 dòng chữ `Welcome back!` và `Hello new friend!` lên mặt phẳng board với typography Plus Jakarta Sans nổi bật (`font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-cyan-200`).
+   - Xích vị trí chữ xuống gần sát đỉnh đầu/râu của chú kiến ANT (`mb-3`), nhóm thành cụm trung tâm cân đối hài hòa theo trục dọc.
+   - Áp dụng đồng bộ cho cả giao diện máy tính và mobile.
+
+### 8.2. Kiểm thử Tự động & Quản lý Nhánh
+- **Turbopack Build**: `npm run build` hoàn tất trong 3.0s, TypeScript type check: **0 errors**.
+- **Browser Validation**: Xác thực trực quan bằng Browser Subagent trên `http://localhost:3000` (đã chụp ảnh lưu trữ `signin_board_view_v2` và `signup_board_view_v2`).
+- **Git Branch**: Lưu vết trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`.
+
