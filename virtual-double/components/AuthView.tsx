@@ -279,7 +279,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
             {!isForgot ? (
               <form onSubmit={handleSignIn} className="space-y-4">
                 {/* Centered Title in Plus Jakarta Sans */}
-                <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+                <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-5">
                   Sign In
                 </h2>
 
@@ -518,7 +518,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
             <form onSubmit={handleSignUp} className="space-y-3.5">
               {/* Centered Title in Plus Jakarta Sans */}
-              <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+              <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-5">
                 Create Account
               </h2>
 
@@ -706,38 +706,14 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
             {/* Inner mascot content with smooth cross-fade */}
             <div className="h-full w-full p-8 flex flex-col items-center justify-between text-center select-none">
               
-              {/* Comic Speech Bubble */}
-              <div className="relative z-20 mt-4 max-w-[19rem] px-4">
-                <div className="relative rounded-[2rem] border-[3px] border-slate-900 bg-white px-5 py-3 shadow-xl transition-all duration-300 dark:border-cyan-400 dark:bg-[#070F26]">
-                  <p className="font-sans text-base lg:text-lg font-bold tracking-tight text-slate-900 dark:text-cyan-200">
-                    &ldquo;{isSignUp ? 'Hello new friend!' : 'Welcome back!'}&rdquo;
-                  </p>
+              {/* Mascot & Greeting Group (Clean text directly on board, moved closer to ANT's head) */}
+              <div className="my-auto flex flex-col items-center justify-center">
+                <h3 className="font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-cyan-200 mb-3 drop-shadow-sm">
+                  {isSignUp ? 'Hello new friend!' : 'Welcome back!'}
+                </h3>
 
-                  {/* Comic Bubble Pointer Tail */}
-                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-                    <svg
-                      className="h-5 w-7 text-white dark:text-[#070F26]"
-                      viewBox="0 0 36 24"
-                      fill="currentColor"
-                    >
-                      <path d="M0 0 C 12 12, 14 24, 6 24 C 20 20, 28 12, 36 0 Z" />
-                    </svg>
-                    <svg
-                      className="absolute inset-0 h-5 w-7 text-slate-900 dark:text-cyan-400 pointer-events-none"
-                      viewBox="0 0 36 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    >
-                      <path d="M0 0 C 12 12, 14 24, 6 24 C 20 20, 28 12, 36 0" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* ANT Mascot Waving with interactive hover zoom effect (matching Focus view) */}
-              <div className="group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 my-auto flex flex-col items-center">
+                {/* ANT Mascot Waving with interactive hover zoom effect (matching Focus view) */}
+                <div className="group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 flex flex-col items-center">
                 <div className="relative h-56 w-52 lg:h-64 lg:w-60 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_14px_32px_rgba(6,182,212,0.22)] group-hover:drop-shadow-[0_20px_45px_rgba(6,182,212,0.35)] animate-mascot-float">
                   <Image
                     src="/ant-mascot-removebg.png"
@@ -750,8 +726,9 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                 </div>
                 <div className="mx-auto -mt-3 h-3 w-28 rounded-full bg-cyan-500/20 blur-md dark:bg-cyan-400/25 animate-mascot-shadow transition-transform duration-300 group-hover:scale-110" />
               </div>
+            </div>
 
-              {/* Switcher Button */}
+            {/* Switcher Button */}
               <div className="mb-4 flex flex-col items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
@@ -793,13 +770,9 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
         <div className="block md:hidden p-6">
           {/* Mascot Section */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="relative z-20 mb-2">
-              <div className="relative rounded-2xl border-2 border-slate-900 bg-white px-4 py-2 shadow-md dark:border-cyan-400 dark:bg-[#070F26]">
-                <p className="font-sans text-sm font-bold text-slate-900 dark:text-cyan-200">
-                  &ldquo;{isSignUp ? 'Hello new friend!' : 'Welcome back!'}&rdquo;
-                </p>
-              </div>
-            </div>
+            <h3 className="font-sans text-xl font-bold tracking-tight text-slate-900 dark:text-cyan-200 mb-1">
+              {isSignUp ? 'Hello new friend!' : 'Welcome back!'}
+            </h3>
             <div className="group relative size-32 my-1 transition-transform duration-300 hover:scale-105 cursor-pointer">
               <Image
                 src="/ant-mascot-removebg.png"
@@ -826,7 +799,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
           {/* Form */}
           {mode === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-3.5">
-              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-1">
+              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4">
                 Sign In
               </h2>
               <div>
@@ -907,7 +880,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
           {mode === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-3">
-              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-1">
+              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4">
                 Create Account
               </h2>
               <div>

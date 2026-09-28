@@ -603,3 +603,24 @@ virtual-double/
    - Card giờ đây nằm ngay vị trí trọng tâm thị giác của người dùng, khoảng cách tới lề trên và lề dưới hoàn toàn đối xứng.
 3. **Hiệu ứng Hover Zoom Chú Kiến Mascot ANT (Interactive Mascot Zoom Parity)**:
    - Rê chuột vào Chú kiến ANT kích hoạt chuyển động phóng to 105% êm dịu (`transition-all duration-300 hover:scale-105`), đổ bóng sàn giãn ra 110%, vầng sáng phát quang cyan tăng cường chiều sâu, tạo cảm giác phản hồi sinh động tương tự như màn hình Focus Hero.
+
+---
+
+## 8. PHIÊN BẢN 4.3.1 — REFINED TITLE SPACING & CLEAN FRAMELESS MASCOT GREETINGS
+
+### 8.1. Tóm tắt 2 Điểm Chỉnh sửa Tinh gọn
+1. **Tăng Khoảng Cách Giữa Tiêu Đề Và Ô Nhập Đầu Tiên (Refined Title Bottom Margin)**:
+   - Tăng lề dưới của tiêu đề `Sign In` từ `mb-2` lên `mb-5` (20px), tạo khoảng trống thoáng đãng trước trường nhập `Email Address or Phone`.
+   - Tăng lề dưới của tiêu đề `Create Account` từ `mb-2` lên `mb-5` (20px), tạo khoảng thở tự nhiên trước trường nhập `Full Name`.
+   - Đồng bộ trên mobile view với `mb-4`.
+2. **Loại Bỏ Hoàn Toàn Khung Thoại & Đặt Dòng Chữ Gần Đầu Chú Kiến (Clean Frameless Greetings)**:
+   - Loại bỏ triệt để viền hộp bo cong (`border-[3px] border-slate-900 bg-white dark:border-cyan-400 dark:bg-[#070F26]`), bóng đổ hộp và đuôi trỏ SVG comic bubble.
+   - Đặt trực tiếp 2 dòng chữ `Welcome back!` và `Hello new friend!` lên mặt phẳng board với typography Plus Jakarta Sans nổi bật (`font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-cyan-200`).
+   - Xích vị trí chữ xuống gần sát đỉnh đầu/râu của chú kiến ANT (`mb-3`), nhóm thành cụm trung tâm cân đối hài hòa theo trục dọc.
+   - Áp dụng đồng bộ cho cả giao diện máy tính và mobile.
+
+### 8.2. Kiểm thử Tự động & Quản lý Nhánh
+- **Turbopack Build**: `npm run build` hoàn tất trong 3.0s, TypeScript type check: **0 errors**.
+- **Browser Validation**: Xác thực trực quan bằng Browser Subagent trên `http://localhost:3000` (đã chụp ảnh lưu trữ `signin_board_view_v2` và `signup_board_view_v2`).
+- **Git Branch**: Lưu vết trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`.
+
