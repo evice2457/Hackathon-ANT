@@ -563,5 +563,43 @@ virtual-double/
    - Tích hợp mô-đun lưu trữ mã xác thực mật mã học server-side [otp-store.ts](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/otp-store.ts) với giới hạn thời gian 10 phút và chống brute-force.
    - Xây dựng API route `/api/auth/verify-otp` xác thực mã 6 chữ số từ Gmail và cập nhật mật khẩu mới an toàn.
 
+---
 
+## 7. PHIÊN BẢN 4.3.0 — PERFECT VERTICAL CENTERING, BALANCED ROW SPACING & MASCOT HOVER ZOOM EFFECT
 
+### 7.1. Cấu trúc Đội ngũ 7 Agents & Phân bổ Công việc
+- **Kỹ sư 1 (Lead FE & Typography Balancer)**:
+  - Tinh chỉnh cân đối cỡ chữ: Giảm kích thước tiêu đề từ `text-3xl / 4xl` xuống `text-2xl lg:text-[28px] font-bold tracking-tight text-center mb-2` (Plus Jakarta Sans) để loại bỏ cảm giác chen chúc.
+  - Tối ưu hóa kích thước nhãn (`text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1`) và input padding (`px-3.5 py-2 text-xs sm:text-[13px] rounded-xl`).
+  - Mở rộng khoảng cách dòng giữa các components (`space-y-3.5`) giúp bố cục thoáng đãng, dễ thở và tinh tế.
+- **Kỹ sư 2 (Layout Geometry & Vertical Centering Specialist)**:
+  - Xử lý triệt để bài toán căn giữa theo chiều dọc: Bổ sung `min-h-screen w-full flex flex-col items-center justify-center` ở vùng unauthenticated container trong [app/page.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/page.tsx) và `min-h-screen items-center justify-center my-auto` trong [components/AuthView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AuthView.tsx).
+  - Tăng chiều cao cố định của Desktop double-panel container lên `h-[660px]` để cung cấp đủ headroom cho toàn bộ 7 hàng của form Create Account mà không bị chật chội.
+  - Đảm bảo lề trên và lề dưới bằng nhau tuyệt đối trên toàn bộ các tỷ lệ màn hình (1920x945, 1440x900, 1366x768).
+- **Kỹ sư 3 (Motion & Interaction Engineer - Mascot Parity)**:
+  - Đồng bộ hiệu ứng hover zoom cho Chú kiến Mascot ANT trên Auth board giống hệt màn hình Focus ([AntWelcomeView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AntWelcomeView.tsx)):
+  - Thêm `group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 my-auto flex flex-col items-center` vào mascot container.
+  - Khi hover: Chú kiến ANT phóng to mượt mà (`group-hover:scale-105`), bóng đổ sàn mở rộng tương xứng (`group-hover:scale-110`), và vầng sáng cyan bao quanh rực rỡ hơn (`group-hover:drop-shadow-[0_22px_48px_rgba(6,182,212,0.38)]`).
+- **Dò lỗi sai 1 (Automated Build & Types Hunter)**:
+  - Thực thi tự động pipeline `npm run build` với Turbopack: Hoàn thành trong 2.8s, TypeScript type check 0 lỗi, toàn bộ 7 routes (3 API endpoints dynamic và 4 static pages) biên dịch thành công 100%.
+- **Dò lỗi sai 2 (Browser End-to-End & Visual Hunter)**:
+  - Sử dụng Browser Subagent kiểm thử tương tác thực tế trên `http://localhost:3000`:
+  - Đo đạc trực quan xác nhận toàn bộ card Sign In / Sign Up nằm chính giữa màn hình theo phương thẳng đứng (khoảng cách lề trên và lề dưới hoàn toàn cân xứng).
+  - Kiểm thử rê chuột hover vào Mascot ANT: xác nhận hiệu ứng zoom-in mượt mà kèm vầng sáng Cyan.
+  - Kiểm thử chuyển đổi Sign In $\leftrightarrow$ Sign Up mượt mà, xác thực khoảng cách giữa các hàng rộng rãi, chữ số rõ nét, không bị chồng lấn.
+- **Tracking 1 (Git Branch & Release Manager)**:
+  - Duy trì tuyệt đối trên branch `feat/supabase-auth-flexible-copilot`.
+  - Tạo commit lưu vết sạch sẽ, mô tả chi tiết các thay đổi.
+- **Tracking 2 (Audit Logger & State Historian)**:
+  - Ghi lại toàn bộ log chỉnh sửa, thông số thiết kế và hình ảnh minh chứng vào [virtual-double_state.md](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/virtual-double_state.md).
+
+### 7.2. Tóm tắt 3 Cải tiến Trọng tâm Đã Hoàn thiện
+1. **Cân đối Khoảng cách Hàng & Cỡ Chữ (Balanced Row Spacing & Typography)**:
+   - Khoảng cách giữa các hàng tăng lên `space-y-3.5` (14px) thay vì chật chội.
+   - Nhãn trường input đổi sang `text-[11px] font-semibold` với icon đồng bộ kích thước `size-3`.
+   - Tiêu đề `Create Account` và `Sign In` giảm nhẹ xuống `text-2xl lg:text-[28px]` giúp bố cục tổng thể thanh thoát, cao cấp.
+2. **Căn Giữa Toàn Bộ Board Theo Chiều Dọc (Perfect Vertical Centering)**:
+   - Khắc phục tình trạng card lệch lên mép trên bằng cấu trúc Flex container `min-h-screen w-full flex items-center justify-center my-auto`.
+   - Card giờ đây nằm ngay vị trí trọng tâm thị giác của người dùng, khoảng cách tới lề trên và lề dưới hoàn toàn đối xứng.
+3. **Hiệu ứng Hover Zoom Chú Kiến Mascot ANT (Interactive Mascot Zoom Parity)**:
+   - Rê chuột vào Chú kiến ANT kích hoạt chuyển động phóng to 105% êm dịu (`transition-all duration-300 hover:scale-105`), đổ bóng sàn giãn ra 110%, vầng sáng phát quang cyan tăng cường chiều sâu, tạo cảm giác phản hồi sinh động tương tự như màn hình Focus Hero.

@@ -217,7 +217,6 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
       const data = await res.json()
 
       if (data.success) {
-        // Also update local fallback store to keep state coherent
         await resetPassword(cleanEmail, newPassword, forgotCode)
         setIsSubmitting(false)
         setSuccessMsg('Your password has been reset successfully! Redirecting to sign in...')
@@ -244,18 +243,18 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
   const isForgot = mode === 'forgot'
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-8 font-sans animate-in fade-in duration-500">
-      {/* Scaled down to ~90% (max-w-[850px]), sleek rounded-2xl border */}
-      <div className="relative w-full max-w-[850px] overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-2xl backdrop-blur-2xl dark:border-cyan-500/25 dark:bg-[#070F26]/95 dark:shadow-[0_20px_50px_-15px_rgba(6,182,212,0.22)]">
+    <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 font-sans animate-in fade-in duration-500">
+      {/* Scaled down to ~90% (max-w-[840px]), sleek rounded-2xl border */}
+      <div className="relative my-auto w-full max-w-[840px] overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-2xl backdrop-blur-2xl dark:border-cyan-500/25 dark:bg-[#070F26]/95 dark:shadow-[0_20px_50px_-15px_rgba(6,182,212,0.22)]">
         
         {/* ========================================================= */}
-        {/* DESKTOP VIEW: SLIDING DOUBLE-PANEL CONTAINER (HEIGHT 610px) */}
+        {/* DESKTOP VIEW: SLIDING DOUBLE-PANEL CONTAINER (HEIGHT 660px) */}
         {/* ========================================================= */}
-        <div className="relative hidden md:block h-[610px] w-full overflow-hidden">
+        <div className="relative hidden md:block h-[660px] w-full overflow-hidden">
           
           {/* 1. SIGN IN FORM PANEL (Positioned on the Left half: left: 0) */}
           <div
-            className={`absolute top-0 left-0 h-full w-1/2 p-8 flex flex-col justify-center transition-all duration-700 ease-in-out ${
+            className={`absolute top-0 left-0 h-full w-1/2 p-8 sm:p-10 flex flex-col justify-center transition-all duration-700 ease-in-out ${
               !isSignUp && !isForgot
                 ? 'z-20 opacity-100 translate-x-0 pointer-events-auto'
                 : isForgot
@@ -279,14 +278,14 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
             {!isForgot ? (
               <form onSubmit={handleSignIn} className="space-y-4">
-                {/* Centered Large Title in Plus Jakarta Sans */}
-                <h2 className="text-center font-sans text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                {/* Centered Title in Plus Jakarta Sans */}
+                <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
                   Sign In
                 </h2>
 
                 {/* Email or Phone Input */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                     <Mail className="size-3.5 text-cyan-600 dark:text-cyan-400" />
                     Email Address or Phone
                   </label>
@@ -302,7 +301,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
                 {/* Password Input */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                     <Lock className="size-3.5 text-cyan-600 dark:text-cyan-400" />
                     Password
                   </label>
@@ -368,7 +367,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
               </form>
             ) : (
               /* Forgot Password Form */
-              <div className="space-y-3.5">
+              <div className="space-y-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -381,14 +380,14 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                   <ArrowLeft className="size-3.5" /> Back to Sign In
                 </button>
 
-                <h2 className="text-center font-sans text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   Reset Password
                 </h2>
 
                 {!codeSent ? (
-                  <form onSubmit={handleRequestResetCode} className="space-y-3">
+                  <form onSubmit={handleRequestResetCode} className="space-y-3.5">
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                         <Mail className="size-3.5 text-cyan-600 dark:text-cyan-400" />
                         Gmail Address
                       </label>
@@ -398,7 +397,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         placeholder="yourname@gmail.com"
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                       />
                     </div>
 
@@ -443,7 +442,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     </button>
                   </form>
                 ) : (
-                  <form onSubmit={handleConfirmReset} className="space-y-3">
+                  <form onSubmit={handleConfirmReset} className="space-y-3.5">
                     {previewOtp && (
                       <div className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 p-2 text-center text-xs text-cyan-700 dark:text-cyan-300">
                         OTP Code dispatched: <strong className="font-mono font-bold">{previewOtp}</strong>
@@ -451,7 +450,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     )}
 
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                         <KeyRound className="size-3.5 text-cyan-600 dark:text-cyan-400" />
                         Enter 6-Digit OTP from Gmail
                       </label>
@@ -467,7 +466,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                         <Lock className="size-3.5 text-cyan-600 dark:text-cyan-400" />
                         New Password
                       </label>
@@ -497,7 +496,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
           {/* 2. SIGN UP FORM PANEL (Positioned on the Right half: right: 0) */}
           <div
-            className={`absolute top-0 right-0 h-full w-1/2 p-7 flex flex-col justify-center transition-all duration-700 ease-in-out ${
+            className={`absolute top-0 right-0 h-full w-1/2 p-8 sm:p-9 flex flex-col justify-center transition-all duration-700 ease-in-out ${
               isSignUp
                 ? 'z-20 opacity-100 translate-x-0 pointer-events-auto'
                 : 'z-10 opacity-0 translate-x-12 pointer-events-none'
@@ -517,15 +516,15 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
               </div>
             )}
 
-            <form onSubmit={handleSignUp} className="space-y-2.5">
-              {/* Centered Large Title in Plus Jakarta Sans */}
-              <h2 className="text-center font-sans text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            <form onSubmit={handleSignUp} className="space-y-3.5">
+              {/* Centered Title in Plus Jakarta Sans */}
+              <h2 className="text-center font-sans text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
                 Create Account
               </h2>
 
               {/* Row 1: Full Name */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                   <User className="size-3 text-cyan-600 dark:text-cyan-400" />
                   Full Name
                 </label>
@@ -535,13 +534,13 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                   value={signUpData.fullName}
                   onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
                   placeholder="e.g. Alex Nguyen"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                 />
               </div>
 
               {/* Row 2: Email Address */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                   <Mail className="size-3 text-cyan-600 dark:text-cyan-400" />
                   Email Address
                 </label>
@@ -551,13 +550,13 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                   value={signUpData.email}
                   onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                   placeholder="alex.nguyen@example.com"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                 />
               </div>
 
               {/* Row 3: Phone Number */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                   <Phone className="size-3 text-cyan-600 dark:text-cyan-400" />
                   Phone Number
                 </label>
@@ -567,20 +566,20 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                   value={signUpData.phone}
                   onChange={(e) => setSignUpData({ ...signUpData, phone: e.target.value })}
                   placeholder="+84 987 654 321"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                 />
               </div>
 
               {/* Row 4: Gender & Date of Birth (Same Row - Only Male and Female) */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                     Gender
                   </label>
                   <select
                     value={signUpData.gender}
                     onChange={(e) => setSignUpData({ ...signUpData, gender: e.target.value as GenderType })}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -588,7 +587,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                     <Calendar className="size-3 text-cyan-600 dark:text-cyan-400" />
                     Date of Birth
                   </label>
@@ -597,14 +596,14 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     required
                     value={signUpData.dateOfBirth}
                     onChange={(e) => setSignUpData({ ...signUpData, dateOfBirth: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white"
                   />
                 </div>
               </div>
 
               {/* Row 5: Password */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                   <Lock className="size-3 text-cyan-600 dark:text-cyan-400" />
                   Password
                 </label>
@@ -615,7 +614,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     value={signUpData.password}
                     onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
                     placeholder="At least 6 characters"
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white pr-9"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white pr-9"
                   />
                   <button
                     type="button"
@@ -629,7 +628,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
               {/* Row 6: Confirm Password */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-0.5">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1">
                   <ShieldCheck className="size-3 text-cyan-600 dark:text-cyan-400" />
                   Confirm Password
                 </label>
@@ -640,7 +639,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repeat password"
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white pr-9"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-cyan-500/30 dark:bg-slate-900/80 dark:text-white pr-9"
                   />
                   <button
                     type="button"
@@ -653,7 +652,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
               </div>
 
               {/* Row 7: Terms & Privacy Checkbox */}
-              <div>
+              <div className="pt-0.5">
                 <label className="flex items-start gap-2 cursor-pointer select-none">
                   <div className="relative flex items-center justify-center mt-0.5">
                     <input
@@ -685,7 +684,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 py-2.5 text-xs font-bold text-white shadow-md shadow-cyan-500/25 transition-all hover:opacity-95 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-cyan-500/25 transition-all hover:opacity-95 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
               >
                 {isSubmitting ? 'Creating account...' : 'Create Account'}
                 <ArrowRight className="size-3.5" />
@@ -737,19 +736,19 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                 </div>
               </div>
 
-              {/* ANT Mascot Waving */}
-              <div className="relative animate-mascot-float my-auto">
-                <div className="relative h-56 w-52 lg:h-64 lg:w-60 drop-shadow-[0_14px_32px_rgba(6,182,212,0.22)]">
+              {/* ANT Mascot Waving with interactive hover zoom effect (matching Focus view) */}
+              <div className="group relative cursor-pointer select-none transition-all duration-300 hover:scale-105 my-auto flex flex-col items-center">
+                <div className="relative h-56 w-52 lg:h-64 lg:w-60 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_14px_32px_rgba(6,182,212,0.22)] group-hover:drop-shadow-[0_20px_45px_rgba(6,182,212,0.35)] animate-mascot-float">
                   <Image
                     src="/ant-mascot-removebg.png"
                     alt="ANT Mascot Waving"
                     width={380}
                     height={460}
                     priority
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-contain pointer-events-none select-none transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
-                <div className="mx-auto -mt-3 h-3 w-28 rounded-full bg-cyan-500/20 blur-md dark:bg-cyan-400/25 animate-mascot-shadow" />
+                <div className="mx-auto -mt-3 h-3 w-28 rounded-full bg-cyan-500/20 blur-md dark:bg-cyan-400/25 animate-mascot-shadow transition-transform duration-300 group-hover:scale-110" />
               </div>
 
               {/* Switcher Button */}
@@ -801,12 +800,12 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
                 </p>
               </div>
             </div>
-            <div className="relative size-32 my-1">
+            <div className="group relative size-32 my-1 transition-transform duration-300 hover:scale-105 cursor-pointer">
               <Image
                 src="/ant-mascot-removebg.png"
                 alt="ANT Mascot"
                 fill
-                className="object-contain"
+                className="object-contain pointer-events-none"
                 sizes="128px"
               />
             </div>
@@ -827,7 +826,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
           {/* Form */}
           {mode === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-3.5">
-              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-1">
                 Sign In
               </h2>
               <div>
@@ -908,7 +907,7 @@ export default function AuthView({ onSuccess }: AuthViewProps) {
 
           {mode === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-3">
-              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h2 className="text-center font-sans text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-1">
                 Create Account
               </h2>
               <div>

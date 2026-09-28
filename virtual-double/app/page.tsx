@@ -299,14 +299,16 @@ function AppShell() {
 
   if (!isAuthenticated) {
     return (
-      <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
+      <div className={`relative min-h-screen w-full flex flex-col items-center justify-center transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
         <InteractiveBackground isDarkMode={isDarkMode} />
-        <AuthView
-          onSuccess={() => {
-            setCurrentTab('focus')
-            setHasStarted(false)
-          }}
-        />
+        <div className="relative z-10 w-full flex items-center justify-center my-auto">
+          <AuthView
+            onSuccess={() => {
+              setCurrentTab('focus')
+              setHasStarted(false)
+            }}
+          />
+        </div>
       </div>
     )
   }
