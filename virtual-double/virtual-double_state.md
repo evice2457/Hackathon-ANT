@@ -624,3 +624,21 @@ virtual-double/
 - **Browser Validation**: Xác thực trực quan bằng Browser Subagent trên `http://localhost:3000` (đã chụp ảnh lưu trữ `signin_board_view_v2` và `signup_board_view_v2`).
 - **Git Branch**: Lưu vết trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`.
 
+---
+
+## 9. PHIÊN BẢN 4.3.2 — BALANCED SWITCHER BUTTON POSITIONING & SENSITIVE USER TELEMETRY REMOVAL
+
+### 9.1. Tóm tắt 2 Điểm Tinh Chỉnh Cốt Lõi
+1. **Dịch Chuyển Nút Chuyển Đổi (Switcher Button) Xích Lên Gần Chú Kiến ANT**:
+   - Thay thế bố cục `justify-between` kéo dãn quá mức bằng cụm căn giữa liên hoàn `flex flex-col items-center justify-center my-auto`.
+   - Nút *"Already have an account? Sign In to Website"* và *"Don't have an account yet? Create New Account"* được đặt ngay dưới bóng sàn của mascot ANT với khoảng cách `mt-5` (20px).
+   - Tỷ lệ khoảng trống phía trên và phía dưới panel mascot trở nên hoàn toàn cân bằng, gắn kết tự nhiên giữa lời chào, chú kiến và nút hành động.
+2. **Ẩn Triệt Để Mã Định Danh Nhạy Cảm (User ID) & Badge Telemetry Khỏi Dashboard**:
+   - Loại bỏ hoàn toàn dòng header hiển thị `Account Isolated Telemetry` và `User ID: usr_...` khỏi [components/DashboardView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/DashboardView.tsx).
+   - Toàn bộ thông tin định danh người dùng (`user.id`) hiện được bảo mật và lưu trữ độc quyền ở tầng LocalStorage / Supabase Server, không rò rỉ ra giao diện người dùng.
+   - Tiêu đề `Focus Intelligence Dashboard` hiện lên trang trọng, thanh thoát theo chuẩn phong cách Editorial báo chí cao cấp.
+
+### 9.2. Kiểm thử Tự động & Quản lý Nhánh
+- **Turbopack Build**: `npm run build` thành công trong 3.3s, TypeScript: **0 errors**.
+- **Browser E2E Verification**: Đã kiểm thử trực quan trên `http://localhost:3000`, chụp ảnh lưu trữ `signin_board_view_v3`, `signup_board_view_v3` và `dashboard_view_v3`.
+- **Git Branch**: Triển khai trên nhánh `feat/supabase-auth-flexible-copilot`.

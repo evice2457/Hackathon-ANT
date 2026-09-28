@@ -17,12 +17,11 @@ import {
   RotateCcw,
   Sparkles,
   ShieldCheck,
-  Database,
 } from 'lucide-react'
 import { useAuth, type GenderType } from '@/lib/auth/auth-context'
 
 export default function DashboardView() {
-  const { user, telemetry, updateProfile, isSupabaseConnected } = useAuth()
+  const { user, telemetry, updateProfile } = useAuth()
 
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [editFullName, setEditFullName] = useState(user?.fullName || 'Alex Nguyen')
@@ -97,17 +96,6 @@ export default function DashboardView() {
       {/* Editorial Dashboard Header */}
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end border-b border-slate-200/80 dark:border-cyan-500/15 pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-200 px-2.5 py-0.5 text-[11px] font-semibold dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300">
-              <Database className="size-3" />
-              {isSupabaseConnected ? 'Supabase Synchronized' : 'Account Isolated Telemetry'}
-            </span>
-            {user && (
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                User ID: <code className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400">{user.id.slice(0, 14)}...</code>
-              </span>
-            )}
-          </div>
           <h1 className="text-3xl font-serif font-normal tracking-tight text-[#0A1128] dark:text-slate-100 sm:text-4xl">
             Focus Intelligence Dashboard
           </h1>
