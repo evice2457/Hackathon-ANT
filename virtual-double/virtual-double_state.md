@@ -428,3 +428,64 @@ virtual-double/
 
 ### Version 1.3.0 — Water Ripple Physics & High-Contrast Countdown
 - Sửa màu countdown sphere sang sapphire `#071329` với số Cyan phát sáng.
+
+---
+
+## 4. PHIÊN BẢN 4.0.0 — SUPABASE AUTH, DATA ISOLATION, HEADER RETURN & FLEXIBLE COPILOT (7-AGENT PIPELINE)
+
+### 4.1. Đội ngũ 7 Agents & Pipeline Điều phối
+- **3 Kỹ sư Hệ thống (Engineers)**:
+  1. *Engineer 1 (Auth & Backend)*: Xây dựng Supabase Client (`lib/supabase/client.ts`), Auth Context (`lib/auth/auth-context.tsx`), schema SQL Supabase (`supabase/schema.sql`), và cô lập dữ liệu người dùng (isolated telemetry & profile).
+  2. *Engineer 2 (Frontend Architecture)*: Xây dựng màn hình đăng nhập / đăng ký (`components/AuthView.tsx`), modal điều khoản bảo mật (`components/TermsAndPrivacyModal.tsx`), và tích hợp auth gate vào `app/page.tsx`.
+  3. *Engineer 3 (UI/UX & Interactions)*: Tái cấu trúc khung chat ANT Copilot (`components/ChatWithAntModal.tsx`) thành non-blocking resizable drawer (`<->` resize handle), đồng thời biến đổi avatar ANT góc trên cùng bên trái của Header (`components/Header.tsx`) thành interactive button đưa người dùng về màn hình Focus ("Flow state by design").
+- **2 Dò lỗi sai (Bug Hunters / QA)**:
+  1. *Bug Hunter 1 (Automated Build & Types)*: Chạy pipeline kiểm thử tự động `npm run build` xác thực 100% Turbopack compilation và TypeScript types.
+  2. *Bug Hunter 2 (E2E & Functional Testing)*: Sử dụng browser subagent kiểm tra toàn bộ luồng đăng nhập, demo account, chuyển tab, resizable drawer, và navigation.
+- **2 Tracking Coordinators (State & Branch Management)**:
+  1. *Tracking Coordinator 1 (Git Branch & Commit)*: Quản lý nhánh riêng `feat/supabase-auth-flexible-copilot` và lưu vết commits.
+  2. *Tracking Coordinator 2 (Documentation & Logs)*: Ghi nhận trạng thái dự án, lưu trữ toàn bộ thay đổi vào `virtual-double_state.md`.
+
+### 4.2. Chi tiết 3 Tính năng Nâng cấp Cốt lõi
+
+#### 1. Hệ thống Đăng nhập / Đăng ký & Cô lập Dữ liệu Supabase (Data Isolation)
+- **Component**: [AuthView.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/AuthView.tsx), [TermsAndPrivacyModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/TermsAndPrivacyModal.tsx), [auth-context.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/auth-context.tsx).
+- **Thiết kế theo Calm Editorial**: Tông màu Indigo-Navy (`#0B132B`, `#070F26`) và Light Cream (`#F8FAFC`), hiệu ứng typography Plus Jakarta Sans, card nổi không viền thô.
+- **Workflow Người dùng**: Màn hình Login/Signup $\rightarrow$ Màn hình Focus hiện tại (*"Flow state by design"*).
+- **Trường thông tin Đăng ký**:
+  - Họ và tên (`fullName`)
+  - Email (`email`)
+  - Số điện thoại (`phone`)
+  - Giới tính (`gender`: Nam, Nữ, Phi nhị nguyên, Không tiết lộ)
+  - Ngày tháng năm sinh (`dateOfBirth`: YYYY-MM-DD $\rightarrow$ Tự động suy ra tuổi thực tế `age` cho Demographic Analytics)
+  - Mật khẩu (`password` & `confirmPassword`)
+  - Checkbox bắt buộc đồng ý Điều khoản & Chính sách quyền riêng tư (`Terms & Privacy Agreement`).
+- **Modal Điều khoản & Quyền riêng tư ([TermsAndPrivacyModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/TermsAndPrivacyModal.tsx))**:
+  - Cam kết bảo mật sinh trắc học On-device: MediaPipe FaceLandmarker xử lý 100% tại trình duyệt qua WebAssembly, không bao giờ gửi video hay hình ảnh webcam lên server.
+  - Quyền sở hữu dữ liệu tập trung: Dữ liệu telemetry và phiên tập trung thuộc quyền riêng tư cá nhân của người dùng.
+- **Tính năng Quên Mật Khẩu (Forgot Password Recovery)**:
+  - Khôi phục qua Email hoặc Số điện thoại.
+  - Tích hợp **Human Verification Captcha** (phép tính xác thực chống spam bot).
+  - Nhập mã xác minh OTP gửi về hòm thư để đặt lại mật khẩu an toàn.
+- **Hỗ trợ Backend Supabase & Isolated Local Sandbox**:
+  - Cung cấp schema PostgreSQL hoàn chỉnh tại [schema.sql](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/supabase/schema.sql) với Row Level Security (RLS) policies.
+  - Tự động nhận diện cấu hình Supabase qua `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Khi chưa gắn credentials hoặc ở chế độ offline, hệ thống tự động fallback sang Sandbox LocalStorage cô lập dữ liệu theo từng account id (`virtualdouble_telemetry_<userId>`).
+  - Nút **"Quick Demo Login (Alex Nguyen)"** giúp ban giám khảo và kiểm thử trải nghiệm ngay lập tức với 1 cú click.
+
+#### 2. Avatar ANT Header Góc Trái Trở thành Nút Quay lại Màn hình Focus
+- **Component**: [Header.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/Header.tsx).
+- **Tương tác**: Avatar chú kiến tròn ANT `/ant-mascot.png` ở góc trên cùng bên trái được chuyển thành button tương tác với hiệu ứng `hover:scale-105 active:scale-95 ring-2 ring-cyan-500/20`.
+- **Hành vi**: Khi người dùng nhấn vào avatar này từ bất kỳ tab nào (Dashboard, Recovery, hoặc khi đang ở giữa các bước thiết lập), hệ thống kích hoạt `onReturnToFocus()`, lập tức đưa người dùng quay lại màn hình chính của Flow State ("Flow state by design" / `AntWelcomeView`).
+
+#### 3. Khung Chat ANT Copilot Linh Hoạt & Co Giãn Không Chặn Thao Tác (Flexible & Resizable Non-Blocking Drawer)
+- **Component**: [ChatWithAntModal.tsx](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/components/ChatWithAntModal.tsx).
+- **Kiến trúc Không Chặn Thao Tác (Non-Blocking Overlay)**:
+  - Loại bỏ hoàn toàn backdrop tối che phủ toàn màn hình (`bg-black/60`).
+  - Container cố định ngoài cùng sử dụng `pointer-events-none`, trong khi drawer bên phải sử dụng `pointer-events-auto`.
+  - Nhờ đó, người dùng có thể mở khung chat và **đồng thời thực hiện các thao tác khác trên website** (chuyển đổi giữa tab Focus, Dashboard, Recovery, nhấn các nút action) mà khung chat không bị đóng và không chặn chuột.
+- **Tính năng Co Giãn Chiều Rộng (<-> Resize Handle)**:
+  - Thanh tay cầm co giãn dọc ở mép trái của drawer với con trỏ chuột `<->` (`cursor-ew-resize`).
+  - Hỗ trợ kéo chuột trái (`startResizing`) mượt mà theo phương ngang, tự do thu hẹp hoặc mở rộng độ rộng khung chat từ `340px` đến `880px`.
+  - Tự động lưu trữ độ rộng ưu thích vào `localStorage` (`virtualdouble_chat_drawer_width`) để duy trì trạng thái khi người dùng mở lại.
+  - Bổ sung nút Quick Preset Toggle ở góc trên để chuyển nhanh giữa chế độ hẹp (`380px`) và chế độ mở rộng (`640px`).
+- **Bảo toàn Giao diện Nguyên bản**: Giữ trọn vẹn phong cách hội thoại chuyên nghiệp, avatar ANT, các gợi ý nhanh (task breakdown chips), và nút ứng dụng hành động nhiệm vụ vào Focus session.
+

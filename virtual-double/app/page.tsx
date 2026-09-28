@@ -33,18 +33,23 @@ import {
   type TaskPlan,
   type TaskPlanProgress,
 } from '@/lib/task-breakdown'
+import { AuthProvider, useAuth } from '@/lib/auth/auth-context'
+import AuthView from '@/components/AuthView'
 
 export default function Page() {
   return (
-    <MascotNameProvider>
-      <FocusSessionProvider>
-        <AppShell />
-      </FocusSessionProvider>
-    </MascotNameProvider>
+    <AuthProvider>
+      <MascotNameProvider>
+        <FocusSessionProvider>
+          <AppShell />
+        </FocusSessionProvider>
+      </MascotNameProvider>
+    </AuthProvider>
   )
 }
 
 function AppShell() {
+  const { user, isAuthenticated, isLoading, recordCompletedSession, recordRescue } = useAuth()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [currentTab, setCurrentTab] = useState<NavTab>('focus')
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -63,8 +68,9 @@ function AppShell() {
     ({ episodeId }: { episodeId: number }) => {
       setCheckIn((current) => current ?? createCheckIn(episodeId))
       pauseSession()
+      recordRescue()
     },
-    [pauseSession],
+    [pauseSession, recordRescue],
   )
 
   useDistractionWatch({
@@ -280,6 +286,31 @@ function AppShell() {
     stopSession()
   }
 
+  if (isLoading) {
+    return (
+      <div className={`flex min-h-screen items-center justify-center transition-colors ${isDarkMode ? 'bg-[#070F26] text-white' : 'bg-[#F8FAFC] text-slate-800'}`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-10 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+          <p className="text-xs font-medium tracking-wider uppercase text-slate-400">Loading ANT Session...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
+        <InteractiveBackground isDarkMode={isDarkMode} />
+        <AuthView
+          onSuccess={() => {
+            setCurrentTab('focus')
+            setHasStarted(false)
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <FloatingCompanionProvider value={floating}>
       <div className={`relative min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark text-white' : 'text-slate-900'}`}>
@@ -296,6 +327,11 @@ function AppShell() {
             onOpenChat={() => setIsChatOpen(true)}
             isChatOpen={isChatOpen}
             isSessionActive={isSessionActive}
+            onReturnToFocus={() => {
+              setCurrentTab('focus')
+              setHasStarted(false)
+              setStagedSession(null)
+            }}
           />
 
           <main className="flex-1">
@@ -389,10 +425,20 @@ function AppShell() {
                   <SessionCompletionModal
                     planCompleteTask={activePlan?.plan.originalTask}
                     onDone={() => {
+                      recordCompletedSession(
+                        activePlan?.plan.originalTask || stagedSession?.task || session.task || 'Focus Sprint',
+                        Math.max(5, Math.round(session.durationSeconds / 60)) || 25,
+                        96
+                      )
                       setActivePlan(null)
                       stopSession()
                     }}
                     onNextTask={() => {
+                      recordCompletedSession(
+                        activePlan?.plan.originalTask || stagedSession?.task || session.task || 'Focus Sprint',
+                        Math.max(5, Math.round(session.durationSeconds / 60)) || 25,
+                        96
+                      )
                       setActivePlan(null)
                       stopSession()
                     }}
