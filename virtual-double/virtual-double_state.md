@@ -489,3 +489,39 @@ virtual-double/
   - Bổ sung nút Quick Preset Toggle ở góc trên để chuyển nhanh giữa chế độ hẹp (`380px`) và chế độ mở rộng (`640px`).
 - **Bảo toàn Giao diện Nguyên bản**: Giữ trọn vẹn phong cách hội thoại chuyên nghiệp, avatar ANT, các gợi ý nhanh (task breakdown chips), và nút ứng dụng hành động nhiệm vụ vào Focus session.
 
+---
+
+## 5. PHIÊN BẢN 4.1.0 — SPLIT-PANEL AUTHVIEW, ANT SPEECH BUBBLE & SEPARATED FORM ROWS
+
+### 5.1. Cấu trúc Đội ngũ 7 Agents Thực thi
+- **Kỹ sư 1 (Layout & Panel Swapping)**: Xây dựng card xác thực đôi 2 nửa (Split-panel card) lấy cảm hứng từ video thiết kế, quản lý cơ chế tráo đổi vị trí giữa cột Mascot Hero và cột Form theo từng trạng thái (Sign In vs Sign Up).
+- **Kỹ sư 2 (Mascot Comic Speech Bubble)**: Tích hợp sân khấu chú kiến ANT vẫy tay kèm Comic Speech Bubble có đuôi trỏ SVG đặc trưng truyện tranh (tương tự như màn hình Smile Ritual). Bubble hiển thị `"Welcome back!"` khi Sign In và `"Hello new friend!"` khi Sign Up.
+- **Kỹ sư 3 (Form Rows Re-architecture & Remember Me)**: Tách riêng từng hàng nhập liệu cho form Create Account: Full Name (Hàng 1), Email (Hàng 2), Phone (Hàng 3), Gender & DOB (Hàng 4, 2 cột), Password (Hàng 5), Confirm Password (Hàng 6), Terms & Privacy (Hàng 7). Thêm checkbox "Remember me" cho form Sign In chuẩn visual đồng bộ.
+- **Dò lỗi sai 1 (Automated Build & Types)**: Chạy pipeline kiểm thử tự động `npm run build` xác thực 100% Turbopack compilation và TypeScript types: **0 errors**.
+- **Dò lỗi sai 2 (Browser End-to-End Validation)**: Sử dụng Browser Subagent kiểm thử tương tác thực tế: chuyển đổi Sign In $\leftrightarrow$ Sign Up mượt mà, kiểm tra vị trí cột và câu thoại Mascot, test tick box Remember me, test One-Click Demo Account đăng nhập vào màn hình Focus Hero.
+- **Tracking 1 (Git Branch & Commit)**: Thực thi trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`, tạo commit lưu vết.
+- **Tracking 2 (State Documentation)**: Ghi chép toàn diện log cập nhật vào `virtual-double_state.md`.
+
+### 5.2. Chi tiết Cải tiến Giao diện & Trải nghiệm
+1. **Thiết kế Card Đôi 2 Nửa (Split-Panel Card)**:
+   - Thùng chứa bo tròn cong mềm mại `rounded-[2.5rem]`, viền phát sáng cyan tinh tế, đổ bóng chiều sâu 3D trên nền canvas gradient dither.
+   - Khi ở chế độ **Sign In**: Form Sign In nằm ở nửa bên TRÁI; Nửa bên PHẢI là Mascot ANT vẫy tay kèm khung thoại `"Welcome back!"` và nút chuyển `"Create New Account"`.
+   - Khi ở chế độ **Sign Up**: Nửa bên TRÁI là Mascot ANT vẫy tay kèm khung thoại `"Hello new friend!"` và nút chuyển `"Sign In to Website"`; Nửa bên PHẢI là form Create Account.
+2. **Khung Thoại Truyện Tranh Mascot ANT (Comic Speech Bubble)**:
+   - Khung thoại bo tròn `rounded-[2rem]`, viền nổi bật `border-[3px] border-slate-900 dark:border-cyan-400`, nền `dark:bg-[#070F26]`.
+   - Đuôi trỏ SVG nhọn cong đặc trưng truyện tranh chỉ thẳng vào đỉnh đầu chú kiến ANT.
+   - Chú kiến ANT vẫy tay chuyển động lơ lửng `animate-mascot-float` kèm đổ bóng sàn `animate-mascot-shadow`.
+3. **Tách Riêng Từng Hàng Form Đăng Ký (Create Account)**:
+   - **Hàng 1**: Họ và tên (`fullName`)
+   - **Hàng 2**: Địa chỉ email (`email`)
+   - **Hàng 3**: Số điện thoại (`phone`)
+   - **Hàng 4**: Giới tính (`gender`) & Ngày sinh (`dateOfBirth`) trên cùng 1 hàng (2 cột cân đối)
+   - **Hàng 5**: Mật khẩu (`password`) với nút ẩn/hiện mắt
+   - **Hàng 6**: Xác nhận mật khẩu (`confirmPassword`) với nút ẩn/hiện mắt
+   - **Hàng 7**: Checkbox đồng ý Điều khoản Dịch vụ & Chính sách Bảo mật (xử lý 100% On-device WASM)
+4. **Checkbox "Remember me" cho Form Sign In**:
+   - Nút tick box vuông với dấu tích Check icon cyan đồng bộ chuẩn thiết kế của checkbox Terms & Privacy.
+   - Tự động lưu và điền lại thông tin đăng nhập vào `localStorage` (`virtualdouble_remembered_email`).
+   - Nút liên kết `"Forgot password?"` đặt ngang hàng tiện lợi.
+
+
