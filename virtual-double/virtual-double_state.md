@@ -524,4 +524,44 @@ virtual-double/
    - Tự động lưu và điền lại thông tin đăng nhập vào `localStorage` (`virtualdouble_remembered_email`).
    - Nút liên kết `"Forgot password?"` đặt ngang hàng tiện lợi.
 
+---
+
+## 6. PHIÊN BẢN 4.2.0 — SLIDING OVERLAY ANIMATION, GMAIL OTP PIPELINE, REDUCED BORDER RADIUS & CLEAN TYPOGRAPHY
+
+### 6.1. Cấu trúc Đội ngũ 7 Agents Thực thi
+- **Kỹ sư 1 (Sliding Overlay Architecture)**: Xây dựng cơ chế trượt tráo đổi Overlay Panel theo chuẩn chuyển động ngang 60fps từ video tham khảo (`transition-transform duration-700 ease-in-out`), panel chú kiến trượt từ phải sang trái khi mở Sign Up và trượt mượt mà ngược lại khi mở Sign In.
+- **Kỹ sư 2 (Real Gmail OTP Pipeline)**: Xây dựng hệ thống gửi mã OTP thật kết nối trực tiếp đến Gmail của người dùng qua API endpoints [send-otp](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/api/auth/send-otp/route.ts) và [verify-otp](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/app/api/auth/verify-otp/route.ts) tích hợp Supabase Auth `resetPasswordForEmail` và mô-đun sinh mã bảo mật [otp-store.ts](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/otp-store.ts).
+- **Kỹ sư 3 (Refined Typography, Scale & Form Fields)**: Căn giữa tiêu đề `Create Account` và `Sign In`, đổi sang font Plus Jakarta Sans to rõ (`font-sans font-bold text-3xl sm:text-4xl tracking-tight text-center`); giảm độ bo viền xuống `rounded-2xl` (16px); thu gọn 90% kích thước tổng thể (`max-w-[850px]`); giới hạn tùy chọn giới tính chỉ gồm `Male` và `Female`; loại bỏ toàn bộ chữ tiếng Việt phụ đề và nút demo account.
+- **Dò lỗi sai 1 (Automated Build & Types)**: Chạy pipeline kiểm thử tự động `npm run build` với Turbopack: **0 lỗi, 0 cảnh báo TypeScript strict mode, 7/7 route static/dynamic hoàn hảo**.
+- **Dò lỗi sai 2 (Browser End-to-End Validation)**: Sử dụng Browser Subagent kiểm thử tương tác thực tế: chuyển đổi Sign In $\leftrightarrow$ Sign Up với hiệu ứng trượt mượt mà, xác thực tiêu đề to rõ căn giữa, kiểm tra độ bo viền `rounded-2xl`, kiểm thử gửi mã OTP đến Gmail (`test@gmail.com`) với captcha tính nhẩm và đăng nhập tài khoản Alex Nguyen thành công vào màn hình Focus Hero.
+- **Tracking 1 (Git Branch & Commit)**: Thực thi trực tiếp trên nhánh `feat/supabase-auth-flexible-copilot`, tạo commit lưu vết.
+- **Tracking 2 (State Documentation)**: Ghi chép toàn diện log cập nhật vào `virtual-double_state.md`.
+
+### 6.2. Chi tiết 8 Điểm Thay đổi Cốt lõi
+1. **Hiệu ứng Chuyển Đổi Trượt Mượt Mà (Sliding Overlay Animation)**:
+   - Thay thế cơ chế switch tĩnh bằng Overlay Panel trượt ngang 50% (`translate-x-0` $\leftrightarrow$ `translate-x-full`) với `duration-700 ease-in-out` chân thực như video mẫu.
+   - Khi bấm `"Create New Account"`, panel chú kiến ANT lướt êm ái sang bên trái, đồng thời form Create Account xuất hiện bên phải.
+   - Khi bấm `"Sign In to Website"`, panel chú kiến ANT lướt êm ái trở lại bên phải, để lộ form Sign In bên trái.
+2. **Loại Bỏ Header Ribbon Phụ**:
+   - Xóa bỏ hoàn toàn thanh thông tin `Account-Isolated Telemetry Engine` và `ANT COGNITIVE BODY DOUBLER` ở đầu card để giao diện thanh thoát, tối giản.
+3. **Tiêu Đề Căn Giữa & Typography To Rõ**:
+   - Tiêu đề `Sign In` và `Create Account` được đặt căn giữa (`text-center`).
+   - Sử dụng font chữ Plus Jakarta Sans to rõ (`font-sans font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-slate-100`) đồng bộ với tiêu đề *"What will you focus on next?"*.
+4. **Giảm Độ Bo Viền Khung (Reduced Border Radius)**:
+   - Giảm độ cong từ `rounded-[2.5rem]` (40px) xuống `rounded-2xl` (16px), tạo cảm giác sắc nét, hiện đại và cao cấp hơn.
+5. **Dọn Sạch Tiếng Việt & Nút Demo Phụ**:
+   - Xóa bỏ nút One-Click Demo Account.
+   - Xóa bỏ toàn bộ chú thích tiếng Việt trong ngoặc: `Full Name` (bỏ `HỌ VÀ TÊN`), `Phone Number` (bỏ `SỐ ĐIỆN THOẠI`), `Gender` (bỏ `GIỚI TÍNH`).
+   - Xóa bỏ các dòng mô tả phụ: *"Register your private ANT profile for isolated metrics..."* và *"Enter your email or phone number to resume your focus flow."*.
+   - Xóa bỏ các tag badge *"New Explorer Orientation"* và *"Welcome Back"* trên đỉnh bóng thoại chú kiến.
+6. **Thu Gọn 90% Kích Thước Board**:
+   - Giảm chiều rộng tối đa từ `max-w-5xl` (1024px) xuống `max-w-[850px]` (tương đương 85-90%), căn đối hài hòa trên mọi kích cỡ màn hình.
+7. **Tùy Chọn Giới Tính Tinh Gọn**:
+   - Menu Gender rút gọn chỉ giữ lại đúng 2 lựa chọn: `Male` và `Female`.
+8. **Hệ Thống Gửi Mã OTP Thật Đến Gmail (Real Gmail OTP Pipeline)**:
+   - Xây dựng API route `/api/auth/send-otp` kết nối Supabase Auth `resetPasswordForEmail` gửi thư thật đến hòm thư Gmail của người dùng.
+   - Tích hợp mô-đun lưu trữ mã xác thực mật mã học server-side [otp-store.ts](file:///c:/My-Project/ADC_Hackathon--ANT/virtual-double/lib/auth/otp-store.ts) với giới hạn thời gian 10 phút và chống brute-force.
+   - Xây dựng API route `/api/auth/verify-otp` xác thực mã 6 chữ số từ Gmail và cập nhật mật khẩu mới an toàn.
+
+
 
